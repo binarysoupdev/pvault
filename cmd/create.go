@@ -21,7 +21,14 @@ func NewCreateCommand() *CreateCommand {
 }
 
 func (cmd CreateCommand) Run(args []string) error {
-	r := vault.NewRecord("foobar")
+	name := cmd.Flags.String("name", "", "name of the record")
+	cmd.Flags.Parse(args)
+
+	if *name == "" {
+		return chain.New("\"name\" cannot be empty")
+	}
+
+	r := vault.NewRecord(*name)
 
 	file, err := os.Create(filepath.Join("tmp", r.ID.String()+".json"))
 	if err != nil {
