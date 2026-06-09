@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/binary-soup/go-command/command"
-	"github.com/binary-soup/go-command/command/sample"
-	"github.com/binary-soup/go-command/style"
+	"github.com/binarysoupdev/go-commando/command"
+	"github.com/binarysoupdev/go-commando/command/sample"
+	"github.com/binarysoupdev/got-style/style"
 )
 
 func main() {
