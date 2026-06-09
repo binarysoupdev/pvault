@@ -13,7 +13,10 @@ type Record struct {
 
 func NewRecord(name string) Record {
 	return Record{
-		ID:   uuid.New(),
-		Name: name,
+		ID:       uuid.New(),
+		Name:     name,
+		Username: "",
+		Password: "",
+		Other:    map[string]string{},
 	}
 }

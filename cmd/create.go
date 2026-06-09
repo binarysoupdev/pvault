@@ -28,7 +28,10 @@ func (cmd CreateCommand) Run(args []string) error {
 		return chain.Error(err, "error creating record file")
 	}
 
-	err = json.NewEncoder(file).Encode(r)
+	e := json.NewEncoder(file)
+	e.SetIndent("", "    ")
+
+	err = e.Encode(r)
 	if err != nil {
 		return chain.Error(err, "error encode record JSON")
 	}
