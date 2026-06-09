@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"pvault/cmd"
 
 	"github.com/binarysoupdev/go-commando/command"
-	"github.com/binarysoupdev/go-commando/command/sample"
 	"github.com/binarysoupdev/got-style/style"
 )
 
@@ -14,7 +14,9 @@ func main() {
 	ls := flag.Bool("ls", false, "list all commands")
 	flag.Parse()
 
-	runner := command.NewRunner(sample.NewHelloCommand())
+	runner := command.NewRunner(
+		cmd.NewCreateCommand(),
+	)
 
 	if *ls || len(os.Args) < 2 {
 		runner.ListCommands()

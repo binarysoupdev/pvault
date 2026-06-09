@@ -1,3 +1,6 @@
-.vscode
+.vscode/*
+
+tmp/*
+!tmp/.keep
 
 pvault
