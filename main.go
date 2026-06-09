@@ -17,6 +17,7 @@ func main() {
 	runner := command.NewRunner(
 		cmd.NewCreateCommand(),
 		cmd.NewLockCommand(),
+		cmd.NewUnlockCommand(),
 	)
 
 	if *ls || len(os.Args) < 2 {

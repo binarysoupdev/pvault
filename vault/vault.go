@@ -41,3 +41,20 @@ func (Vault) SaveRecord(r Record) error {
 
 	return nil
 }
+
+func (Vault) LoadRecord(id uuid.UUID) (Record, error) {
+	var r Record
+
+	file, err := os.Open(filepath.Join(VAULT_DIR, id.String()+".json"))
+	if err != nil {
+		return r, chain.Error(err, "error opening record file")
+	}
+	defer file.Close()
+
+	err = json.NewDecoder(file).Decode(&r)
+	if err != nil {
+		return r, chain.Error(err, "error decoding record JSON")
+	}
+
+	return r, nil
+}
