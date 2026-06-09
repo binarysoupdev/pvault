@@ -32,6 +32,7 @@ func (Vault) SaveRecord(r Record) error {
 	if err != nil {
 		return chain.Error(err, "error creating record file")
 	}
+	defer file.Close()
 
 	err = json.NewEncoder(file).Encode(r)
 	if err != nil {

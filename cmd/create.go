@@ -33,15 +33,17 @@ func (cmd CreateCommand) Run(args []string) error {
 
 	r, err := vault.Vault{}.NewRecord(*name)
 	if err != nil {
-		return err
+		return chain.Error(err, "error creating new record")
 	}
 	style.BoldCreate.Printf("[+] New Record: %s\n", r.ID.String())
 
 	filename := filepath.Join(LOCAL_DIR, r.ID.String()+".json")
+
 	file, err := os.Create(filename)
 	if err != nil {
 		return chain.Error(err, "error creating record file")
 	}
+	defer file.Close()
 
 	e := json.NewEncoder(file)
 	e.SetIndent("", "    ")
