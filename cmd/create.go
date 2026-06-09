@@ -8,7 +8,10 @@ import (
 	"pvault/vault"
 
 	"github.com/binarysoupdev/go-commando/command"
+	"github.com/binarysoupdev/got-style/style"
 )
+
+const LOCAL_DIR = "tmp/local"
 
 type CreateCommand struct {
 	command.FlagCommandBase
@@ -28,9 +31,14 @@ func (cmd CreateCommand) Run(args []string) error {
 		return chain.New("\"name\" cannot be empty")
 	}
 
-	r := vault.NewRecord(*name)
+	r, err := vault.Vault{}.NewRecord(*name)
+	if err != nil {
+		return err
+	}
+	style.BoldCreate.Printf("[+] New Record: %s\n", r.ID.String())
 
-	file, err := os.Create(filepath.Join("tmp", r.ID.String()+".json"))
+	filename := filepath.Join(LOCAL_DIR, r.ID.String()+".json")
+	file, err := os.Create(filename)
 	if err != nil {
 		return chain.Error(err, "error creating record file")
 	}
@@ -43,5 +51,6 @@ func (cmd CreateCommand) Run(args []string) error {
 		return chain.Error(err, "error encode record JSON")
 	}
 
+	style.Create.Printf("[+] %s\n", filename)
 	return nil
 }

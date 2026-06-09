@@ -1,6 +1,9 @@
 .vscode/*
 
-tmp/*
-!tmp/.keep
+tmp/vault/*
+!tmp/vault/.keep
+
+tmp/local/*
+!tmp/local/.keep
 
 pvault

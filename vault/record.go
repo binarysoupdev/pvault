@@ -10,13 +10,3 @@ type Record struct {
 	Password string `json:"password"`
 	Other    any    `json:"other"`
 }
-
-func NewRecord(name string) Record {
-	return Record{
-		ID:       uuid.New(),
-		Name:     name,
-		Username: "",
-		Password: "",
-		Other:    map[string]string{},
-	}
-}
