@@ -35,14 +35,14 @@ func (cmd LockCommand) Run(args []string) error {
 
 	err = vault.Vault{}.SaveRecord(r)
 	if err != nil {
-		return chain.Error(err, "error saving record")
+		return chain.Error(err, "error saving vault record")
 	}
 
 	style.BoldInfo.Printf("[+] Updated Record: %s\n", r.ID.String())
 
 	err = os.Remove(*path)
 	if err != nil {
-		return chain.Error(err, "error removing local record")
+		return chain.Error(err, "error removing source record")
 	}
 
 	style.Delete.Printf("[-] %s\n", *path)

@@ -11,14 +11,7 @@ import (
 type Vault struct{}
 
 func (v Vault) NewRecord(name string) (Record, error) {
-	r := Record{
-		ID:       uuid.New(),
-		Name:     name,
-		Username: "",
-		Password: "",
-		Other:    map[string]string{},
-	}
-
+	r := NewRecord(name)
 	return r, v.SaveRecord(r)
 }
 
