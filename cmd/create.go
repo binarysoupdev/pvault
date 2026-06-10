@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"encoding/json"
-	"os"
 	"path/filepath"
 	"pvault/chain"
 	"pvault/vault"
@@ -35,24 +33,15 @@ func (cmd CreateCommand) Run(args []string) error {
 	if err != nil {
 		return chain.Error(err, "error creating new record")
 	}
+
 	style.BoldCreate.Printf("[+] New Record: %s\n", r.ID.String())
 
-	filename := filepath.Join(LOCAL_DIR, r.ID.String()+".json")
-
-	file, err := os.Create(filename)
+	path := filepath.Join(LOCAL_DIR, r.ID.String()+".json")
+	err = vault.SaveRecordJSON(r, path)
 	if err != nil {
-		return chain.Error(err, "error creating record file")
-	}
-	defer file.Close()
-
-	e := json.NewEncoder(file)
-	e.SetIndent("", "    ")
-
-	err = e.Encode(r)
-	if err != nil {
-		return chain.Error(err, "error encode record JSON")
+		return err
 	}
 
-	style.Create.Printf("[+] %s\n", filename)
+	style.Create.Printf("[+] %s\n", path)
 	return nil
 }

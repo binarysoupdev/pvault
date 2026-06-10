@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"os"
 	"pvault/chain"
 	"pvault/vault"
@@ -28,22 +27,16 @@ func (cmd LockCommand) Run(args []string) error {
 		return chain.New("\"path\" cannot be empty")
 	}
 
-	file, err := os.Open(*path)
+	r, err := vault.LoadRecordJSON(*path)
 	if err != nil {
-		return chain.Error(err, "error opening local record")
-	}
-	defer file.Close()
-
-	var r vault.Record
-	err = json.NewDecoder(file).Decode(&r)
-	if err != nil {
-		return chain.Error(err, "error decoding record JSON")
+		return err
 	}
 
 	err = vault.Vault{}.SaveRecord(r)
 	if err != nil {
 		return chain.Error(err, "error saving record")
 	}
+
 	style.BoldInfo.Printf("[+] Updated Record: %s\n", r.ID.String())
 
 	err = os.Remove(*path)

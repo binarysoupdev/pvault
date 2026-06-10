@@ -1,10 +1,7 @@
 package vault
 
 import (
-	"encoding/json"
-	"os"
 	"path/filepath"
-	"pvault/chain"
 
 	"github.com/google/uuid"
 )
@@ -28,33 +25,9 @@ func (v Vault) NewRecord(name string) (Record, error) {
 func (Vault) SaveRecord(r Record) error {
 	//TODO: check record name is unique
 
-	file, err := os.Create(filepath.Join(VAULT_DIR, r.ID.String()+".json"))
-	if err != nil {
-		return chain.Error(err, "error creating record file")
-	}
-	defer file.Close()
-
-	err = json.NewEncoder(file).Encode(r)
-	if err != nil {
-		return chain.Error(err, "error encoding record JSON")
-	}
-
-	return nil
+	return SaveRecordJSON(r, filepath.Join(VAULT_DIR, r.ID.String()+".json"))
 }
 
 func (Vault) LoadRecord(id uuid.UUID) (Record, error) {
-	var r Record
-
-	file, err := os.Open(filepath.Join(VAULT_DIR, id.String()+".json"))
-	if err != nil {
-		return r, chain.Error(err, "error opening record file")
-	}
-	defer file.Close()
-
-	err = json.NewDecoder(file).Decode(&r)
-	if err != nil {
-		return r, chain.Error(err, "error decoding record JSON")
-	}
-
-	return r, nil
+	return LoadRecordJSON(filepath.Join(VAULT_DIR, id.String()+".json"))
 }
