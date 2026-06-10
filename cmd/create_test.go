@@ -32,6 +32,8 @@ func (s *CreateTestSuite) SetupTest() {
 	})
 }
 
+//=====================================
+
 func (s *CreateTestSuite) TestNameNotEmpty() {
 	//-- act
 	s.RunCommand("-name", "")
@@ -68,8 +70,8 @@ func (s *CreateTestSuite) TestInvalidOutputPath() {
 
 func (s *CreateTestSuite) TestCreateRecord() {
 	//-- arrange
-	r := rand.New(0)
-	NAME := r.ASCII(10)
+	rand := rand.New(0)
+	NAME := rand.ASCII(15)
 
 	out := pipe.OpenStdout(2)
 	defer out.Close()
