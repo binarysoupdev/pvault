@@ -7,6 +7,7 @@ require (
 	github.com/binarysoupdev/got-style v1.1.0
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.11.1
+	github.com/binarysoupdev/tinsel v0.2.0
 )
 
 require (
