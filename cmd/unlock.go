@@ -37,7 +37,7 @@ func (cmd UnlockCommand) Run(args []string) error {
 
 	r, err := vault.Vault{}.LoadRecord(id)
 	if err != nil {
-		return chain.Error(err, "error loading record")
+		return chain.Error(err, "error loading vault record")
 	}
 
 	style.BoldInfo.Printf("[=] Loaded Record: %s\n", r.ID.String())
