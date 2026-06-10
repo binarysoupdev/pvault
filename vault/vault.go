@@ -2,11 +2,11 @@ package vault
 
 import (
 	"path/filepath"
+	"pvault/cfg"
+	"pvault/data"
 
 	"github.com/google/uuid"
 )
-
-const VAULT_DIR = "tmp/vault"
 
 type Vault struct{}
 
@@ -25,9 +25,9 @@ func (v Vault) NewRecord(name string) (Record, error) {
 func (Vault) SaveRecord(r Record) error {
 	//TODO: check record name is unique
 
-	return SaveRecordJSON(r, filepath.Join(VAULT_DIR, r.ID.String()+".json"))
+	return data.SaveJSON(r, filepath.Join(cfg.Global.VaultPath, r.ID.String()+".json"))
 }
 
 func (Vault) LoadRecord(id uuid.UUID) (Record, error) {
-	return LoadRecordJSON(filepath.Join(VAULT_DIR, id.String()+".json"))
+	return data.LoadJSON[Record](filepath.Join(cfg.Global.VaultPath, id.String()+".json"))
 }

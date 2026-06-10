@@ -3,7 +3,7 @@
 tmp/vault/*
 !tmp/vault/.keep
 
-tmp/local/*
-!tmp/local/.keep
+tmp/output/*
+!tmp/output/.keep
 
 pvault

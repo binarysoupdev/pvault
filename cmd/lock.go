@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 	"pvault/chain"
+	"pvault/data"
 	"pvault/vault"
 
 	"github.com/binarysoupdev/go-commando/command"
@@ -27,9 +28,9 @@ func (cmd LockCommand) Run(args []string) error {
 		return chain.New("\"path\" cannot be empty")
 	}
 
-	r, err := vault.LoadRecordJSON(*path)
+	r, err := data.LoadJSON[vault.Record](*path)
 	if err != nil {
-		return err
+		return chain.Error(err, "error loading source record")
 	}
 
 	err = vault.Vault{}.SaveRecord(r)

@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"pvault/cfg"
+	"pvault/chain"
 	"pvault/cmd"
 
 	"github.com/binarysoupdev/go-commando/command"
@@ -25,8 +27,17 @@ func main() {
 		return
 	}
 
-	if err := runner.RunCommand(os.Args[1], os.Args[2:]); err != nil {
+	if err := run(runner); err != nil {
 		style.BoldError.Print("ERROR: ")
 		fmt.Println(err)
 	}
+}
+
+func run(runner command.Runner) error {
+	err := cfg.Load(&cfg.Global, "config.json")
+	if err != nil {
+		return chain.Error(err, "error loading global config")
+	}
+
+	return runner.RunCommand(os.Args[1], os.Args[2:])
 }

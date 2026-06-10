@@ -2,14 +2,14 @@ package cmd
 
 import (
 	"path/filepath"
+	"pvault/cfg"
 	"pvault/chain"
+	"pvault/data"
 	"pvault/vault"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
 )
-
-const LOCAL_DIR = "tmp/local"
 
 type CreateCommand struct {
 	command.FlagCommandBase
@@ -31,15 +31,15 @@ func (cmd CreateCommand) Run(args []string) error {
 
 	r, err := vault.Vault{}.NewRecord(*name)
 	if err != nil {
-		return chain.Error(err, "error creating new record")
+		return chain.Error(err, "error creating vault record")
 	}
 
 	style.BoldCreate.Printf("[+] New Record: %s\n", r.ID.String())
 
-	path := filepath.Join(LOCAL_DIR, r.ID.String()+".json")
-	err = vault.SaveRecordJSON(r, path)
+	path := filepath.Join(cfg.Global.OutputPath, r.ID.String()+".json")
+	err = data.SaveJSON(r, path)
 	if err != nil {
-		return err
+		return chain.Error(err, "error creating output record")
 	}
 
 	style.Create.Printf("[+] %s\n", path)
