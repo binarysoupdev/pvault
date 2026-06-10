@@ -10,11 +10,6 @@ import (
 
 type Vault struct{}
 
-func (v Vault) NewRecord(name string) (Record, error) {
-	r := NewRecord(name)
-	return r, v.SaveRecord(r)
-}
-
 func (Vault) SaveRecord(r Record) error {
 	//TODO: check record name is unique
 

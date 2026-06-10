@@ -29,7 +29,9 @@ func (cmd CreateCommand) Run(args []string) error {
 		return chain.New("\"name\" cannot be empty")
 	}
 
-	r, err := vault.Vault{}.NewRecord(*name)
+	r := vault.NewRecord(*name)
+
+	err := vault.Vault{}.SaveRecord(r)
 	if err != nil {
 		return chain.Error(err, "error creating vault record")
 	}
