@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"path/filepath"
-	"pvault/cfg"
 	"pvault/chain"
+	"pvault/config"
 	"pvault/data"
 	"pvault/vault"
 
@@ -42,7 +42,7 @@ func (cmd UnlockCommand) Run(args []string) error {
 
 	style.BoldInfo.Printf("[=] Loaded Record: %s\n", r.ID.String())
 
-	path := filepath.Join(cfg.Global.OutputPath, r.ID.String()+".json")
+	path := filepath.Join(config.Global.OutputPath, r.ID.String()+".json")
 	err = data.SaveJSON(r, path)
 	if err != nil {
 		return chain.Error(err, "error creating output record")

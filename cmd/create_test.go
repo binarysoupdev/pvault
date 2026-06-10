@@ -2,8 +2,8 @@ package cmd_test
 
 import (
 	"path/filepath"
-	"pvault/cfg"
 	"pvault/cmd"
+	"pvault/config"
 	"pvault/data"
 	"pvault/vault"
 	"testing"
@@ -26,7 +26,7 @@ func TestCreateCommandSuite(t *testing.T) {
 }
 
 func (s *CreateTestSuite) SetupTest() {
-	cfg.SetGlobal(cfg.Config{
+	config.SetGlobal(config.Config{
 		VaultPath:  file.NewPath(s.T(), ""),
 		OutputPath: file.NewPath(s.T(), ""),
 	})
@@ -41,8 +41,8 @@ func (s *CreateTestSuite) TestNameNotEmpty() {
 }
 
 func (s *CreateTestSuite) TestInvalidVaultPath() {
-	//-- assert
-	cfg.Global.VaultPath += "/invalid"
+	//-- arrange
+	config.Global.VaultPath += "/invalid"
 
 	//-- act
 	s.RunCommand("-name", "foobar")
@@ -52,8 +52,8 @@ func (s *CreateTestSuite) TestInvalidVaultPath() {
 }
 
 func (s *CreateTestSuite) TestInvalidOutputPath() {
-	//-- assert
-	cfg.Global.OutputPath += "/invalid"
+	//-- arrange
+	config.Global.OutputPath += "/invalid"
 
 	out := pipe.OpenStdout(1)
 	defer out.Close()
@@ -84,8 +84,8 @@ func (s *CreateTestSuite) TestCreateRecord() {
 	s.Require().Contains(line, "[+] New Record: ")
 
 	ID := line[len(line)-36:]
-	VAULT_FILE := filepath.Join(cfg.Global.VaultPath, ID+".json")
-	OUTPUT_FILE := filepath.Join(cfg.Global.OutputPath, ID+".json")
+	VAULT_FILE := filepath.Join(config.Global.VaultPath, ID+".json")
+	OUTPUT_FILE := filepath.Join(config.Global.OutputPath, ID+".json")
 
 	s.Assert().Contains(out.ReadLine(), "[+] "+OUTPUT_FILE)
 

@@ -1,4 +1,4 @@
-package cfg
+package config
 
 import (
 	"os"
@@ -12,11 +12,16 @@ func Load(cfg *Config, path string) error {
 	if err != nil {
 		return chain.Error(err, "error locating executable")
 	}
-	path = filepath.Join(exec, path)
+	path = filepath.Join(filepath.Dir(exec), path)
 
 	*cfg, err = data.LoadJSON[Config](path)
 	if err != nil {
 		return chain.Error(err, "error loading config JSON")
+	}
+
+	err = cfg.Validate()
+	if err != nil {
+		return chain.Error(err, "error validating config")
 	}
 
 	return nil

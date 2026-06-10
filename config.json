@@ -1,4 +1,4 @@
 {
-    "vault_path": "tmp/vault",
-    "output_path": "tmp/output"
+    "vault_path": "tmp/vault/.keep",
+    "output_path": "tmp/output/foo"
 }

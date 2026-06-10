@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"pvault/cfg"
 	"pvault/chain"
 	"pvault/cmd"
+	"pvault/config"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
@@ -34,7 +34,7 @@ func main() {
 }
 
 func run(runner command.Runner) error {
-	err := cfg.Load(&cfg.Global, "config.json")
+	err := config.Load(&config.Global, "config.json")
 	if err != nil {
 		return chain.Error(err, "error loading global config")
 	}
