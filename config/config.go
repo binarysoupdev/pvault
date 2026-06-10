@@ -6,6 +6,9 @@ import (
 )
 
 type Config struct {
+	Path    string
+	Version string `json:"version"`
+
 	VaultPath  string `json:"vault_path"`
 	OutputPath string `json:"output_path"`
 }

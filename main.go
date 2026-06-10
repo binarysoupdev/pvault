@@ -17,6 +17,7 @@ func main() {
 	flag.Parse()
 
 	runner := command.NewRunner(
+		cmd.NewConfigCommand(),
 		cmd.NewCreateCommand(),
 		cmd.NewLockCommand(),
 		cmd.NewUnlockCommand(),

@@ -1,4 +1,5 @@
 {
-    "vault_path": "tmp/vault/.keep",
-    "output_path": "tmp/output/foo"
+    "version": "1.0",
+    "vault_path": "tmp/vault",
+    "output_path": "tmp/output"
 }
