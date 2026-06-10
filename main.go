@@ -35,7 +35,7 @@ func main() {
 }
 
 func run(runner command.Runner) error {
-	err := config.Load(&config.Global, "config.json")
+	err := config.LoadDefault(&config.Global)
 	if err != nil {
 		return chain.Error(err, "error loading global config")
 	}

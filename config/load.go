@@ -7,12 +7,14 @@ import (
 	"pvault/data"
 )
 
-func Load(cfg *Config, path string) error {
-	exec, err := os.Executable()
+const CONFIG_FILE = "config.json"
+
+func LoadDefault(cfg *Config) error {
+	base, err := configPath()
 	if err != nil {
-		return chain.Error(err, "error locating executable")
+		return chain.Error(err, "error determining config path")
 	}
-	path = filepath.Join(filepath.Dir(exec), path)
+	path := filepath.Join(base, CONFIG_FILE)
 
 	*cfg, err = data.LoadJSON[Config](path)
 	if err != nil {
@@ -26,4 +28,19 @@ func Load(cfg *Config, path string) error {
 	}
 
 	return nil
+}
+
+func configPath() (string, error) {
+	// check for ENV variable override
+	val := os.Getenv("CFG_PATH")
+	if val != "" {
+		return val, nil
+	}
+
+	// use executable path as default
+	exec, err := os.Executable()
+	if err != nil {
+		return "", chain.Error(err, "error locating executable")
+	}
+	return filepath.Dir(exec), nil
 }
