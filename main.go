@@ -18,6 +18,7 @@ func main() {
 
 	runner := command.NewRunner(
 		cmd.NewConfigCommand(),
+		cmd.NewInitCommand(),
 		cmd.NewCreateCommand(),
 		cmd.NewLockCommand(),
 		cmd.NewUnlockCommand(),

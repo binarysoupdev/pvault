@@ -1,21 +1,32 @@
 package vault
 
 import (
+	"os"
 	"path/filepath"
-	"pvault/config"
-	"pvault/data"
-
-	"github.com/google/uuid"
+	"pvault/chain"
 )
 
-type Vault struct{}
+const INDEX_FILE = "index.bin"
 
-func (Vault) SaveRecord(r Record) error {
-	//TODO: check record name is unique
-
-	return data.SaveJSON(r, filepath.Join(config.Global.VaultPath, r.ID.String()+".json"))
+type Vault struct {
+	Index IndexMap
 }
 
-func (Vault) LoadRecord(id uuid.UUID) (Record, error) {
-	return data.LoadJSON[Record](filepath.Join(config.Global.VaultPath, id.String()+".json"))
+func InitializeNew(path string) error {
+	_, err := os.Stat(path)
+	if err == nil || !os.IsNotExist(err) {
+		return chain.New("vault path already exists")
+	}
+
+	err = os.MkdirAll(path, 0755)
+	if err != nil {
+		return chain.Error(err, "error creating vault directory")
+	}
+
+	err = IndexMap{}.Save(filepath.Join(path, INDEX_FILE))
+	if err != nil {
+		return chain.Error(err, "error saving index file")
+	}
+
+	return nil
 }
