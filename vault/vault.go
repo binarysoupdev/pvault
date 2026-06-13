@@ -9,6 +9,7 @@ import (
 const INDEX_FILE = "index.bin"
 
 type Vault struct {
+	Path  string
 	Index IndexMap
 }
 
@@ -29,4 +30,18 @@ func InitializeNew(path string) error {
 	}
 
 	return nil
+}
+
+func Open(path string) (Vault, error) {
+	v := Vault{
+		Path:  path,
+		Index: IndexMap{},
+	}
+
+	err := v.Index.Load(filepath.Join(path, INDEX_FILE))
+	if err != nil {
+		return v, chain.Error(err, "error loading index file")
+	}
+
+	return v, nil
 }
