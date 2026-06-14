@@ -1,6 +1,7 @@
 package vault
 
 import (
+	"fmt"
 	"pvault/chain"
 	"pvault/data"
 
@@ -8,7 +9,10 @@ import (
 )
 
 func (v Vault) SaveRecord(r Record) error {
-	//TODO: check record name is unique
+	id, exists := v.Index[r.Name]
+	if exists && id != r.ID {
+		return fmt.Errorf("name \"%s\" already exists", r.Name)
+	}
 
 	err := data.SaveJSON(r, v.RecordPath(r.ID))
 	if err != nil {

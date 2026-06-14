@@ -1,12 +1,14 @@
 package vault_test
 
 import (
+	"fmt"
 	"pvault/data"
 	"pvault/vault"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/rand"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -38,6 +40,17 @@ func (s *OperationsTestSuite) SetupTest() {
 
 //=====================================
 
+func (s *OperationsTestSuite) TestSaveRecordNameAlreadyExists() {
+	//-- arrange
+	s.Vault.Index[s.Record.Name] = uuid.Nil
+
+	//-- act
+	res := s.Vault.SaveRecord(s.Record)
+
+	//-- assert
+	s.Require().ErrorContains(res, fmt.Sprintf("name \"%s\" already exists", s.Record.Name))
+}
+
 func (s *OperationsTestSuite) TestSaveRecordInvalidVaultPath() {
 	//-- arrange
 	s.Vault.Path = "invalid"
@@ -49,7 +62,7 @@ func (s *OperationsTestSuite) TestSaveRecordInvalidVaultPath() {
 	s.Require().ErrorContains(res, "error saving record file")
 }
 
-func (s *OperationsTestSuite) TestSaveRecordValid() {
+func (s *OperationsTestSuite) TestSaveRecordNewNameValid() {
 	//-- act
 	res := s.Vault.SaveRecord(s.Record)
 
@@ -60,6 +73,21 @@ func (s *OperationsTestSuite) TestSaveRecordValid() {
 	idx, err := vault.LoadIndex(s.Vault.IndexPath())
 	s.Require().NoError(err)
 	s.Assert().Contains(idx, s.Record.Name)
+
+	r, err := data.LoadJSON[vault.Record](s.Vault.RecordPath(s.Record.ID))
+	s.Require().NoError(err)
+	s.Assert().Equal(s.Record, r)
+}
+
+func (s *OperationsTestSuite) TestSaveRecordUpdateExistingValid() {
+	//-- arrange
+	s.Vault.Index[s.Record.Name] = s.Record.ID
+
+	//-- act
+	res := s.Vault.SaveRecord(s.Record)
+
+	//-- assert
+	s.Require().NoError(res)
 
 	r, err := data.LoadJSON[vault.Record](s.Vault.RecordPath(s.Record.ID))
 	s.Require().NoError(err)
