@@ -101,3 +101,21 @@ func (s *CreateTestSuite) TestRunValid() {
 	s.Assert().FileExists(VAULT_FILE)
 	s.Assert().FileExists(OUTPUT_FILE)
 }
+
+func (s *CreateTestSuite) TestRunExistingNameInvalid() {
+	//-- arrange
+	rand := rand.New(0)
+	NAME := rand.ASCII(15)
+
+	v, err := vault.Open(config.Global.VaultPath)
+	s.Require().NoError(err)
+
+	v.SaveRecord(vault.EmptyRecord(NAME))
+	s.Require().NoError(err)
+
+	//-- act
+	s.RunCommand("-name", NAME)
+
+	//-- assert
+	s.RequireResultFail("error saving vault record")
+}

@@ -95,3 +95,18 @@ func (s *LockTestSuite) TestRunValid() {
 	s.Assert().Contains(out.ReadLine(), "[-] "+s.RecordPath)
 	s.Assert().NoFileExists(s.RecordPath)
 }
+
+func (s *LockTestSuite) TestRunExistingNameInvalid() {
+	//-- arrange
+	v, err := vault.Open(config.Global.VaultPath)
+	s.Require().NoError(err)
+
+	v.SaveRecord(vault.EmptyRecord(s.Record.Name))
+	s.Require().NoError(err)
+
+	//-- act
+	s.RunCommand("-path", s.RecordPath)
+
+	//-- assert
+	s.RequireResultFail("error saving vault record")
+}
