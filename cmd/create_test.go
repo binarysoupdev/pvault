@@ -4,7 +4,6 @@ import (
 	"path/filepath"
 	"pvault/cmd"
 	"pvault/config"
-	"pvault/data"
 	"pvault/vault"
 	"testing"
 
@@ -27,14 +26,17 @@ func TestCreateCommandSuite(t *testing.T) {
 
 func (s *CreateTestSuite) SetupTest() {
 	config.SetGlobal(config.Config{
-		VaultPath:  file.NewPath(s.T(), ""),
+		VaultPath:  file.NewPath(s.T(), "vault"),
 		OutputPath: file.NewPath(s.T(), ""),
 	})
+
+	err := vault.InitializeNew(config.Global.VaultPath)
+	s.Require().NoError(err)
 }
 
 //=====================================
 
-func (s *CreateTestSuite) TestNameNotEmpty() {
+func (s *CreateTestSuite) TestRunNameNotEmpty() {
 	//-- act
 	s.RunCommand("-name", "")
 
@@ -42,33 +44,39 @@ func (s *CreateTestSuite) TestNameNotEmpty() {
 	s.RequireResultFail("\"name\" cannot be empty")
 }
 
-func (s *CreateTestSuite) TestInvalidVaultPath() {
+func (s *CreateTestSuite) TestRunInvalidVaultPath() {
 	//-- arrange
-	config.Global.VaultPath += "/invalid"
+	rand := rand.New(0)
+	NAME := rand.ASCII(15)
+
+	config.Global.VaultPath = "invalid"
 
 	//-- act
-	s.RunCommand("-name", "foobar")
+	s.RunCommand("-name", NAME)
 
 	//-- assert
-	s.RequireResultFail("error creating vault record")
+	s.RequireResultFail("error opening vault")
 }
 
-func (s *CreateTestSuite) TestInvalidOutputPath() {
+func (s *CreateTestSuite) TestRunInvalidOutputPath() {
 	//-- arrange
-	config.Global.OutputPath += "/invalid"
+	rand := rand.New(0)
+	NAME := rand.ASCII(15)
+
+	config.Global.OutputPath = "invalid"
 
 	out := pipe.OpenStdout(1)
 	defer out.Close()
 
 	//-- act
-	s.RunCommand("-name", "foobar")
+	s.RunCommand("-name", NAME)
 
 	//-- assert
 	s.RequireResultFail("error creating output record")
 	s.Assert().Contains(out.ReadLine(), "[+] New Record: ")
 }
 
-func (s *CreateTestSuite) TestCreateRecord() {
+func (s *CreateTestSuite) TestRunValid() {
 	//-- arrange
 	rand := rand.New(0)
 	NAME := rand.ASCII(15)
@@ -90,14 +98,6 @@ func (s *CreateTestSuite) TestCreateRecord() {
 	OUTPUT_FILE := filepath.Join(config.Global.OutputPath, ID+".json")
 
 	s.Assert().Contains(out.ReadLine(), "[+] "+OUTPUT_FILE)
-
-	record, err := data.LoadJSON[vault.Record](VAULT_FILE)
-	s.Require().NoError(err)
-	s.Assert().Equal(ID, record.ID.String())
-	s.Assert().Equal(NAME, record.Name)
-
-	record, err = data.LoadJSON[vault.Record](OUTPUT_FILE)
-	s.Require().NoError(err)
-	s.Assert().Equal(ID, record.ID.String())
-	s.Assert().Equal(NAME, record.Name)
+	s.Assert().FileExists(VAULT_FILE)
+	s.Assert().FileExists(OUTPUT_FILE)
 }

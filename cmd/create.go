@@ -38,7 +38,7 @@ func (cmd CreateCommand) Run(args []string) error {
 
 	err = v.SaveRecord(r)
 	if err != nil {
-		return chain.Error(err, "error creating vault record")
+		return chain.Error(err, "error saving vault record")
 	}
 
 	style.BoldCreate.Printf("[+] New Record: %s\n", r.ID.String())
