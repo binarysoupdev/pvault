@@ -29,20 +29,23 @@ func TestLockCommandSuite(t *testing.T) {
 
 func (s *LockTestSuite) SetupTest() {
 	config.SetGlobal(config.Config{
-		VaultPath: file.NewPath(s.T(), ""),
+		VaultPath: file.NewPath(s.T(), "vault"),
 	})
+
+	err := vault.InitializeNew(config.Global.VaultPath)
+	s.Require().NoError(err)
 
 	rand := rand.New(0)
 	s.RecordPath = file.NewPath(s.T(), rand.ASCII(10))
 	s.Record = vault.EmptyRecord(rand.ASCII(15))
 
-	err := data.SaveJSON(s.Record, s.RecordPath)
+	err = data.SaveJSON(s.Record, s.RecordPath)
 	s.Require().NoError(err)
 }
 
 //=====================================
 
-func (s *LockTestSuite) TestPathNotEmpty() {
+func (s *LockTestSuite) TestRunPathNotEmpty() {
 	//-- act
 	s.RunCommand("-path", "")
 
@@ -50,7 +53,18 @@ func (s *LockTestSuite) TestPathNotEmpty() {
 	s.RequireResultFail("\"path\" cannot be empty")
 }
 
-func (s *LockTestSuite) TestInvalidRecordPath() {
+func (s *LockTestSuite) TestRunInvalidVaultPath() {
+	//-- arrange
+	config.Global.VaultPath = "invalid"
+
+	//-- act
+	s.RunCommand("-path", s.RecordPath)
+
+	//-- assert
+	s.RequireResultFail("error opening vault")
+}
+
+func (s *LockTestSuite) TestRunInvalidRecordPath() {
 	//-- act
 	s.RunCommand("-path", "invalid")
 
@@ -58,18 +72,7 @@ func (s *LockTestSuite) TestInvalidRecordPath() {
 	s.RequireResultFail("error loading source record")
 }
 
-func (s *LockTestSuite) TestInvalidVaultPath() {
-	//-- arrange
-	config.Global.VaultPath += "/invalid"
-
-	//-- act
-	s.RunCommand("-path", s.RecordPath)
-
-	//-- assert
-	s.RequireResultFail("error saving vault record")
-}
-
-func (s *LockTestSuite) TestLockRecord() {
+func (s *LockTestSuite) TestRunValid() {
 	//-- arrange
 	VAULT_FILE := filepath.Join(config.Global.VaultPath, s.Record.ID.String()+".json")
 
