@@ -13,31 +13,33 @@ const INDEX_VERSION = 1
 
 type IndexMap map[string]uuid.UUID
 
-func (idx IndexMap) Load(path string) error {
+func LoadIndex(path string) (IndexMap, error) {
+	idx := IndexMap{}
+
 	raw, err := os.ReadFile(path)
 	if err != nil {
-		return chain.Error(err, "error reading index file")
+		return idx, chain.Error(err, "error reading index file")
 	}
 
 	header := raw[:4]
 
 	version := binary.BigEndian.Uint16(header)
 	if version < INDEX_VERSION {
-		return fmt.Errorf("unsupported version \"%d\"", version)
+		return idx, fmt.Errorf("unsupported version \"%d\"", version)
 	}
 
 	entryCount := binary.BigEndian.Uint16(header[2:])
-	ptr := uint32(len(header))
+	ptr := len(header)
 
 	for range entryCount {
-		length := binary.BigEndian.Uint32(raw[ptr : ptr+4])
-		ptr += 4
+		length := int(binary.BigEndian.Uint16(raw[ptr : ptr+2]))
+		ptr += 2
 
 		idx.loadEntry(raw[ptr : ptr+length])
 		ptr += length
 	}
 
-	return nil
+	return idx, nil
 }
 
 func (idx IndexMap) loadEntry(raw []byte) {
@@ -79,11 +81,11 @@ func (idx IndexMap) writeHeader(file *os.File) error {
 }
 
 func (IndexMap) writeEntry(file *os.File, name string, id uuid.UUID) error {
-	entry := make([]byte, 4+16+len(name))
+	entry := make([]byte, 2+16+len(name))
 
-	binary.BigEndian.PutUint32(entry, 16+uint32(len(name)))
-	copy(entry[4:], id[:])
-	copy(entry[4+16:], []byte(name))
+	binary.BigEndian.PutUint16(entry, 16+uint16(len(name)))
+	copy(entry[2:], id[:])
+	copy(entry[2+16:], []byte(name))
 
 	_, err := file.Write(entry)
 	return err

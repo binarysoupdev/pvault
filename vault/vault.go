@@ -34,11 +34,11 @@ func InitializeNew(path string) error {
 
 func Open(path string) (Vault, error) {
 	v := Vault{
-		Path:  path,
-		Index: IndexMap{},
+		Path: path,
 	}
 
-	err := v.Index.Load(v.indexPath())
+	var err error
+	v.Index, err = LoadIndex(v.indexPath())
 	if err != nil {
 		return v, chain.Error(err, "error loading index file")
 	}
