@@ -24,7 +24,7 @@ func LoadIndex(path string) (IndexMap, error) {
 	header := raw[:4]
 
 	version := binary.BigEndian.Uint16(header)
-	if version < INDEX_VERSION {
+	if version > INDEX_VERSION {
 		return idx, fmt.Errorf("unsupported version \"%d\"", version)
 	}
 
