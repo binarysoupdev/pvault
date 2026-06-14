@@ -2,18 +2,30 @@ package vault
 
 import (
 	"path/filepath"
-	"pvault/config"
+	"pvault/chain"
 	"pvault/data"
 
 	"github.com/google/uuid"
 )
 
-func (Vault) SaveRecord(r Record) error {
+func (v Vault) SaveRecord(r Record) error {
 	//TODO: check record name is unique
 
-	return data.SaveJSON(r, filepath.Join(config.Global.VaultPath, r.ID.String()+".json"))
+	v.Index[r.Name] = r.ID
+
+	err := v.Index.Save(v.indexPath())
+	if err != nil {
+		return chain.Error(err, "error saving index file")
+	}
+
+	err = data.SaveJSON(r, filepath.Join(v.Path, r.ID.String()+".json"))
+	if err != nil {
+		return chain.Error(err, "error saving record file")
+	}
+
+	return nil
 }
 
-func (Vault) LoadRecord(id uuid.UUID) (Record, error) {
-	return data.LoadJSON[Record](filepath.Join(config.Global.VaultPath, id.String()+".json"))
+func (v Vault) LoadRecord(id uuid.UUID) (Record, error) {
+	return data.LoadJSON[Record](filepath.Join(v.Path, id.String()+".json"))
 }

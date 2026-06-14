@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 	"pvault/chain"
+	"pvault/config"
 	"pvault/data"
 	"pvault/vault"
 
@@ -28,12 +29,17 @@ func (cmd LockCommand) Run(args []string) error {
 		return chain.New("\"path\" cannot be empty")
 	}
 
+	v, err := vault.Open(config.Global.VaultPath)
+	if err != nil {
+		return chain.Error(err, "error opening vault")
+	}
+
 	r, err := data.LoadJSON[vault.Record](*path)
 	if err != nil {
 		return chain.Error(err, "error loading source record")
 	}
 
-	err = vault.Vault{}.SaveRecord(r)
+	err = v.SaveRecord(r)
 	if err != nil {
 		return chain.Error(err, "error saving vault record")
 	}

@@ -35,7 +35,12 @@ func (cmd UnlockCommand) Run(args []string) error {
 		return chain.Error(err, "error parsing ID")
 	}
 
-	r, err := vault.Vault{}.LoadRecord(id)
+	v, err := vault.Open(config.Global.VaultPath)
+	if err != nil {
+		return chain.Error(err, "error opening vault")
+	}
+
+	r, err := v.LoadRecord(id)
 	if err != nil {
 		return chain.Error(err, "error loading vault record")
 	}

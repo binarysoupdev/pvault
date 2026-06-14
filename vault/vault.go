@@ -38,10 +38,14 @@ func Open(path string) (Vault, error) {
 		Index: IndexMap{},
 	}
 
-	err := v.Index.Load(filepath.Join(path, INDEX_FILE))
+	err := v.Index.Load(v.indexPath())
 	if err != nil {
 		return v, chain.Error(err, "error loading index file")
 	}
 
 	return v, nil
+}
+
+func (v Vault) indexPath() string {
+	return filepath.Join(v.Path, INDEX_FILE)
 }
