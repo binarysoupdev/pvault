@@ -1,7 +1,6 @@
 package vault
 
 import (
-	"path/filepath"
 	"pvault/chain"
 	"pvault/data"
 
@@ -11,21 +10,26 @@ import (
 func (v Vault) SaveRecord(r Record) error {
 	//TODO: check record name is unique
 
-	v.Index[r.Name] = r.ID
-
-	err := v.Index.Save(v.indexPath())
-	if err != nil {
-		return chain.Error(err, "error saving index file")
-	}
-
-	err = data.SaveJSON(r, filepath.Join(v.Path, r.ID.String()+".json"))
+	err := data.SaveJSON(r, v.RecordPath(r.ID))
 	if err != nil {
 		return chain.Error(err, "error saving record file")
+	}
+
+	v.Index[r.Name] = r.ID
+
+	err = v.Index.Save(v.IndexPath())
+	if err != nil {
+		return chain.Error(err, "error saving index file")
 	}
 
 	return nil
 }
 
 func (v Vault) LoadRecord(id uuid.UUID) (Record, error) {
-	return data.LoadJSON[Record](filepath.Join(v.Path, id.String()+".json"))
+	r, err := data.LoadJSON[Record](v.RecordPath(id))
+	if err != nil {
+		return Record{}, chain.Error(err, "error loading record file")
+	}
+
+	return r, nil
 }

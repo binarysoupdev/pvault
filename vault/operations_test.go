@@ -1,6 +1,7 @@
 package vault_test
 
 import (
+	"pvault/data"
 	"pvault/vault"
 	"testing"
 
@@ -15,6 +16,10 @@ type OperationsTestSuite struct {
 	Record vault.Record
 }
 
+func TestCreateCommandSuite(t *testing.T) {
+	suite.Run(t, &OperationsTestSuite{})
+}
+
 func (s *OperationsTestSuite) SetupTest() {
 	PATH := file.NewPath(s.T(), "vault")
 
@@ -25,10 +30,15 @@ func (s *OperationsTestSuite) SetupTest() {
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
-	s.Record = vault.NewRecord(rand.ASCII(10))
+	s.Record = vault.EmptyRecord(rand.ASCII(10))
+	s.Record.Username = rand.ASCII(10)
+	s.Record.Password = rand.ASCII(30)
+	s.Record.Other = []interface{}{rand.ASCII(5), rand.ASCII(5), rand.ASCII(5)}
 }
 
-func (s *OperationsTestSuite) TestSaveRecordInvalidVaultPath(t *testing.T) {
+//=====================================
+
+func (s *OperationsTestSuite) TestSaveRecordInvalidVaultPath() {
 	//-- arrange
 	s.Vault.Path = "invalid"
 
@@ -36,10 +46,10 @@ func (s *OperationsTestSuite) TestSaveRecordInvalidVaultPath(t *testing.T) {
 	res := s.Vault.SaveRecord(s.Record)
 
 	//-- assert
-	s.Require().ErrorContains(res, "error saving index file")
+	s.Require().ErrorContains(res, "error saving record file")
 }
 
-func (s *OperationsTestSuite) TestSaveRecordValid(t *testing.T) {
+func (s *OperationsTestSuite) TestSaveRecordValid() {
 	//-- act
 	res := s.Vault.SaveRecord(s.Record)
 
@@ -47,6 +57,38 @@ func (s *OperationsTestSuite) TestSaveRecordValid(t *testing.T) {
 	s.Require().NoError(res)
 	s.Assert().Contains(s.Vault.Index, s.Record.Name)
 
-	//TODO: load and verify index file
-	//TODO: load and verify vault record file
+	idx, err := vault.LoadIndex(s.Vault.IndexPath())
+	s.Require().NoError(err)
+	s.Assert().Contains(idx, s.Record.Name)
+
+	r, err := data.LoadJSON[vault.Record](s.Vault.RecordPath(s.Record.ID))
+	s.Require().NoError(err)
+	s.Assert().Equal(s.Record, r)
+}
+
+func (s *OperationsTestSuite) TestLoadRecordInvalidVaultPath() {
+	//-- arrange
+	err := s.Vault.SaveRecord(s.Record)
+	s.Require().NoError(err)
+
+	s.Vault.Path = "invalid"
+
+	//-- act
+	_, res := s.Vault.LoadRecord(s.Record.ID)
+
+	//-- assert
+	s.Require().ErrorContains(res, "error loading record file")
+}
+
+func (s *OperationsTestSuite) TestLoadRecordValid() {
+	//-- arrange
+	err := s.Vault.SaveRecord(s.Record)
+	s.Require().NoError(err)
+
+	//-- act
+	r, err := s.Vault.LoadRecord(s.Record.ID)
+
+	//-- assert
+	s.Require().NoError(err)
+	s.Assert().Equal(s.Record, r)
 }

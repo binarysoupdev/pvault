@@ -34,7 +34,7 @@ func (s *UnlockTestSuite) SetupTest() {
 	})
 
 	rand := rand.New(0)
-	s.Record = vault.NewRecord(rand.ASCII(15))
+	s.Record = vault.EmptyRecord(rand.ASCII(15))
 
 	err := vault.Vault{}.SaveRecord(s.Record)
 	s.Require().NoError(err)

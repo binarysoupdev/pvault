@@ -34,7 +34,7 @@ func (s *LockTestSuite) SetupTest() {
 
 	rand := rand.New(0)
 	s.RecordPath = file.NewPath(s.T(), rand.ASCII(10))
-	s.Record = vault.NewRecord(rand.ASCII(15))
+	s.Record = vault.EmptyRecord(rand.ASCII(15))
 
 	err := data.SaveJSON(s.Record, s.RecordPath)
 	s.Require().NoError(err)

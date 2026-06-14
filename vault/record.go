@@ -13,7 +13,7 @@ type Record struct {
 	Other    any    `json:"other"`
 }
 
-func NewRecord(name string) Record {
+func EmptyRecord(name string) Record {
 	return Record{
 		ID:       uuid.New(),
 		Name:     name,

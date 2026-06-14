@@ -34,7 +34,7 @@ func (cmd CreateCommand) Run(args []string) error {
 		return chain.Error(err, "error opening vault")
 	}
 
-	r := vault.NewRecord(*name)
+	r := vault.EmptyRecord(*name)
 
 	err = v.SaveRecord(r)
 	if err != nil {

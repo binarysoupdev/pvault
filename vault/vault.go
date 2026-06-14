@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"pvault/chain"
+
+	"github.com/google/uuid"
 )
 
 const INDEX_FILE = "index.bin"
@@ -38,7 +40,7 @@ func Open(path string) (Vault, error) {
 	}
 
 	var err error
-	v.Index, err = LoadIndex(v.indexPath())
+	v.Index, err = LoadIndex(v.IndexPath())
 	if err != nil {
 		return v, chain.Error(err, "error loading index file")
 	}
@@ -46,6 +48,10 @@ func Open(path string) (Vault, error) {
 	return v, nil
 }
 
-func (v Vault) indexPath() string {
+func (v Vault) IndexPath() string {
 	return filepath.Join(v.Path, INDEX_FILE)
+}
+
+func (v Vault) RecordPath(id uuid.UUID) string {
+	return filepath.Join(v.Path, id.String()+".json")
 }
