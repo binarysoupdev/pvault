@@ -29,20 +29,26 @@ func TestUnlockCommandSuite(t *testing.T) {
 
 func (s *UnlockTestSuite) SetupTest() {
 	config.SetGlobal(config.Config{
-		VaultPath:  file.NewPath(s.T(), ""),
+		VaultPath:  file.NewPath(s.T(), "vault"),
 		OutputPath: file.NewPath(s.T(), ""),
 	})
 
 	rand := rand.New(0)
 	s.Record = vault.EmptyRecord(rand.ASCII(15))
 
-	err := vault.Vault{}.SaveRecord(s.Record)
+	err := vault.InitializeNew(config.Global.VaultPath)
+	s.Require().NoError(err)
+
+	v, err := vault.Open(config.Global.VaultPath)
+	s.Require().NoError(err)
+
+	err = v.SaveRecord(s.Record)
 	s.Require().NoError(err)
 }
 
 //=====================================
 
-func (s *UnlockTestSuite) TestNameNotEmpty() {
+func (s *UnlockTestSuite) TestRunNameNotEmpty() {
 	//-- act
 	s.RunCommand("-name", "")
 
@@ -50,7 +56,7 @@ func (s *UnlockTestSuite) TestNameNotEmpty() {
 	s.RequireResultFail("\"name\" cannot be empty")
 }
 
-func (s *UnlockTestSuite) TestInvalidIDFormat() {
+func (s *UnlockTestSuite) TestRunInvalidIDFormat() {
 	//-- act
 	s.RunCommand("-name", "invalid")
 
@@ -58,7 +64,18 @@ func (s *UnlockTestSuite) TestInvalidIDFormat() {
 	s.RequireResultFail("error parsing ID")
 }
 
-func (s *UnlockTestSuite) TestInvalidID() {
+func (s *UnlockTestSuite) TestRunInvalidVaultPath() {
+	//-- arrange
+	config.Global.VaultPath = "invalid"
+
+	//-- act
+	s.RunCommand("-name", s.Record.ID.String())
+
+	//-- assert
+	s.RequireResultFail("error opening vault")
+}
+
+func (s *UnlockTestSuite) TestRunInvalidID() {
 	//-- act
 	s.RunCommand("-name", uuid.Nil.String())
 
@@ -66,20 +83,9 @@ func (s *UnlockTestSuite) TestInvalidID() {
 	s.RequireResultFail("error loading vault record")
 }
 
-func (s *UnlockTestSuite) TestInvalidVaultPath() {
+func (s *UnlockTestSuite) TestRunInvalidOutputPath() {
 	//-- arrange
-	config.Global.VaultPath += "/invalid"
-
-	//-- act
-	s.RunCommand("-name", s.Record.ID.String())
-
-	//-- assert
-	s.RequireResultFail("error loading vault record")
-}
-
-func (s *UnlockTestSuite) TestInvalidOutputPath() {
-	//-- arrange
-	config.Global.OutputPath += "/invalid"
+	config.Global.OutputPath = "invalid"
 
 	out := pipe.OpenStdout(1)
 	defer out.Close()
@@ -92,7 +98,7 @@ func (s *UnlockTestSuite) TestInvalidOutputPath() {
 	s.Assert().Contains(out.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
 }
 
-func (s *UnlockTestSuite) TestUnlockRecord() {
+func (s *UnlockTestSuite) TestRunValid() {
 	//-- arrange
 	OUTPUT_FILE := filepath.Join(config.Global.OutputPath, s.Record.ID.String()+".json")
 
