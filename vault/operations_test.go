@@ -40,17 +40,6 @@ func (s *OperationsTestSuite) SetupTest() {
 
 //=====================================
 
-func (s *OperationsTestSuite) TestSaveRecordNameAlreadyExists() {
-	//-- arrange
-	s.Vault.Index[s.Record.Name] = uuid.Nil
-
-	//-- act
-	res := s.Vault.SaveRecord(s.Record)
-
-	//-- assert
-	s.Require().ErrorContains(res, fmt.Sprintf("name \"%s\" already exists", s.Record.Name))
-}
-
 func (s *OperationsTestSuite) TestSaveRecordInvalidVaultPath() {
 	//-- arrange
 	s.Vault.Path = "invalid"
@@ -62,7 +51,7 @@ func (s *OperationsTestSuite) TestSaveRecordInvalidVaultPath() {
 	s.Require().ErrorContains(res, "error saving record file")
 }
 
-func (s *OperationsTestSuite) TestSaveRecordNewNameValid() {
+func (s *OperationsTestSuite) TestSaveRecordNewIdNewNameValid() {
 	//-- act
 	res := s.Vault.SaveRecord(s.Record)
 
@@ -79,7 +68,41 @@ func (s *OperationsTestSuite) TestSaveRecordNewNameValid() {
 	s.Assert().Equal(s.Record, r)
 }
 
-func (s *OperationsTestSuite) TestSaveRecordUpdateExistingValid() {
+func (s *OperationsTestSuite) TestSaveRecordExistingIDNewNameValid() {
+	//-- arrange
+	s.Vault.Index[s.Record.Name] = s.Record.ID
+	s.Record.Name += "x"
+
+	//-- act
+	res := s.Vault.SaveRecord(s.Record)
+
+	//-- assert
+	s.Require().NoError(res)
+	s.Assert().Contains(s.Vault.Index, s.Record.Name)
+	s.Assert().Len(s.Vault.Index, 1)
+
+	idx, err := vault.LoadIndex(s.Vault.IndexPath())
+	s.Require().NoError(err)
+	s.Assert().Contains(idx, s.Record.Name)
+	s.Assert().Len(s.Vault.Index, 1)
+
+	r, err := data.LoadJSON[vault.Record](s.Vault.RecordPath(s.Record.ID))
+	s.Require().NoError(err)
+	s.Assert().Equal(s.Record, r)
+}
+
+func (s *OperationsTestSuite) TestSaveRecordNewIDExistingNameInvalid() {
+	//-- arrange
+	s.Vault.Index[s.Record.Name] = uuid.Nil
+
+	//-- act
+	res := s.Vault.SaveRecord(s.Record)
+
+	//-- assert
+	s.Require().ErrorContains(res, fmt.Sprintf("name \"%s\" already exists", s.Record.Name))
+}
+
+func (s *OperationsTestSuite) TestSaveRecordExistingIDExistingNameValid() {
 	//-- arrange
 	s.Vault.Index[s.Record.Name] = s.Record.ID
 
@@ -88,6 +111,11 @@ func (s *OperationsTestSuite) TestSaveRecordUpdateExistingValid() {
 
 	//-- assert
 	s.Require().NoError(res)
+	s.Assert().Len(s.Vault.Index, 1)
+
+	idx, err := vault.LoadIndex(s.Vault.IndexPath())
+	s.Require().NoError(err)
+	s.Assert().Len(idx, 1)
 
 	r, err := data.LoadJSON[vault.Record](s.Vault.RecordPath(s.Record.ID))
 	s.Require().NoError(err)

@@ -90,3 +90,12 @@ func (IndexMap) writeEntry(file *os.File, name string, id uuid.UUID) error {
 	_, err := file.Write(entry)
 	return err
 }
+
+func (idx IndexMap) findName(id uuid.UUID) (string, bool) {
+	for name, val := range idx {
+		if val == id {
+			return name, true
+		}
+	}
+	return "", false
+}

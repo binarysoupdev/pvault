@@ -9,8 +9,8 @@ import (
 )
 
 func (v Vault) SaveRecord(r Record) error {
-	id, exists := v.Index[r.Name]
-	if exists && id != r.ID {
+	existingId, ok := v.Index[r.Name]
+	if ok && existingId != r.ID {
 		return fmt.Errorf("name \"%s\" already exists", r.Name)
 	}
 
@@ -19,6 +19,10 @@ func (v Vault) SaveRecord(r Record) error {
 		return chain.Error(err, "error saving record file")
 	}
 
+	existingName, ok := v.Index.findName(r.ID)
+	if ok && existingName != r.Name {
+		delete(v.Index, existingName)
+	}
 	v.Index[r.Name] = r.ID
 
 	err = v.Index.Save(v.IndexPath())
