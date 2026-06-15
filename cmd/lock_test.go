@@ -72,9 +72,39 @@ func (s *LockTestSuite) TestRunInvalidRecordPath() {
 	s.RequireResultFail("error loading source record")
 }
 
-func (s *LockTestSuite) TestRunValid() {
+func (s *LockTestSuite) TestRunSaveNewValid() {
 	//-- arrange
 	VAULT_FILE := filepath.Join(config.Global.VaultPath, s.Record.ID.String()+".json")
+
+	out := pipe.OpenStdout(2)
+	defer out.Close()
+
+	//-- act
+	s.RunCommand("-path", s.RecordPath)
+
+	//-- assert
+	s.RequireResultPass()
+
+	line := out.ReadLine()
+	s.Require().Contains(line, "[+] Updated Record: "+s.Record.ID.String())
+	s.Assert().Contains(out.ReadLine(), "[-] "+s.RecordPath)
+
+	s.Assert().FileExists(VAULT_FILE)
+	s.Assert().NoFileExists(s.RecordPath)
+}
+
+func (s *LockTestSuite) TestRunUpdateExistingValid() {
+	//-- arrange
+	VAULT_FILE := filepath.Join(config.Global.VaultPath, s.Record.ID.String()+".json")
+
+	v, err := vault.Open(config.Global.VaultPath)
+	s.Require().NoError(err)
+
+	err = v.SaveRecord(vault.Record{
+		ID:   s.Record.ID,
+		Name: "existing",
+	})
+	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(2)
 	defer out.Close()
@@ -101,7 +131,7 @@ func (s *LockTestSuite) TestRunExistingNameInvalid() {
 	v, err := vault.Open(config.Global.VaultPath)
 	s.Require().NoError(err)
 
-	v.SaveRecord(vault.EmptyRecord(s.Record.Name))
+	err = v.SaveRecord(vault.EmptyRecord(s.Record.Name))
 	s.Require().NoError(err)
 
 	//-- act

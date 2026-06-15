@@ -110,7 +110,7 @@ func (s *CreateTestSuite) TestRunExistingNameInvalid() {
 	v, err := vault.Open(config.Global.VaultPath)
 	s.Require().NoError(err)
 
-	v.SaveRecord(vault.EmptyRecord(NAME))
+	err = v.SaveRecord(vault.EmptyRecord(NAME))
 	s.Require().NoError(err)
 
 	//-- act
