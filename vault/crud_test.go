@@ -12,17 +12,17 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type OperationsTestSuite struct {
+type CRUDTestSuite struct {
 	suite.Suite
 	Vault  vault.Vault
 	Record vault.Record
 }
 
 func TestCreateCommandSuite(t *testing.T) {
-	suite.Run(t, &OperationsTestSuite{})
+	suite.Run(t, &CRUDTestSuite{})
 }
 
-func (s *OperationsTestSuite) SetupTest() {
+func (s *CRUDTestSuite) SetupTest() {
 	PATH := file.NewPath(s.T(), "vault")
 
 	err := vault.InitializeNew(PATH)
@@ -40,7 +40,7 @@ func (s *OperationsTestSuite) SetupTest() {
 
 //=====================================
 
-func (s *OperationsTestSuite) TestSaveRecordInvalidVaultPath() {
+func (s *CRUDTestSuite) TestSaveRecordInvalidVaultPath() {
 	//-- arrange
 	s.Vault.Path = "invalid"
 
@@ -51,7 +51,7 @@ func (s *OperationsTestSuite) TestSaveRecordInvalidVaultPath() {
 	s.Require().ErrorContains(res, "error saving record file")
 }
 
-func (s *OperationsTestSuite) TestSaveRecordNewIdNewNameValid() {
+func (s *CRUDTestSuite) TestSaveRecordNewIdNewNameValid() {
 	//-- act
 	res := s.Vault.SaveRecord(s.Record)
 
@@ -68,7 +68,7 @@ func (s *OperationsTestSuite) TestSaveRecordNewIdNewNameValid() {
 	s.Assert().Equal(s.Record, r)
 }
 
-func (s *OperationsTestSuite) TestSaveRecordExistingIDNewNameValid() {
+func (s *CRUDTestSuite) TestSaveRecordExistingIDNewNameValid() {
 	//-- arrange
 	s.Vault.Index[s.Record.Name] = s.Record.ID
 	s.Record.Name += "x"
@@ -91,7 +91,7 @@ func (s *OperationsTestSuite) TestSaveRecordExistingIDNewNameValid() {
 	s.Assert().Equal(s.Record, r)
 }
 
-func (s *OperationsTestSuite) TestSaveRecordNewIDExistingNameInvalid() {
+func (s *CRUDTestSuite) TestSaveRecordNewIDExistingNameInvalid() {
 	//-- arrange
 	s.Vault.Index[s.Record.Name] = uuid.Nil
 
@@ -102,7 +102,7 @@ func (s *OperationsTestSuite) TestSaveRecordNewIDExistingNameInvalid() {
 	s.Require().ErrorContains(res, fmt.Sprintf("name \"%s\" already exists", s.Record.Name))
 }
 
-func (s *OperationsTestSuite) TestSaveRecordExistingIDExistingNameValid() {
+func (s *CRUDTestSuite) TestSaveRecordExistingIDExistingNameValid() {
 	//-- arrange
 	s.Vault.Index[s.Record.Name] = s.Record.ID
 
@@ -122,7 +122,7 @@ func (s *OperationsTestSuite) TestSaveRecordExistingIDExistingNameValid() {
 	s.Assert().Equal(s.Record, r)
 }
 
-func (s *OperationsTestSuite) TestLoadRecordInvalidVaultPath() {
+func (s *CRUDTestSuite) TestLoadRecordInvalidVaultPath() {
 	//-- arrange
 	err := s.Vault.SaveRecord(s.Record)
 	s.Require().NoError(err)
@@ -136,7 +136,7 @@ func (s *OperationsTestSuite) TestLoadRecordInvalidVaultPath() {
 	s.Require().ErrorContains(res, "error loading record file")
 }
 
-func (s *OperationsTestSuite) TestLoadRecordInvalidName() {
+func (s *CRUDTestSuite) TestLoadRecordInvalidName() {
 	//-- arrange
 	err := s.Vault.SaveRecord(s.Record)
 	s.Require().NoError(err)
@@ -150,7 +150,7 @@ func (s *OperationsTestSuite) TestLoadRecordInvalidName() {
 	s.Require().ErrorContains(res, fmt.Sprintf("name \"%s\" not found", NAME))
 }
 
-func (s *OperationsTestSuite) TestLoadRecordValid() {
+func (s *CRUDTestSuite) TestLoadRecordValid() {
 	//-- arrange
 	err := s.Vault.SaveRecord(s.Record)
 	s.Require().NoError(err)
@@ -161,4 +161,45 @@ func (s *OperationsTestSuite) TestLoadRecordValid() {
 	//-- assert
 	s.Require().NoError(err)
 	s.Assert().Equal(s.Record, r)
+}
+
+func (s *CRUDTestSuite) TestDeleteRecordInvalidName() {
+	//-- act
+	_, res := s.Vault.DeleteRecord(s.Record.Name)
+
+	//-- assert
+	s.Require().ErrorContains(res, fmt.Sprintf("name \"%s\" not found", s.Record.Name))
+}
+
+func (s *CRUDTestSuite) TestDeleteRecordInvalidVaultPath() {
+	//-- arrange
+	err := s.Vault.SaveRecord(s.Record)
+	s.Require().NoError(err)
+
+	s.Vault.Path = "invalid"
+
+	//-- act
+	_, res := s.Vault.DeleteRecord(s.Record.Name)
+
+	//-- assert
+	s.Require().ErrorContains(res, "error deleting record file")
+}
+
+func (s *CRUDTestSuite) TestDeleteRecordValid() {
+	//-- arrange
+	err := s.Vault.SaveRecord(s.Record)
+	s.Require().NoError(err)
+
+	//-- act
+	id, err := s.Vault.DeleteRecord(s.Record.Name)
+
+	//-- assert
+	s.Require().NoError(err)
+	s.Assert().Equal(s.Record.ID, id)
+
+	idx, err := vault.LoadIndex(s.Vault.IndexPath())
+	s.Require().NoError(err)
+	s.Assert().Len(idx, 0)
+
+	s.Assert().NoFileExists(s.Vault.RecordPath(s.Record.ID))
 }

@@ -2,8 +2,11 @@ package vault
 
 import (
 	"fmt"
+	"os"
 	"pvault/chain"
 	"pvault/data"
+
+	"github.com/google/uuid"
 )
 
 func (v Vault) SaveRecord(r Record) error {
@@ -43,4 +46,25 @@ func (v Vault) LoadRecord(name string) (Record, error) {
 	}
 
 	return r, nil
+}
+
+func (v Vault) DeleteRecord(name string) (uuid.UUID, error) {
+	id, ok := v.Index[name]
+	if !ok {
+		return uuid.Nil, fmt.Errorf("name \"%s\" not found", name)
+	}
+
+	err := os.Remove(v.RecordPath(id))
+	if err != nil {
+		return uuid.Nil, chain.Error(err, "error deleting record file")
+	}
+
+	delete(v.Index, name)
+
+	err = v.Index.Save(v.IndexPath())
+	if err != nil {
+		return uuid.Nil, chain.Error(err, "error saving index file")
+	}
+
+	return id, nil
 }
