@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"pvault/chain"
 	"pvault/data"
-
-	"github.com/google/uuid"
 )
 
 func (v Vault) SaveRecord(r Record) error {
@@ -33,7 +31,12 @@ func (v Vault) SaveRecord(r Record) error {
 	return nil
 }
 
-func (v Vault) LoadRecord(id uuid.UUID) (Record, error) {
+func (v Vault) LoadRecord(name string) (Record, error) {
+	id, ok := v.Index[name]
+	if !ok {
+		return Record{}, fmt.Errorf("name \"%s\" not found", name)
+	}
+
 	r, err := data.LoadJSON[Record](v.RecordPath(id))
 	if err != nil {
 		return Record{}, chain.Error(err, "error loading record file")

@@ -1,6 +1,7 @@
 package cmd_test
 
 import (
+	"os"
 	"path/filepath"
 	"pvault/cmd"
 	"pvault/config"
@@ -12,12 +13,12 @@ import (
 	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
 	"github.com/binarysoupdev/tinsel/rand"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 )
 
 type UnlockTestSuite struct {
 	test.CommandSuite[*cmd.UnlockCommand]
+	Vault  vault.Vault
 	Record vault.Record
 }
 
@@ -39,62 +40,68 @@ func (s *UnlockTestSuite) SetupTest() {
 	err := vault.InitializeNew(config.Global.VaultPath)
 	s.Require().NoError(err)
 
-	v, err := vault.Open(config.Global.VaultPath)
+	s.Vault, err = vault.Open(config.Global.VaultPath)
 	s.Require().NoError(err)
 
-	err = v.SaveRecord(s.Record)
+	err = s.Vault.SaveRecord(s.Record)
 	s.Require().NoError(err)
 }
 
 //=====================================
-
-func (s *UnlockTestSuite) TestRunNameNotEmpty() {
-	//-- act
-	s.RunCommand("-name", "")
-
-	//-- assert
-	s.RequireResultFail("\"name\" cannot be empty")
-}
-
-func (s *UnlockTestSuite) TestRunInvalidIDFormat() {
-	//-- act
-	s.RunCommand("-name", "invalid")
-
-	//-- assert
-	s.RequireResultFail("error parsing ID")
-}
 
 func (s *UnlockTestSuite) TestRunInvalidVaultPath() {
 	//-- arrange
 	config.Global.VaultPath = "invalid"
 
 	//-- act
-	s.RunCommand("-name", s.Record.ID.String())
+	s.RunCommand("-s", s.Record.Name)
 
 	//-- assert
 	s.RequireResultFail("error opening vault")
 }
 
-func (s *UnlockTestSuite) TestRunInvalidID() {
+func (s *UnlockTestSuite) TestRunValidNoResults() {
+	//-- arrange
+	out := pipe.OpenStdout(1)
+	defer out.Close()
+
 	//-- act
-	s.RunCommand("-name", uuid.Nil.String())
+	s.RunCommand("-s", "no match")
+
+	//-- assert
+	s.RequireResultPass()
+	s.Assert().Contains(out.ReadLine(), "No MATCHES found")
+}
+
+func (s *UnlockTestSuite) TestRunVaultFileMissing() {
+	//-- arrange
+	err := os.Remove(s.Vault.RecordPath(s.Record.ID))
+	s.Require().NoError(err)
+
+	out := pipe.OpenStdout(1)
+	defer out.Close()
+
+	//-- act
+	s.RunCommand("-s", s.Record.Name)
 
 	//-- assert
 	s.RequireResultFail("error loading vault record")
+	s.Assert().Contains(out.ReadLine(), s.Record.Name)
 }
 
 func (s *UnlockTestSuite) TestRunInvalidOutputPath() {
 	//-- arrange
 	config.Global.OutputPath = "invalid"
 
-	out := pipe.OpenStdout(1)
+	out := pipe.OpenStdout(2)
 	defer out.Close()
 
 	//-- act
-	s.RunCommand("-name", s.Record.ID.String())
+	s.RunCommand("-s", s.Record.Name)
 
 	//-- assert
 	s.RequireResultFail("error creating output record")
+	s.Assert().Contains(out.ReadLine(), s.Record.Name)
 	s.Assert().Contains(out.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
 }
 
@@ -102,14 +109,15 @@ func (s *UnlockTestSuite) TestRunValid() {
 	//-- arrange
 	OUTPUT_FILE := filepath.Join(config.Global.OutputPath, s.Record.ID.String()+".json")
 
-	out := pipe.OpenStdout(2)
+	out := pipe.OpenStdout(3)
 	defer out.Close()
 
 	//-- act
-	s.RunCommand("-name", s.Record.ID.String())
+	s.RunCommand("-s", s.Record.Name)
 
 	//-- assert
 	s.RequireResultPass()
+	s.Assert().Contains(out.ReadLine(), s.Record.Name)
 
 	line := out.ReadLine()
 	s.Require().Contains(line, "[=] Loaded Record: "+s.Record.ID.String())

@@ -130,10 +130,24 @@ func (s *OperationsTestSuite) TestLoadRecordInvalidVaultPath() {
 	s.Vault.Path = "invalid"
 
 	//-- act
-	_, res := s.Vault.LoadRecord(s.Record.ID)
+	_, res := s.Vault.LoadRecord(s.Record.Name)
 
 	//-- assert
 	s.Require().ErrorContains(res, "error loading record file")
+}
+
+func (s *OperationsTestSuite) TestLoadRecordInvalidName() {
+	//-- arrange
+	err := s.Vault.SaveRecord(s.Record)
+	s.Require().NoError(err)
+
+	NAME := s.Record.Name + "x"
+
+	//-- act
+	_, res := s.Vault.LoadRecord(NAME)
+
+	//-- assert
+	s.Require().ErrorContains(res, fmt.Sprintf("name \"%s\" not found", NAME))
 }
 
 func (s *OperationsTestSuite) TestLoadRecordValid() {
@@ -142,7 +156,7 @@ func (s *OperationsTestSuite) TestLoadRecordValid() {
 	s.Require().NoError(err)
 
 	//-- act
-	r, err := s.Vault.LoadRecord(s.Record.ID)
+	r, err := s.Vault.LoadRecord(s.Record.Name)
 
 	//-- assert
 	s.Require().NoError(err)

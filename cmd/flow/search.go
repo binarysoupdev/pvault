@@ -19,7 +19,7 @@ type SearchFlow struct {
 func NewSearchFlow(flags *flag.FlagSet) SearchFlow {
 	return SearchFlow{
 		term:  flags.String("s", "", "the search term"),
-		index: flags.Int("x", -1, "the index if multiple matches"),
+		index: flags.Int("x", -1, "the index if many matches"),
 	}
 }
 

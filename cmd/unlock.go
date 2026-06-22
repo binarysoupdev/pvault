@@ -3,13 +3,13 @@ package cmd
 import (
 	"path/filepath"
 	"pvault/chain"
+	"pvault/cmd/flow"
 	"pvault/config"
 	"pvault/data"
 	"pvault/vault"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
-	"github.com/google/uuid"
 )
 
 type UnlockCommand struct {
@@ -23,24 +23,20 @@ func NewUnlockCommand() *UnlockCommand {
 }
 
 func (cmd UnlockCommand) Run(args []string) error {
-	name := cmd.Flags.String("name", "", "the name of the record")
+	search := flow.NewSearchFlow(cmd.Flags)
 	cmd.Flags.Parse(args)
-
-	if *name == "" {
-		return chain.New("\"name\" cannot be empty")
-	}
-
-	id, err := uuid.Parse(*name)
-	if err != nil {
-		return chain.Error(err, "error parsing ID")
-	}
 
 	v, err := vault.Open(config.Global.VaultPath)
 	if err != nil {
 		return chain.Error(err, "error opening vault")
 	}
 
-	r, err := v.LoadRecord(id)
+	name := search.Select(v)
+	if name == "" {
+		return nil
+	}
+
+	r, err := v.LoadRecord(name)
 	if err != nil {
 		return chain.Error(err, "error loading vault record")
 	}
