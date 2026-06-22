@@ -98,7 +98,7 @@ func (s *SearchFlowSuite) TestSelectOneResultResult() {
 	res := s.Flow.Select(s.Vault)
 
 	//-- assert
-	s.Assert().Equal("bar1", res)
+	s.Assert().Equal("Bar1", res)
 	s.Assert().Contains(out.ReadLine(), "Bar")
 }
 
@@ -146,6 +146,6 @@ func (s *SearchFlowSuite) TestSelectManyResultsValidIndexReturnsMatch() {
 	res := s.Flow.Select(s.Vault)
 
 	//-- assert
-	s.Assert().Equal("foo1", res)
+	s.Assert().Equal("Foo1", res)
 	s.Assert().Contains(out.ReadLine(), "Foo")
 }
