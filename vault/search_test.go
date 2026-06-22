@@ -10,7 +10,7 @@ import (
 
 func TestSearchEmptyTermReturnsAllNamesSorted(t *testing.T) {
 	//-- arrange
-	NAMES := []string{"foo2", "bar1", "foo1"}
+	NAMES := []string{"Foo2", "Bar1", "Foo1"}
 
 	v := vault.Vault{
 		Index: vault.IndexMap{
@@ -29,7 +29,7 @@ func TestSearchEmptyTermReturnsAllNamesSorted(t *testing.T) {
 
 func TestSearchReturnsOnlyMatchesSorted(t *testing.T) {
 	//-- arrange
-	NAMES := []string{"foo2", "bar1", "foo1"}
+	NAMES := []string{"Foo2", "Bar1", "Foo1"}
 
 	v := vault.Vault{
 		Index: vault.IndexMap{
