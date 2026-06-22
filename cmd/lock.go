@@ -44,7 +44,7 @@ func (cmd LockCommand) Run(args []string) error {
 		return chain.Error(err, "error saving vault record")
 	}
 
-	style.BoldInfo.Printf("[+] Updated Record: %s\n", r.ID.String())
+	style.BoldCreate.Printf("[+] Updated Record: %s\n", r.ID.String())
 
 	err = os.Remove(*path)
 	if err != nil {
