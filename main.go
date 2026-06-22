@@ -22,6 +22,7 @@ func main() {
 		cmd.NewCreateCommand(),
 		cmd.NewLockCommand(),
 		cmd.NewUnlockCommand(),
+		cmd.NewDeleteCommand(),
 		cmd.NewSearchCommand(),
 	)
 
