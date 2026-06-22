@@ -48,6 +48,19 @@ func (s *SearchTestSuite) TestRunInvalidVaultPath() {
 	s.RequireResultFail("error opening vault")
 }
 
+func (s *SearchTestSuite) TestRunValidNoResults() {
+	//-- arrange
+	out := pipe.OpenStdout(1)
+	defer out.Close()
+
+	//-- act
+	s.RunCommand("-s", "no match")
+
+	//-- assert
+	s.RequireResultPass()
+	s.Assert().Contains(out.ReadLine(), "No MATCHES found")
+}
+
 func (s *SearchTestSuite) TestRunValidDisplaySearchResults() {
 	//-- arrange
 	rand := rand.New(0)
