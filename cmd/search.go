@@ -4,6 +4,7 @@ import (
 	"pvault/chain"
 	"pvault/config"
 	"pvault/vault"
+	"strings"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
@@ -30,8 +31,16 @@ func (cmd SearchCommand) Run(args []string) error {
 
 	matches := v.Search(*term)
 
+	result := style.New(style.YELLOW)
+	highlight := append(result, style.UNDERLINE)
+
 	for i, match := range matches {
-		style.New(style.YELLOW).Printf("[%d] %s\n", i, match)
+		start := strings.Index(strings.ToLower(match), strings.ToLower(*term))
+		end := start + len(*term)
+
+		result.Printf("[%d] %s", i+1, match[:start])
+		highlight.Print(match[start:end])
+		result.Println(match[end:])
 	}
 
 	return nil
