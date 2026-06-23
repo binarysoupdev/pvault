@@ -148,7 +148,7 @@ func (s *CreateTestSuite) TestRunValid() {
 	s.Require().Contains(line, "[+] New Record: ")
 
 	ID := line[len(line)-36:]
-	VAULT_FILE := filepath.Join(config.Global.VaultPath, ID+".json")
+	VAULT_FILE := filepath.Join(config.Global.VaultPath, ID)
 	OUTPUT_FILE := filepath.Join(config.Global.OutputPath, ID+".json")
 
 	s.Assert().Contains(io.ReadLine(), "[+] "+OUTPUT_FILE)

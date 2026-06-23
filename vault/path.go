@@ -11,5 +11,5 @@ func (v Vault) IndexPath() string {
 }
 
 func (v Vault) RecordPath(id uuid.UUID) string {
-	return filepath.Join(v.Path, id.String()+".json")
+	return filepath.Join(v.Path, id.String())
 }
