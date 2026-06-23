@@ -21,7 +21,7 @@ func (v Vault) SaveRecord(r record.Record) error {
 		return chain.Error(err, "error saving record file")
 	}
 
-	existingName, ok := v.Index.findName(r.ID)
+	existingName, ok := v.Index.FindName(r.ID)
 	if ok && existingName != r.Name {
 		delete(v.Index, existingName)
 	}

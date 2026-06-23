@@ -4,6 +4,7 @@ import (
 	"flag"
 	"pvault/cmd/flow"
 	"pvault/vault"
+	"pvault/vault/index"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/pipe"
@@ -25,7 +26,7 @@ func TestSearchFlowSuite(t *testing.T) {
 
 func (s *SearchFlowSuite) SetupTest() {
 	s.Vault = vault.Vault{
-		Index: vault.IndexMap{
+		Index: index.IndexMap{
 			"Foo1": uuid.New(),
 			"Foo2": uuid.New(),
 			"Bar1": uuid.New(),

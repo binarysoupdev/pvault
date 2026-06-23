@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"pvault/chain"
+	"pvault/vault/index"
 
 	"github.com/google/uuid"
 )
@@ -12,7 +13,7 @@ const INDEX_FILE = "index.bin"
 
 type Vault struct {
 	Path  string
-	Index IndexMap
+	Index index.IndexMap
 }
 
 func InitializeNew(path string) error {
@@ -26,7 +27,7 @@ func InitializeNew(path string) error {
 		return chain.Error(err, "error creating vault directory")
 	}
 
-	err = IndexMap{}.Save(filepath.Join(path, INDEX_FILE))
+	err = index.IndexMap{}.Save(filepath.Join(path, INDEX_FILE))
 	if err != nil {
 		return chain.Error(err, "error saving index file")
 	}
@@ -40,7 +41,7 @@ func Open(path string) (Vault, error) {
 	}
 
 	var err error
-	v.Index, err = LoadIndex(v.IndexPath())
+	v.Index, err = index.LoadIndex(v.IndexPath())
 	if err != nil {
 		return v, chain.Error(err, "error loading index file")
 	}
