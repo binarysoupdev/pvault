@@ -43,28 +43,26 @@ func (s *SearchFlowSuite) ParseFlags(args ...string) {
 //=====================================
 
 func (s *SearchFlowSuite) TestDisplayNoResults() {
-	//-- arrange
-	out := pipe.OpenStdout(1)
-	defer out.Close()
-
 	//-- act
 	s.ParseFlags("-s", "no match")
-	s.Flow.Display(s.Vault)
+	res := s.Flow.Display(s.Vault)
 
 	//-- assert
-	s.Assert().Contains(out.ReadLine(), "No MATCHES found")
+	s.Assert().ErrorContains(res, "no matches found")
 }
 
 func (s *SearchFlowSuite) TestDisplayPrintResults() {
 	//-- arrange
-	out := pipe.OpenStdout(1)
+	out := pipe.OpenStdout(2)
 	defer out.Close()
 
 	//-- act
 	s.ParseFlags("-s", "foo")
-	s.Flow.Display(s.Vault)
+	err := s.Flow.Display(s.Vault)
 
 	//-- assert
+	s.Require().NoError(err)
+
 	line := out.ReadLine()
 	s.Assert().Contains(line, "[1]")
 	s.Assert().Contains(line, "Foo")
@@ -75,29 +73,26 @@ func (s *SearchFlowSuite) TestDisplayPrintResults() {
 }
 
 func (s *SearchFlowSuite) TestSelectNoResults() {
-	//-- arrange
-	out := pipe.OpenStdout(1)
-	defer out.Close()
-
 	//-- act
 	s.ParseFlags("-s", "no match")
-	res := s.Flow.Select(s.Vault)
+	_, res := s.Flow.Select(s.Vault)
 
 	//-- assert
-	s.Assert().Empty(res)
-	s.Assert().Contains(out.ReadLine(), "No MATCHES found")
+	s.Assert().ErrorContains(res, "no matches found")
 }
 
-func (s *SearchFlowSuite) TestSelectOneResultResult() {
+func (s *SearchFlowSuite) TestSelectOneResult() {
 	//-- arrange
 	out := pipe.OpenStdout(1)
 	defer out.Close()
 
 	//-- act
 	s.ParseFlags("-s", "bar")
-	res := s.Flow.Select(s.Vault)
+	res, err := s.Flow.Select(s.Vault)
 
 	//-- assert
+	s.Require().NoError(err)
+
 	s.Assert().Equal("Bar1", res)
 	s.Assert().Contains(out.ReadLine(), "Bar")
 }
@@ -109,31 +104,29 @@ func (s *SearchFlowSuite) TestSelectManyResultsNoIndex() {
 
 	//-- act
 	s.ParseFlags("-s", "foo")
-	res := s.Flow.Select(s.Vault)
+	_, res := s.Flow.Select(s.Vault)
 
 	//-- assert
-	s.Assert().Empty(res)
+	s.Assert().ErrorContains(res, "rerun with \"-x <index>\"")
 
 	s.Assert().Contains(out.ReadLine(), "Foo")
 	s.Assert().Contains(out.ReadLine(), "Foo")
-	s.Assert().Contains(out.ReadLine(), "Rerun with \"-x <index>\"")
 }
 
 func (s *SearchFlowSuite) TestSelectManyResultsInvalidIndex() {
 	//-- arrange
-	out := pipe.OpenStdout(3)
+	out := pipe.OpenStdout(2)
 	defer out.Close()
 
 	//-- act
 	s.ParseFlags("-s", "foo", "-x", "3")
-	res := s.Flow.Select(s.Vault)
+	_, res := s.Flow.Select(s.Vault)
 
 	//-- assert
-	s.Assert().Empty(res)
+	s.Assert().ErrorContains(res, "rerun with \"-x <index>\"")
 
 	s.Assert().Contains(out.ReadLine(), "Foo")
 	s.Assert().Contains(out.ReadLine(), "Foo")
-	s.Assert().Contains(out.ReadLine(), "Rerun with \"-x <index>\"")
 }
 
 func (s *SearchFlowSuite) TestSelectManyResultsValidIndexReturnsMatch() {
@@ -143,9 +136,11 @@ func (s *SearchFlowSuite) TestSelectManyResultsValidIndexReturnsMatch() {
 
 	//-- act
 	s.ParseFlags("-s", "foo", "-x", "1")
-	res := s.Flow.Select(s.Vault)
+	res, err := s.Flow.Select(s.Vault)
 
 	//-- assert
+	s.Require().NoError(err)
+
 	s.Assert().Equal("Foo1", res)
 	s.Assert().Contains(out.ReadLine(), "Foo")
 }

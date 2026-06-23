@@ -57,17 +57,12 @@ func (s *DeleteTestSuite) TestRunInvalidVaultPath() {
 	s.RequireResultFail("error opening vault")
 }
 
-func (s *DeleteTestSuite) TestRunValidNoResults() {
-	//-- arrange
-	out := pipe.OpenStdout(1)
-	defer out.Close()
-
+func (s *DeleteTestSuite) TestRunInvalidNoResults() {
 	//-- act
 	s.RunCommand("-s", "no match")
 
 	//-- assert
-	s.RequireResultPass()
-	s.Assert().Contains(out.ReadLine(), "No MATCHES found")
+	s.RequireResultFail("no matches found")
 }
 
 func (s *DeleteTestSuite) TestRunIncorrectConfirmName() {

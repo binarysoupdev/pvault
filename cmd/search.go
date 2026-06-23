@@ -28,6 +28,5 @@ func (cmd SearchCommand) Run(args []string) error {
 		return chain.Error(err, "error opening vault")
 	}
 
-	search.Display(v)
-	return nil
+	return search.Display(v)
 }

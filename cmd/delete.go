@@ -29,9 +29,9 @@ func (cmd DeleteCommand) Run(args []string) error {
 		return chain.Error(err, "error opening vault")
 	}
 
-	name := search.Select(v)
-	if name == "" {
-		return nil
+	name, err := search.Select(v)
+	if err != nil {
+		return err
 	}
 
 	if flow.Prompt("Confirm NAME: ") != name {

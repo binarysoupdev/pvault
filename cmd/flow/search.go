@@ -2,6 +2,7 @@ package flow
 
 import (
 	"flag"
+	"pvault/chain"
 	"pvault/vault"
 	"strings"
 
@@ -23,40 +24,38 @@ func NewSearchFlow(flags *flag.FlagSet) SearchFlow {
 	}
 }
 
-func (f SearchFlow) Display(v vault.Vault) {
+func (f SearchFlow) Display(v vault.Vault) error {
 	matches := v.Search(*f.term)
 
 	if len(matches) == 0 {
-		style.Info.Println("No MATCHES found")
-		return
+		return chain.New("no matches found")
 	}
 
 	f.displayMatches(matches)
+	return nil
 }
 
-func (f SearchFlow) Select(v vault.Vault) string {
+func (f SearchFlow) Select(v vault.Vault) (string, error) {
 	matches := v.Search(*f.term)
 
 	if len(matches) == 0 {
-		style.Error.Println("No MATCHES found")
-		return ""
+		return "", chain.New("no matches found")
 	}
 
 	if len(matches) == 1 {
 		f.displayMatch(matches[0], 1)
-		return matches[0]
+		return matches[0], nil
 	}
 
 	index := *f.index - 1
 
 	if index < 0 || index >= len(matches) {
 		f.displayMatches(matches)
-		style.Error.Println("Rerun with \"-x <index>\"")
-		return ""
+		return "", chain.New("rerun with \"-x <index>\"")
 	}
 
 	f.displayMatch(matches[index], index+1)
-	return matches[index]
+	return matches[index], nil
 }
 
 func (f SearchFlow) displayMatches(matches []string) {

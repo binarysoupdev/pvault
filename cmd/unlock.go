@@ -31,9 +31,9 @@ func (cmd UnlockCommand) Run(args []string) error {
 		return chain.Error(err, "error opening vault")
 	}
 
-	name := search.Select(v)
-	if name == "" {
-		return nil
+	name, err := search.Select(v)
+	if err != nil {
+		return err
 	}
 
 	r, err := v.LoadRecord(name)

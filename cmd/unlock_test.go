@@ -60,17 +60,12 @@ func (s *UnlockTestSuite) TestRunInvalidVaultPath() {
 	s.RequireResultFail("error opening vault")
 }
 
-func (s *UnlockTestSuite) TestRunValidNoResults() {
-	//-- arrange
-	out := pipe.OpenStdout(1)
-	defer out.Close()
-
+func (s *UnlockTestSuite) TestRunInvalidNoResults() {
 	//-- act
 	s.RunCommand("-s", "no match")
 
 	//-- assert
-	s.RequireResultPass()
-	s.Assert().Contains(out.ReadLine(), "No MATCHES found")
+	s.RequireResultFail("no matches found")
 }
 
 func (s *UnlockTestSuite) TestRunVaultFileMissing() {
