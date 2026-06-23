@@ -1,3 +1,5 @@
+github.com/binarysoupdev/cryptool v1.0.0 h1:jMrM7jlTmw+p2hPHn+LNp4EmINPI60DdDbj3CUWEQwc=
+github.com/binarysoupdev/cryptool v1.0.0/go.mod h1:TjlWiLszDprJ6Tpc8ff4zHjoF+VPicykFxNElNyumPU=
 github.com/binarysoupdev/go-commando v1.3.0 h1:QoQs9Ekq9vUo+aDylgNXW1Ijo7amlrVG4kEz7jDct1U=
 github.com/binarysoupdev/go-commando v1.3.0/go.mod h1:RXjpje+Lk0CtXew1boXQ1LMTQQAqXqM+6KSg64ftSKk=
 github.com/binarysoupdev/got-style v1.1.0 h1:f5D2tsWE5ttftoYPSuF33J74tnTQ4uiAbkuvdZzrack=

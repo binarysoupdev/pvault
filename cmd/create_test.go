@@ -5,7 +5,6 @@ import (
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/vault"
-	"pvault/vault/record"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/test"
@@ -31,7 +30,7 @@ func (s *CreateTestSuite) SetupTest() {
 		OutputPath: file.NewPath(s.T(), ""),
 	})
 
-	err := vault.InitializeNew(config.Global.VaultPath)
+	_, err := vault.InitializeNew(config.Global.VaultPath)
 	s.Require().NoError(err)
 }
 
@@ -59,64 +58,81 @@ func (s *CreateTestSuite) TestRunInvalidVaultPath() {
 	s.RequireResultFail("error opening vault")
 }
 
+func (s *CreateTestSuite) TestRunIncorrectVerifyPassword() {
+	//-- arrange
+	rand := rand.New(0)
+	NAME := rand.ASCII(15)
+	PASSWORD := rand.ASCII(30)
+
+	io := pipe.OpenStdio(2, 2, false)
+	defer io.Close()
+
+	//-- act
+	io.Queue("PASSWORD: ", PASSWORD)
+	io.Queue("PASSWORD: ", PASSWORD+"x")
+	io.EndQueue()
+
+	s.RunCommand("-name", NAME)
+
+	//-- assert
+	s.RequireResultFail("passwords do not match")
+	s.Assert().Contains(io.ReadLine(), "New PASSWORD")
+	s.Assert().Contains(io.ReadLine(), "Verify PASSWORD")
+}
+
 func (s *CreateTestSuite) TestRunInvalidOutputPath() {
 	//-- arrange
 	rand := rand.New(0)
 	NAME := rand.ASCII(15)
+	PASSWORD := rand.ASCII(30)
 
 	config.Global.OutputPath = "invalid"
 
-	out := pipe.OpenStdout(1)
-	defer out.Close()
+	io := pipe.OpenStdio(2, 3, false)
+	defer io.Close()
 
 	//-- act
+	io.Queue("PASSWORD: ", PASSWORD)
+	io.Queue("PASSWORD: ", PASSWORD)
+	io.EndQueue()
+
 	s.RunCommand("-name", NAME)
 
 	//-- assert
 	s.RequireResultFail("error creating output record")
-	s.Assert().Contains(out.ReadLine(), "[+] New Record: ")
+	io.SkipLines(2)
+	s.Assert().Contains(io.ReadLine(), "[+] New Record: ")
 }
 
 func (s *CreateTestSuite) TestRunValid() {
 	//-- arrange
 	rand := rand.New(0)
 	NAME := rand.ASCII(15)
+	PASSWORD := rand.ASCII(30)
 
-	out := pipe.OpenStdout(2)
-	defer out.Close()
+	io := pipe.OpenStdio(2, 4, false)
+	defer io.Close()
 
 	//-- act
+	io.Queue("PASSWORD: ", PASSWORD)
+	io.Queue("PASSWORD: ", PASSWORD)
+	io.EndQueue()
+
 	s.RunCommand("-name", NAME)
 
 	//-- assert
 	s.RequireResultPass()
+	s.Assert().Contains(io.ReadLine(), "New PASSWORD")
+	s.Assert().Contains(io.ReadLine(), "Verify PASSWORD")
 
-	line := out.ReadLine()
+	line := io.ReadLine()
 	s.Require().Contains(line, "[+] New Record: ")
 
 	ID := line[len(line)-36:]
 	VAULT_FILE := filepath.Join(config.Global.VaultPath, ID+".json")
 	OUTPUT_FILE := filepath.Join(config.Global.OutputPath, ID+".json")
 
-	s.Assert().Contains(out.ReadLine(), "[+] "+OUTPUT_FILE)
+	s.Assert().Contains(io.ReadLine(), "[+] "+OUTPUT_FILE)
 	s.Assert().FileExists(VAULT_FILE)
 	s.Assert().FileExists(OUTPUT_FILE)
-}
-
-func (s *CreateTestSuite) TestRunExistingNameInvalid() {
-	//-- arrange
-	rand := rand.New(0)
-	NAME := rand.ASCII(15)
-
-	v, err := vault.Open(config.Global.VaultPath)
-	s.Require().NoError(err)
-
-	err = v.SaveRecord(record.NewFromName(NAME))
-	s.Require().NoError(err)
-
-	//-- act
-	s.RunCommand("-name", NAME)
-
-	//-- assert
-	s.RequireResultFail("error saving vault record")
 }

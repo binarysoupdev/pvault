@@ -9,13 +9,13 @@ import (
 	"github.com/google/uuid"
 )
 
-func (v Vault) SaveRecord(r record.Record) error {
+func (v Vault) SaveRecord(r record.Record, password string) error {
 	existingId, ok := v.Index[r.Name]
 	if ok && existingId != r.ID {
 		return fmt.Errorf("name \"%s\" already exists", r.Name)
 	}
 
-	err := v.saveEncryptedRecord(r)
+	err := v.saveEncryptedRecord(r, password)
 	if err != nil {
 		return err
 	}
@@ -28,13 +28,13 @@ func (v Vault) SaveRecord(r record.Record) error {
 	return nil
 }
 
-func (v Vault) LoadRecord(name string) (record.Record, error) {
+func (v Vault) LoadRecord(name string, password string) (record.Record, error) {
 	id, ok := v.Index[name]
 	if !ok {
 		return record.Record{}, fmt.Errorf("name \"%s\" not found", name)
 	}
 
-	r, err := v.loadEncryptedRecord(id)
+	r, err := v.loadEncryptedRecord(id, password)
 	if err != nil {
 		return record.Record{}, err
 	}

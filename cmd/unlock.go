@@ -36,7 +36,9 @@ func (cmd UnlockCommand) Run(args []string) error {
 		return err
 	}
 
-	r, err := v.LoadRecord(name)
+	password := flow.PromptPassword("Enter PASSWORD: ")
+
+	r, err := v.LoadRecord(name, password)
 	if err != nil {
 		return chain.Error(err, "error loading vault record")
 	}

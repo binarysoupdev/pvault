@@ -1,7 +1,6 @@
 package cmd_test
 
 import (
-	"path/filepath"
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/data"
@@ -33,7 +32,7 @@ func (s *LockTestSuite) SetupTest() {
 		VaultPath: file.NewPath(s.T(), "vault"),
 	})
 
-	err := vault.InitializeNew(config.Global.VaultPath)
+	_, err := vault.InitializeNew(config.Global.VaultPath)
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
@@ -73,71 +72,96 @@ func (s *LockTestSuite) TestRunInvalidRecordPath() {
 	s.RequireResultFail("error loading source record")
 }
 
-func (s *LockTestSuite) TestRunSaveNewValid() {
+func (s *LockTestSuite) TestRunIncorrectVerifyPassword() {
 	//-- arrange
-	VAULT_FILE := filepath.Join(config.Global.VaultPath, s.Record.ID.String()+".json")
+	rand := rand.New(0)
+	PASSWORD := rand.ASCII(30)
 
-	out := pipe.OpenStdout(2)
-	defer out.Close()
+	io := pipe.OpenStdio(2, 2, false)
+	defer io.Close()
 
 	//-- act
+	io.Queue("PASSWORD: ", PASSWORD)
+	io.Queue("PASSWORD: ", PASSWORD+"x")
+	io.EndQueue()
+
+	s.RunCommand("-path", s.RecordPath)
+
+	//-- assert
+	s.RequireResultFail("passwords do not match")
+	s.Assert().Contains(io.ReadLine(), "New PASSWORD")
+	s.Assert().Contains(io.ReadLine(), "Verify PASSWORD")
+}
+
+func (s *LockTestSuite) TestRunValidSaveNew() {
+	//-- arrange
+	rand := rand.New(0)
+	PASSWORD := rand.ASCII(30)
+
+	io := pipe.OpenStdio(2, 4, false)
+	defer io.Close()
+
+	//-- act
+	io.Queue("PASSWORD: ", PASSWORD)
+	io.Queue("PASSWORD: ", PASSWORD)
+	io.EndQueue()
+
 	s.RunCommand("-path", s.RecordPath)
 
 	//-- assert
 	s.RequireResultPass()
+	s.Assert().Contains(io.ReadLine(), "New PASSWORD")
+	s.Assert().Contains(io.ReadLine(), "Verify PASSWORD")
 
-	line := out.ReadLine()
-	s.Require().Contains(line, "[+] Updated Record: "+s.Record.ID.String())
-	s.Assert().Contains(out.ReadLine(), "[-] "+s.RecordPath)
-
-	s.Assert().FileExists(VAULT_FILE)
+	s.Require().Contains(io.ReadLine(), "[+] Updated Record: "+s.Record.ID.String())
+	s.Assert().Contains(io.ReadLine(), "[-] "+s.RecordPath)
 	s.Assert().NoFileExists(s.RecordPath)
-}
-
-func (s *LockTestSuite) TestRunUpdateExistingValid() {
-	//-- arrange
-	VAULT_FILE := filepath.Join(config.Global.VaultPath, s.Record.ID.String()+".json")
 
 	v, err := vault.Open(config.Global.VaultPath)
 	s.Require().NoError(err)
 
-	err = v.SaveRecord(record.Record{
-		ID:   s.Record.ID,
-		Name: "existing",
-	})
+	res, err := v.LoadRecord(s.Record.Name, PASSWORD)
+	s.Require().NoError(err)
+	s.Assert().Equal(s.Record, res)
+}
+
+func (s *LockTestSuite) TestRunValidUpdateExisting() {
+	//-- arrange
+	OLD_RECORD := record.NewFromName(s.Record.Name + "x")
+	OLD_RECORD.ID = s.Record.ID
+
+	rand := rand.New(0)
+	PASSWORD := rand.ASCII(30)
+
+	v, err := vault.Open(config.Global.VaultPath)
 	s.Require().NoError(err)
 
-	out := pipe.OpenStdout(2)
-	defer out.Close()
+	err = v.SaveRecord(OLD_RECORD, PASSWORD+"x")
+	s.Require().NoError(err)
+
+	io := pipe.OpenStdio(2, 4, false)
+	defer io.Close()
 
 	//-- act
+	io.Queue("PASSWORD: ", PASSWORD)
+	io.Queue("PASSWORD: ", PASSWORD)
+	io.EndQueue()
+
 	s.RunCommand("-path", s.RecordPath)
 
 	//-- assert
 	s.RequireResultPass()
+	s.Assert().Contains(io.ReadLine(), "New PASSWORD")
+	s.Assert().Contains(io.ReadLine(), "Verify PASSWORD")
 
-	line := out.ReadLine()
-	s.Require().Contains(line, "[+] Updated Record: "+s.Record.ID.String())
-
-	record, err := data.LoadJSON[record.Record](VAULT_FILE)
-	s.Require().NoError(err)
-	s.Assert().Equal(s.Record, record)
-
-	s.Assert().Contains(out.ReadLine(), "[-] "+s.RecordPath)
+	s.Assert().Contains(io.ReadLine(), "[+] Updated Record: "+s.Record.ID.String())
+	s.Assert().Contains(io.ReadLine(), "[-] "+s.RecordPath)
 	s.Assert().NoFileExists(s.RecordPath)
-}
 
-func (s *LockTestSuite) TestRunExistingNameInvalid() {
-	//-- arrange
-	v, err := vault.Open(config.Global.VaultPath)
+	v, err = vault.Open(v.Path)
 	s.Require().NoError(err)
 
-	err = v.SaveRecord(record.NewFromName(s.Record.Name))
+	res, err := v.LoadRecord(s.Record.Name, PASSWORD)
 	s.Require().NoError(err)
-
-	//-- act
-	s.RunCommand("-path", s.RecordPath)
-
-	//-- assert
-	s.RequireResultFail("error saving vault record")
+	s.Assert().Equal(s.Record, res)
 }

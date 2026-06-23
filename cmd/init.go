@@ -20,7 +20,7 @@ func NewInitCommand() *InitCommand {
 }
 
 func (cmd InitCommand) Run(_ []string) error {
-	err := vault.InitializeNew(config.Global.VaultPath)
+	_, err := vault.InitializeNew(config.Global.VaultPath)
 	if err != nil {
 		return chain.Error(err, "error initializing new vault")
 	}

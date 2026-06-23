@@ -15,7 +15,7 @@ func TestInitializeNewDirectoryExists(t *testing.T) {
 	PATH := file.NewPath(t, "")
 
 	//-- act
-	res := vault.InitializeNew(PATH)
+	_, res := vault.InitializeNew(PATH)
 
 	//-- assert
 	require.ErrorContains(t, res, "vault path already exists")
@@ -26,7 +26,7 @@ func TestInitializeNewSuccess(t *testing.T) {
 	PATH := file.NewPath(t, "vault")
 
 	//-- act
-	res := vault.InitializeNew(PATH)
+	_, res := vault.InitializeNew(PATH)
 
 	//-- assert
 	require.NoError(t, res)
@@ -50,7 +50,7 @@ func TestOpenSuccess(t *testing.T) {
 	//-- arrange
 	PATH := file.NewPath(t, "vault")
 
-	err := vault.InitializeNew(PATH)
+	_, err := vault.InitializeNew(PATH)
 	require.NoError(t, err)
 
 	//-- act

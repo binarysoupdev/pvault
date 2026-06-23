@@ -35,13 +35,11 @@ func (s *DeleteTestSuite) SetupTest() {
 	rand := rand.New(0)
 	s.Record = record.NewFromName(rand.ASCII(15))
 
-	err := vault.InitializeNew(config.Global.VaultPath)
+	var err error
+	s.Vault, err = vault.InitializeNew(config.Global.VaultPath)
 	s.Require().NoError(err)
 
-	s.Vault, err = vault.Open(config.Global.VaultPath)
-	s.Require().NoError(err)
-
-	err = s.Vault.SaveRecord(s.Record)
+	err = s.Vault.SaveRecord(s.Record, rand.ASCII(30))
 	s.Require().NoError(err)
 }
 

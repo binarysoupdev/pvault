@@ -3,6 +3,7 @@ package cmd
 import (
 	"path/filepath"
 	"pvault/chain"
+	"pvault/cmd/flow"
 	"pvault/config"
 	"pvault/data"
 	"pvault/vault"
@@ -37,7 +38,12 @@ func (cmd CreateCommand) Run(args []string) error {
 
 	r := record.NewFromName(*name)
 
-	err = v.SaveRecord(r)
+	password := flow.PromptPassword("New PASSWORD: ")
+	if flow.PromptPassword("Verify PASSWORD: ") != password {
+		return chain.New("passwords do not match")
+	}
+
+	err = v.SaveRecord(r, password)
 	if err != nil {
 		return chain.Error(err, "error saving vault record")
 	}

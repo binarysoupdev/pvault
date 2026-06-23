@@ -29,7 +29,7 @@ func (s *SearchTestSuite) SetupTest() {
 		VaultPath: file.NewPath(s.T(), "vault"),
 	})
 
-	err := vault.InitializeNew(config.Global.VaultPath)
+	_, err := vault.InitializeNew(config.Global.VaultPath)
 	s.Require().NoError(err)
 }
 
@@ -65,7 +65,7 @@ func (s *SearchTestSuite) TestRunValidDisplaySearchResults() {
 	v, err := vault.Open(config.Global.VaultPath)
 	s.Require().NoError(err)
 
-	err = v.SaveRecord(record.NewFromName(NAME))
+	err = v.SaveRecord(record.NewFromName(NAME), rand.ASCII(30))
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(1)
