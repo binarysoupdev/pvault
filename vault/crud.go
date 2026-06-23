@@ -21,15 +21,9 @@ func (v Vault) SaveRecord(r record.Record) error {
 		return chain.Error(err, "error saving record file")
 	}
 
-	existingName, ok := v.Index.FindName(r.ID)
-	if ok && existingName != r.Name {
-		delete(v.Index, existingName)
-	}
-	v.Index[r.Name] = r.ID
-
-	err = v.Index.Save(v.IndexPath())
+	err = v.updateIndex(r)
 	if err != nil {
-		return chain.Error(err, "error saving index file")
+		return err
 	}
 
 	return nil
@@ -62,11 +56,9 @@ func (v Vault) DeleteRecord(name string) (uuid.UUID, error) {
 		return uuid.Nil, chain.Error(err, "error deleting record file")
 	}
 
-	delete(v.Index, name)
-
-	err = v.Index.Save(v.IndexPath())
+	err = v.deleteIndex(name)
 	if err != nil {
-		return uuid.Nil, chain.Error(err, "error saving index file")
+		return uuid.Nil, err
 	}
 
 	return id, nil
