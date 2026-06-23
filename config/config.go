@@ -18,9 +18,9 @@ func (c Config) Validate() error {
 
 	stat, err := os.Stat(c.OutputPath)
 	if err != nil {
-		errs.Append(errors.New("\"output_path\" invalid path"))
+		errs.Add("\"output_path\" invalid path")
 	} else if !stat.IsDir() {
-		errs.Append(errors.New("\"output_path\" not a directory"))
+		errs.Add("\"output_path\" not a directory")
 	}
 
 	return errs.Collapse(", ")

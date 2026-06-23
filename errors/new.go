@@ -1,11 +1,12 @@
 package errors
 
 import (
+	"errors"
 	"fmt"
 )
 
 func New(msg string) error {
-	return fmt.Errorf("%s", msg)
+	return errors.New(msg)
 }
 
 func Format(format string, args ...any) error {

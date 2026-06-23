@@ -2,7 +2,11 @@ package errors
 
 type Errors []error
 
-func (errs *Errors) Append(err error) {
+func (errs *Errors) Add(msg string) {
+	errs.AddError(New(msg))
+}
+
+func (errs *Errors) AddError(err error) {
 	*errs = append(*errs, err)
 }
 
