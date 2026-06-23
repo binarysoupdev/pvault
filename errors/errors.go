@@ -6,17 +6,15 @@ func (errs *Errors) Append(err error) {
 	*errs = append(*errs, err)
 }
 
-func (errs Errors) Collapse() error {
+func (errs Errors) Collapse(sep string) error {
 	if len(errs) == 0 {
 		return nil
 	}
-
-	const SEPARATOR = ", "
 	msg := ""
 
 	for _, err := range errs {
-		msg += err.Error() + SEPARATOR
+		msg += err.Error() + sep
 	}
 
-	return New(msg[:len(msg)-len(SEPARATOR)])
+	return New(msg[:len(msg)-len(sep)])
 }

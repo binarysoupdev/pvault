@@ -23,5 +23,5 @@ func (c Config) Validate() error {
 		errs.Append(errors.New("\"output_path\" not a directory"))
 	}
 
-	return errs.Collapse()
+	return errs.Collapse(", ")
 }
