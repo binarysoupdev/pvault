@@ -6,6 +6,7 @@ import (
 	"pvault/config"
 	"pvault/data"
 	"pvault/vault"
+	"pvault/vault/record"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/test"
@@ -18,7 +19,7 @@ import (
 type LockTestSuite struct {
 	test.CommandSuite[*cmd.LockCommand]
 	RecordPath string
-	Record     vault.Record
+	Record     record.Record
 }
 
 func TestLockCommandSuite(t *testing.T) {
@@ -37,7 +38,7 @@ func (s *LockTestSuite) SetupTest() {
 
 	rand := rand.New(0)
 	s.RecordPath = file.NewPath(s.T(), rand.ASCII(10))
-	s.Record = vault.EmptyRecord(rand.ASCII(15))
+	s.Record = record.NewFromName(rand.ASCII(15))
 
 	err = data.SaveJSON(s.Record, s.RecordPath)
 	s.Require().NoError(err)
@@ -100,7 +101,7 @@ func (s *LockTestSuite) TestRunUpdateExistingValid() {
 	v, err := vault.Open(config.Global.VaultPath)
 	s.Require().NoError(err)
 
-	err = v.SaveRecord(vault.Record{
+	err = v.SaveRecord(record.Record{
 		ID:   s.Record.ID,
 		Name: "existing",
 	})
@@ -118,7 +119,7 @@ func (s *LockTestSuite) TestRunUpdateExistingValid() {
 	line := out.ReadLine()
 	s.Require().Contains(line, "[+] Updated Record: "+s.Record.ID.String())
 
-	record, err := data.LoadJSON[vault.Record](VAULT_FILE)
+	record, err := data.LoadJSON[record.Record](VAULT_FILE)
 	s.Require().NoError(err)
 	s.Assert().Equal(s.Record, record)
 
@@ -131,7 +132,7 @@ func (s *LockTestSuite) TestRunExistingNameInvalid() {
 	v, err := vault.Open(config.Global.VaultPath)
 	s.Require().NoError(err)
 
-	err = v.SaveRecord(vault.EmptyRecord(s.Record.Name))
+	err = v.SaveRecord(record.NewFromName(s.Record.Name))
 	s.Require().NoError(err)
 
 	//-- act

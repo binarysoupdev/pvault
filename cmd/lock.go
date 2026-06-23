@@ -6,6 +6,7 @@ import (
 	"pvault/config"
 	"pvault/data"
 	"pvault/vault"
+	"pvault/vault/record"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
@@ -34,7 +35,7 @@ func (cmd LockCommand) Run(args []string) error {
 		return chain.Error(err, "error opening vault")
 	}
 
-	r, err := data.LoadJSON[vault.Record](*path)
+	r, err := data.LoadJSON[record.Record](*path)
 	if err != nil {
 		return chain.Error(err, "error loading source record")
 	}

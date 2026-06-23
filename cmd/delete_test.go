@@ -5,6 +5,7 @@ import (
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/vault"
+	"pvault/vault/record"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/test"
@@ -17,7 +18,7 @@ import (
 type DeleteTestSuite struct {
 	test.CommandSuite[*cmd.DeleteCommand]
 	Vault  vault.Vault
-	Record vault.Record
+	Record record.Record
 }
 
 func TestDeleteCommandSuite(t *testing.T) {
@@ -32,7 +33,7 @@ func (s *DeleteTestSuite) SetupTest() {
 	})
 
 	rand := rand.New(0)
-	s.Record = vault.EmptyRecord(rand.ASCII(15))
+	s.Record = record.NewFromName(rand.ASCII(15))
 
 	err := vault.InitializeNew(config.Global.VaultPath)
 	s.Require().NoError(err)

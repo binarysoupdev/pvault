@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"pvault/data"
 	"pvault/vault"
+	"pvault/vault/record"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -15,7 +16,7 @@ import (
 type CRUDTestSuite struct {
 	suite.Suite
 	Vault  vault.Vault
-	Record vault.Record
+	Record record.Record
 }
 
 func TestCreateCommandSuite(t *testing.T) {
@@ -32,7 +33,7 @@ func (s *CRUDTestSuite) SetupTest() {
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
-	s.Record = vault.EmptyRecord(rand.ASCII(10))
+	s.Record = record.NewFromName(rand.ASCII(10))
 	s.Record.Username = rand.ASCII(10)
 	s.Record.Password = rand.ASCII(30)
 	s.Record.Other = []interface{}{rand.ASCII(5), rand.ASCII(5), rand.ASCII(5)}
@@ -63,7 +64,7 @@ func (s *CRUDTestSuite) TestSaveRecordNewIdNewNameValid() {
 	s.Require().NoError(err)
 	s.Assert().Contains(idx, s.Record.Name)
 
-	r, err := data.LoadJSON[vault.Record](s.Vault.RecordPath(s.Record.ID))
+	r, err := data.LoadJSON[record.Record](s.Vault.RecordPath(s.Record.ID))
 	s.Require().NoError(err)
 	s.Assert().Equal(s.Record, r)
 }
@@ -86,7 +87,7 @@ func (s *CRUDTestSuite) TestSaveRecordExistingIDNewNameValid() {
 	s.Assert().Contains(idx, s.Record.Name)
 	s.Assert().Len(s.Vault.Index, 1)
 
-	r, err := data.LoadJSON[vault.Record](s.Vault.RecordPath(s.Record.ID))
+	r, err := data.LoadJSON[record.Record](s.Vault.RecordPath(s.Record.ID))
 	s.Require().NoError(err)
 	s.Assert().Equal(s.Record, r)
 }
@@ -117,7 +118,7 @@ func (s *CRUDTestSuite) TestSaveRecordExistingIDExistingNameValid() {
 	s.Require().NoError(err)
 	s.Assert().Len(idx, 1)
 
-	r, err := data.LoadJSON[vault.Record](s.Vault.RecordPath(s.Record.ID))
+	r, err := data.LoadJSON[record.Record](s.Vault.RecordPath(s.Record.ID))
 	s.Require().NoError(err)
 	s.Assert().Equal(s.Record, r)
 }

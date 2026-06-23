@@ -6,6 +6,7 @@ import (
 	"pvault/config"
 	"pvault/data"
 	"pvault/vault"
+	"pvault/vault/record"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
@@ -34,7 +35,7 @@ func (cmd CreateCommand) Run(args []string) error {
 		return chain.Error(err, "error opening vault")
 	}
 
-	r := vault.EmptyRecord(*name)
+	r := record.NewFromName(*name)
 
 	err = v.SaveRecord(r)
 	if err != nil {

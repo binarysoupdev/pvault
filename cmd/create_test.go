@@ -5,6 +5,7 @@ import (
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/vault"
+	"pvault/vault/record"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/test"
@@ -110,7 +111,7 @@ func (s *CreateTestSuite) TestRunExistingNameInvalid() {
 	v, err := vault.Open(config.Global.VaultPath)
 	s.Require().NoError(err)
 
-	err = v.SaveRecord(vault.EmptyRecord(NAME))
+	err = v.SaveRecord(record.NewFromName(NAME))
 	s.Require().NoError(err)
 
 	//-- act

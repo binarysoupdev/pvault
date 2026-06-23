@@ -7,6 +7,7 @@ import (
 	"pvault/config"
 	"pvault/data"
 	"pvault/vault"
+	"pvault/vault/record"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/test"
@@ -19,7 +20,7 @@ import (
 type UnlockTestSuite struct {
 	test.CommandSuite[*cmd.UnlockCommand]
 	Vault  vault.Vault
-	Record vault.Record
+	Record record.Record
 }
 
 func TestUnlockCommandSuite(t *testing.T) {
@@ -35,7 +36,7 @@ func (s *UnlockTestSuite) SetupTest() {
 	})
 
 	rand := rand.New(0)
-	s.Record = vault.EmptyRecord(rand.ASCII(15))
+	s.Record = record.NewFromName(rand.ASCII(15))
 
 	err := vault.InitializeNew(config.Global.VaultPath)
 	s.Require().NoError(err)
@@ -117,7 +118,7 @@ func (s *UnlockTestSuite) TestRunValid() {
 	line := out.ReadLine()
 	s.Require().Contains(line, "[=] Loaded Record: "+s.Record.ID.String())
 
-	record, err := data.LoadJSON[vault.Record](OUTPUT_FILE)
+	record, err := data.LoadJSON[record.Record](OUTPUT_FILE)
 	s.Require().NoError(err)
 	s.Assert().Equal(s.Record, record)
 

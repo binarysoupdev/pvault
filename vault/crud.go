@@ -5,11 +5,12 @@ import (
 	"os"
 	"pvault/chain"
 	"pvault/data"
+	"pvault/vault/record"
 
 	"github.com/google/uuid"
 )
 
-func (v Vault) SaveRecord(r Record) error {
+func (v Vault) SaveRecord(r record.Record) error {
 	existingId, ok := v.Index[r.Name]
 	if ok && existingId != r.ID {
 		return fmt.Errorf("name \"%s\" already exists", r.Name)
@@ -34,15 +35,17 @@ func (v Vault) SaveRecord(r Record) error {
 	return nil
 }
 
-func (v Vault) LoadRecord(name string) (Record, error) {
+func (v Vault) LoadRecord(name string) (record.Record, error) {
+	var r record.Record
+
 	id, ok := v.Index[name]
 	if !ok {
-		return Record{}, fmt.Errorf("name \"%s\" not found", name)
+		return r, fmt.Errorf("name \"%s\" not found", name)
 	}
 
-	r, err := data.LoadJSON[Record](v.RecordPath(id))
+	r, err := data.LoadJSON[record.Record](v.RecordPath(id))
 	if err != nil {
-		return Record{}, chain.Error(err, "error loading record file")
+		return r, chain.Error(err, "error loading record file")
 	}
 
 	return r, nil

@@ -1,4 +1,4 @@
-package vault
+package record
 
 import (
 	"github.com/google/uuid"
@@ -13,7 +13,7 @@ type Record struct {
 	Other    any    `json:"other"`
 }
 
-func EmptyRecord(name string) Record {
+func NewFromName(name string) Record {
 	return Record{
 		ID:       uuid.New(),
 		Name:     name,
