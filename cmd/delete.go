@@ -34,7 +34,9 @@ func (cmd DeleteCommand) Run(args []string) error {
 		return nil
 	}
 
-	//TODO: add confirmation
+	if flow.Prompt("Confirm NAME: ") != name {
+		return chain.New("names do not match")
+	}
 
 	id, err := v.DeleteRecord(name)
 	if err != nil {
