@@ -43,6 +43,6 @@ func (cmd DeleteCommand) Run(args []string) error {
 		return errors.Chain(err, "error deleting vault record")
 	}
 
-	style.BoldInfo.Printf("[-] Deleted Record: %s\n", id.String())
+	style.BoldDelete.Printf("[-] Deleted Record: %s\n", id.String())
 	return nil
 }
