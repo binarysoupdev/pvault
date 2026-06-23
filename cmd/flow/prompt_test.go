@@ -29,3 +29,23 @@ func TestPromptReturnsInput(t *testing.T) {
 	assert.Equal(t, INPUT, res)
 	assert.Contains(t, io.ReadLine(), PROMPT+INPUT)
 }
+
+func TestPromptPasswordReturnsPassword(t *testing.T) {
+	//-- arrange
+	rand := rand.New(0)
+	PROMPT := rand.ASCII(10)
+	PASSWORD := rand.ASCII(30)
+
+	io := pipe.OpenStdio(1, 1, true)
+	defer io.Close()
+
+	//-- act
+	io.Queue(PROMPT, PASSWORD)
+	io.EndQueue()
+
+	res := flow.PromptPassword(PROMPT)
+
+	//-- assert
+	assert.Equal(t, PASSWORD, res)
+	assert.Contains(t, io.ReadLine(), PROMPT+PASSWORD)
+}
