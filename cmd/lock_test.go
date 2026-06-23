@@ -72,6 +72,36 @@ func (s *LockTestSuite) TestRunInvalidRecordPath() {
 	s.RequireResultFail("error loading source record")
 }
 
+func (s *LockTestSuite) TestRunInvalidRecord() {
+	//-- arrange
+	s.Record.Name = ""
+
+	err := data.SaveJSON(s.Record, s.RecordPath)
+	s.Require().NoError(err)
+
+	//-- act
+	s.RunCommand("-path", s.RecordPath)
+
+	//-- assert
+	s.RequireResultFail("error validating record")
+}
+
+func (s *LockTestSuite) TestRunInvalidNameAlreadyExists() {
+	//-- arrange
+	v, err := vault.Open(config.Global.VaultPath)
+	s.Require().NoError(err)
+
+	rand := rand.New(0)
+	err = v.SaveRecord(record.NewFromName(s.Record.Name), rand.ASCII(30))
+	s.Require().NoError(err)
+
+	//-- act
+	s.RunCommand("-path", s.RecordPath)
+
+	//-- assert
+	s.RequireResultFail("error validating record")
+}
+
 func (s *LockTestSuite) TestRunIncorrectVerifyPassword() {
 	//-- arrange
 	rand := rand.New(0)

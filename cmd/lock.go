@@ -41,6 +41,11 @@ func (cmd LockCommand) Run(args []string) error {
 		return errors.Chain(err, "error loading source record")
 	}
 
+	err = v.ValidateRecord(r)
+	if err != nil {
+		return errors.Chain(err, "error validating record")
+	}
+
 	password := flow.PromptPassword("New PASSWORD: ")
 	if flow.PromptPassword("Verify PASSWORD: ") != password {
 		return errors.New("passwords do not match")

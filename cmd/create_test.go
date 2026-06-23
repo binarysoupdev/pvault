@@ -5,6 +5,7 @@ import (
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/vault"
+	"pvault/vault/record"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/test"
@@ -56,6 +57,24 @@ func (s *CreateTestSuite) TestRunInvalidVaultPath() {
 
 	//-- assert
 	s.RequireResultFail("error opening vault")
+}
+
+func (s *CreateTestSuite) TestRunInvalidNameAlreadyExists() {
+	//-- arrange
+	rand := rand.New(0)
+	NAME := rand.ASCII(15)
+
+	v, err := vault.Open(config.Global.VaultPath)
+	s.Require().NoError(err)
+
+	err = v.SaveRecord(record.NewFromName(NAME), rand.ASCII(30))
+	s.Require().NoError(err)
+
+	//-- act
+	s.RunCommand("-name", NAME)
+
+	//-- assert
+	s.RequireResultFail("error validating record")
 }
 
 func (s *CreateTestSuite) TestRunIncorrectVerifyPassword() {

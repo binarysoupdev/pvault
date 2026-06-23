@@ -38,6 +38,11 @@ func (cmd CreateCommand) Run(args []string) error {
 
 	r := record.NewFromName(*name)
 
+	err = v.ValidateRecord(r)
+	if err != nil {
+		return errors.Chain(err, "error validating record")
+	}
+
 	password := flow.PromptPassword("New PASSWORD: ")
 	if flow.PromptPassword("Verify PASSWORD: ") != password {
 		return errors.New("passwords do not match")
