@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"pvault/chain"
-	"pvault/data"
 	"pvault/vault/record"
 
 	"github.com/google/uuid"
@@ -16,9 +15,9 @@ func (v Vault) SaveRecord(r record.Record) error {
 		return fmt.Errorf("name \"%s\" already exists", r.Name)
 	}
 
-	err := data.SaveJSON(r, v.RecordPath(r.ID))
+	err := v.saveEncryptedRecord(r)
 	if err != nil {
-		return chain.Error(err, "error saving record file")
+		return err
 	}
 
 	err = v.updateIndex(r)
@@ -30,16 +29,14 @@ func (v Vault) SaveRecord(r record.Record) error {
 }
 
 func (v Vault) LoadRecord(name string) (record.Record, error) {
-	var r record.Record
-
 	id, ok := v.Index[name]
 	if !ok {
-		return r, fmt.Errorf("name \"%s\" not found", name)
+		return record.Record{}, fmt.Errorf("name \"%s\" not found", name)
 	}
 
-	r, err := data.LoadJSON[record.Record](v.RecordPath(id))
+	r, err := v.loadEncryptedRecord(id)
 	if err != nil {
-		return r, chain.Error(err, "error loading record file")
+		return record.Record{}, err
 	}
 
 	return r, nil
@@ -53,12 +50,12 @@ func (v Vault) DeleteRecord(name string) (uuid.UUID, error) {
 
 	err := os.Remove(v.RecordPath(id))
 	if err != nil {
-		return uuid.Nil, chain.Error(err, "error deleting record file")
+		return id, chain.Error(err, "error deleting record file")
 	}
 
 	err = v.deleteIndex(name)
 	if err != nil {
-		return uuid.Nil, err
+		return id, err
 	}
 
 	return id, nil
