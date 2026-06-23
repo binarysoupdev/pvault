@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"pvault/chain"
 	"pvault/config"
+	"pvault/errors"
 	"pvault/vault"
 
 	"github.com/binarysoupdev/go-commando/command"
@@ -22,7 +22,7 @@ func NewInitCommand() *InitCommand {
 func (cmd InitCommand) Run(_ []string) error {
 	_, err := vault.InitializeNew(config.Global.VaultPath)
 	if err != nil {
-		return chain.Error(err, "error initializing new vault")
+		return errors.Chain(err, "error initializing new vault")
 	}
 
 	style.BoldCreate.Printf("[+] New Vault Initialized: %s\n", config.Global.VaultPath)

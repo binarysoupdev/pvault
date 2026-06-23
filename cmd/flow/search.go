@@ -1,8 +1,8 @@
 package flow
 
 import (
+	"errors"
 	"flag"
-	"pvault/chain"
 	"pvault/vault"
 	"strings"
 
@@ -28,7 +28,7 @@ func (f SearchFlow) Display(v vault.Vault) error {
 	matches := v.Search(*f.term)
 
 	if len(matches) == 0 {
-		return chain.New("no matches found")
+		return errors.New("no matches found")
 	}
 
 	f.displayMatches(matches)
@@ -39,7 +39,7 @@ func (f SearchFlow) Select(v vault.Vault) (string, error) {
 	matches := v.Search(*f.term)
 
 	if len(matches) == 0 {
-		return "", chain.New("no matches found")
+		return "", errors.New("no matches found")
 	}
 
 	if len(matches) == 1 {
@@ -51,7 +51,7 @@ func (f SearchFlow) Select(v vault.Vault) (string, error) {
 
 	if index < 0 || index >= len(matches) {
 		f.displayMatches(matches)
-		return "", chain.New("rerun with \"-x <index>\"")
+		return "", errors.New("rerun with \"-x <index>\"")
 	}
 
 	f.displayMatch(matches[index], index+1)

@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"path/filepath"
-	"pvault/chain"
 	"pvault/cmd/flow"
 	"pvault/config"
 	"pvault/data"
+	"pvault/errors"
 	"pvault/vault"
 	"pvault/vault/record"
 
@@ -28,24 +28,24 @@ func (cmd CreateCommand) Run(args []string) error {
 	cmd.Flags.Parse(args)
 
 	if *name == "" {
-		return chain.New("\"name\" cannot be empty")
+		return errors.New("\"name\" cannot be empty")
 	}
 
 	v, err := vault.Open(config.Global.VaultPath)
 	if err != nil {
-		return chain.Error(err, "error opening vault")
+		return errors.Chain(err, "error opening vault")
 	}
 
 	r := record.NewFromName(*name)
 
 	password := flow.PromptPassword("New PASSWORD: ")
 	if flow.PromptPassword("Verify PASSWORD: ") != password {
-		return chain.New("passwords do not match")
+		return errors.New("passwords do not match")
 	}
 
 	err = v.SaveRecord(r, password)
 	if err != nil {
-		return chain.Error(err, "error saving vault record")
+		return errors.Chain(err, "error saving vault record")
 	}
 
 	style.BoldCreate.Printf("[+] New Record: %s\n", r.ID.String())
@@ -53,7 +53,7 @@ func (cmd CreateCommand) Run(args []string) error {
 	path := filepath.Join(config.Global.OutputPath, r.ID.String()+".json")
 	err = data.SaveJSON(r, path)
 	if err != nil {
-		return chain.Error(err, "error creating output record")
+		return errors.Chain(err, "error creating output record")
 	}
 
 	style.Create.Printf("[+] %s\n", path)

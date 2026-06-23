@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"path/filepath"
-	"pvault/chain"
 	"pvault/cmd/flow"
 	"pvault/config"
 	"pvault/data"
+	"pvault/errors"
 	"pvault/vault"
 
 	"github.com/binarysoupdev/go-commando/command"
@@ -28,7 +28,7 @@ func (cmd UnlockCommand) Run(args []string) error {
 
 	v, err := vault.Open(config.Global.VaultPath)
 	if err != nil {
-		return chain.Error(err, "error opening vault")
+		return errors.Chain(err, "error opening vault")
 	}
 
 	name, err := search.Select(v)
@@ -40,7 +40,7 @@ func (cmd UnlockCommand) Run(args []string) error {
 
 	r, err := v.LoadRecord(name, password)
 	if err != nil {
-		return chain.Error(err, "error loading vault record")
+		return errors.Chain(err, "error loading vault record")
 	}
 
 	style.BoldInfo.Printf("[=] Loaded Record: %s\n", r.ID.String())
@@ -48,7 +48,7 @@ func (cmd UnlockCommand) Run(args []string) error {
 	path := filepath.Join(config.Global.OutputPath, r.ID.String()+".json")
 	err = data.SaveJSON(r, path)
 	if err != nil {
-		return chain.Error(err, "error creating output record")
+		return errors.Chain(err, "error creating output record")
 	}
 
 	style.Create.Printf("[+] %s\n", path)

@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"pvault/chain"
 	"pvault/cmd"
 	"pvault/config"
+	"pvault/errors"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
@@ -40,7 +40,7 @@ func main() {
 func run(runner command.Runner) error {
 	err := config.LoadDefault(&config.Global)
 	if err != nil {
-		return chain.Error(err, "error loading global config")
+		return errors.Chain(err, "error loading global config")
 	}
 
 	return runner.RunCommand(os.Args[1], os.Args[2:])

@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"os"
-	"pvault/chain"
 	"pvault/cmd/flow"
 	"pvault/config"
 	"pvault/data"
+	"pvault/errors"
 	"pvault/vault"
 	"pvault/vault/record"
 
@@ -28,34 +28,34 @@ func (cmd LockCommand) Run(args []string) error {
 	cmd.Flags.Parse(args)
 
 	if *path == "" {
-		return chain.New("\"path\" cannot be empty")
+		return errors.New("\"path\" cannot be empty")
 	}
 
 	v, err := vault.Open(config.Global.VaultPath)
 	if err != nil {
-		return chain.Error(err, "error opening vault")
+		return errors.Chain(err, "error opening vault")
 	}
 
 	r, err := data.LoadJSON[record.Record](*path)
 	if err != nil {
-		return chain.Error(err, "error loading source record")
+		return errors.Chain(err, "error loading source record")
 	}
 
 	password := flow.PromptPassword("New PASSWORD: ")
 	if flow.PromptPassword("Verify PASSWORD: ") != password {
-		return chain.New("passwords do not match")
+		return errors.New("passwords do not match")
 	}
 
 	err = v.SaveRecord(r, password)
 	if err != nil {
-		return chain.Error(err, "error saving vault record")
+		return errors.Chain(err, "error saving vault record")
 	}
 
 	style.BoldCreate.Printf("[+] Updated Record: %s\n", r.ID.String())
 
 	err = os.Remove(*path)
 	if err != nil {
-		return chain.Error(err, "error removing source record")
+		return errors.Chain(err, "error removing source record")
 	}
 
 	style.Delete.Printf("[-] %s\n", *path)

@@ -3,7 +3,7 @@ package index
 import (
 	"encoding/binary"
 	"os"
-	"pvault/chain"
+	"pvault/errors"
 
 	"github.com/google/uuid"
 )
@@ -11,19 +11,19 @@ import (
 func (idx IndexMap) Save(path string) error {
 	file, err := os.Create(path)
 	if err != nil {
-		return chain.Error(err, "error creating index file")
+		return errors.Chain(err, "error creating index file")
 	}
 	defer file.Close()
 
 	err = idx.writeHeader(file)
 	if err != nil {
-		return chain.Error(err, "error writing header")
+		return errors.Chain(err, "error writing header")
 	}
 
 	for name, id := range idx {
 		err = idx.writeEntry(file, name, id)
 		if err != nil {
-			return chain.Error(err, "error writing entry")
+			return errors.Chain(err, "error writing entry")
 		}
 	}
 

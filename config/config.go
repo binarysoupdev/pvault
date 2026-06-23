@@ -1,8 +1,8 @@
 package config
 
 import (
+	"errors"
 	"os"
-	"pvault/chain"
 )
 
 type Config struct {
@@ -18,9 +18,9 @@ func (c Config) Validate() error {
 
 	stat, err := os.Stat(c.OutputPath)
 	if err != nil {
-		verrs = append(verrs, chain.New("\"output_path\" invalid path"))
+		verrs = append(verrs, errors.New("\"output_path\" invalid path"))
 	} else if !stat.IsDir() {
-		verrs = append(verrs, chain.New("\"output_path\" not a directory"))
+		verrs = append(verrs, errors.New("\"output_path\" not a directory"))
 	}
 
 	if verrs.HasErrors() {

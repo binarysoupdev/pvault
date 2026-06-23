@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"pvault/chain"
 	"pvault/cmd/flow"
 	"pvault/config"
+	"pvault/errors"
 	"pvault/vault"
 
 	"github.com/binarysoupdev/go-commando/command"
@@ -26,7 +26,7 @@ func (cmd DeleteCommand) Run(args []string) error {
 
 	v, err := vault.Open(config.Global.VaultPath)
 	if err != nil {
-		return chain.Error(err, "error opening vault")
+		return errors.Chain(err, "error opening vault")
 	}
 
 	name, err := search.Select(v)
@@ -35,12 +35,12 @@ func (cmd DeleteCommand) Run(args []string) error {
 	}
 
 	if flow.Prompt("Confirm NAME: ") != name {
-		return chain.New("names do not match")
+		return errors.New("names do not match")
 	}
 
 	id, err := v.DeleteRecord(name)
 	if err != nil {
-		return chain.Error(err, "error deleting vault record")
+		return errors.Chain(err, "error deleting vault record")
 	}
 
 	style.BoldInfo.Printf("[-] Deleted Record: %s\n", id.String())

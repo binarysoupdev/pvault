@@ -2,9 +2,8 @@ package index
 
 import (
 	"encoding/binary"
-	"fmt"
 	"os"
-	"pvault/chain"
+	"pvault/errors"
 
 	"github.com/google/uuid"
 )
@@ -14,14 +13,14 @@ func LoadIndex(path string) (IndexMap, error) {
 
 	raw, err := os.ReadFile(path)
 	if err != nil {
-		return idx, chain.Error(err, "error reading index file")
+		return idx, errors.Chain(err, "error reading index file")
 	}
 
 	header := raw[:4]
 
 	version := binary.BigEndian.Uint16(header)
 	if version > INDEX_VERSION {
-		return idx, fmt.Errorf("unsupported version \"%d\"", version)
+		return idx, errors.Format("unsupported version \"%d\"", version)
 	}
 
 	entryCount := binary.BigEndian.Uint16(header[2:])

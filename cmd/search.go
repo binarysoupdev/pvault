@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"pvault/chain"
 	"pvault/cmd/flow"
 	"pvault/config"
+	"pvault/errors"
 	"pvault/vault"
 
 	"github.com/binarysoupdev/go-commando/command"
@@ -25,7 +25,7 @@ func (cmd SearchCommand) Run(args []string) error {
 
 	v, err := vault.Open(config.Global.VaultPath)
 	if err != nil {
-		return chain.Error(err, "error opening vault")
+		return errors.Chain(err, "error opening vault")
 	}
 
 	return search.Display(v)
