@@ -9,12 +9,12 @@ import (
 )
 
 func (v Vault) SaveRecord(r record.Record, password string) error {
-	existingId, ok := v.Index[r.Name]
-	if ok && existingId != r.ID {
-		return errors.Format("name \"%s\" already exists", r.Name)
+	err := v.ValidateRecord(r)
+	if err != nil {
+		return errors.Chain(err, "error validating record")
 	}
 
-	err := v.saveEncryptedRecord(r, password)
+	err = v.saveEncryptedRecord(r, password)
 	if err != nil {
 		return err
 	}

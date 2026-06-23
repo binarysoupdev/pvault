@@ -103,7 +103,7 @@ func (s *CRUDTestSuite) TestSaveRecordNewIDExistingNameInvalid() {
 	res := s.Vault.SaveRecord(s.Record, s.Password)
 
 	//-- assert
-	s.Require().ErrorContains(res, fmt.Sprintf("name \"%s\" already exists", s.Record.Name))
+	s.Require().ErrorContains(res, "error validating record")
 }
 
 func (s *CRUDTestSuite) TestSaveRecordExistingIDExistingNameValid() {

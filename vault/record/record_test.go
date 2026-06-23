@@ -9,11 +9,8 @@ import (
 )
 
 func TestValidateInvalid(t *testing.T) {
-	//-- arrange
-	RECORD := record.Record{}
-
 	//-- act
-	res := RECORD.Validate()
+	res := record.Record{}.Validate()
 
 	//-- assert
 	assert.ErrorContains(t, res, "\"ID\" cannot be nil (all zeroes)")
@@ -23,10 +20,10 @@ func TestValidateInvalid(t *testing.T) {
 func TestValidateValid(t *testing.T) {
 	//-- arrange
 	rand := rand.New(0)
-	RECORD := record.NewFromName(rand.ASCII(15))
+	r := record.NewFromName(rand.ASCII(15))
 
 	//-- act
-	res := RECORD.Validate()
+	res := r.Validate()
 
 	//-- assert
 	assert.NoError(t, res)
