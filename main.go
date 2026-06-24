@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"pvault/cmd"
 	"pvault/config"
-	"pvault/errors"
 	"pvault/tools/clipboard"
 
 	"github.com/binarysoupdev/go-commando/command"
@@ -17,8 +17,12 @@ func main() {
 	ls := flag.Bool("ls", false, "list all commands")
 	flag.Parse()
 
+	cfgLoader := config.JSONLoader[config.Config]{
+		Path: configPath(),
+	}
+
 	runner := command.NewRunner(
-		cmd.NewConfigCommand(),
+		cmd.NewConfigCommand(cfgLoader),
 		cmd.NewInitCommand(),
 		cmd.NewCreateCommand(),
 		cmd.NewLockCommand(),
@@ -39,11 +43,23 @@ func main() {
 	}
 }
 
-func run(runner command.Runner) error {
-	err := config.LoadDefault(&config.Global)
-	if err != nil {
-		return errors.Chain(err, "error loading global config")
+func configPath() string {
+	// check for ENV variable override
+	val := os.Getenv("CFG_PATH")
+	if val != "" {
+		return val
 	}
+
+	// use executable path as default
+	exec, _ := os.Executable()
+	return filepath.Join(filepath.Dir(exec), "config.json")
+}
+
+func run(runner command.Runner) error {
+	// err := config.LoadDefault(&config.Global)
+	// if err != nil {
+	// 	return errors.Chain(err, "error loading global config")
+	// }
 
 	return runner.RunCommand(os.Args[1], os.Args[2:])
 }

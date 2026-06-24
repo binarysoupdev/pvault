@@ -20,7 +20,6 @@ func LoadDefault(cfg *Config) error {
 	if err != nil {
 		return errors.Chain(err, "error loading config JSON")
 	}
-	cfg.Path = path
 
 	err = cfg.Validate()
 	if err != nil {
