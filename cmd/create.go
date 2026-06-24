@@ -15,12 +15,25 @@ import (
 
 type CreateCommand struct {
 	command.FlagCommandBase
+	config.LoaderModule[config.Config]
 }
 
-func NewCreateCommand() *CreateCommand {
+func NewCreateCommand(loader config.Loader[config.Config]) *CreateCommand {
 	return &CreateCommand{
 		FlagCommandBase: command.NewFlagCommandBase("create", "create a new vault record"),
+		LoaderModule:    config.NewLoaderModule(loader),
 	}
+}
+
+func (cmd *CreateCommand) Initialize() error {
+	_ = cmd.FlagCommandBase.Initialize()
+
+	err := cmd.LoadConfig()
+	if err != nil {
+		return errors.Chain(err, "error loading config")
+	}
+
+	return nil
 }
 
 func (cmd CreateCommand) Run(args []string) error {
@@ -31,7 +44,7 @@ func (cmd CreateCommand) Run(args []string) error {
 		return errors.New("\"name\" cannot be empty")
 	}
 
-	v, err := vault.Open(config.Global.VaultPath)
+	v, err := vault.Open(cmd.Config.VaultPath)
 	if err != nil {
 		return errors.Chain(err, "error opening vault")
 	}
@@ -55,7 +68,7 @@ func (cmd CreateCommand) Run(args []string) error {
 
 	style.BoldCreate.Printf("[+] New Record: %s\n", r.ID.String())
 
-	path := filepath.Join(config.Global.OutputPath, r.ID.String()+".json")
+	path := filepath.Join(cmd.Config.OutputPath, r.ID.String()+".json")
 	err = data.SaveJSON(r, path)
 	if err != nil {
 		return errors.Chain(err, "error creating output record")

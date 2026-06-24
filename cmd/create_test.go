@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"pvault/cmd"
 	"pvault/config"
+	"pvault/errors"
 	"pvault/vault"
 	"pvault/vault/record"
 	"testing"
@@ -17,25 +18,42 @@ import (
 
 type CreateTestSuite struct {
 	test.CommandSuite[*cmd.CreateCommand]
+	ConfigLoader *config.MockLoader[config.Config]
 }
 
 func TestCreateCommandSuite(t *testing.T) {
-	suite.Run(t, &CreateTestSuite{
-		CommandSuite: test.NewCommandSuite(cmd.NewCreateCommand()),
-	})
+	s := CreateTestSuite{
+		ConfigLoader: &config.MockLoader[config.Config]{},
+	}
+
+	s.CommandSuite = test.NewCommandSuite(cmd.NewCreateCommand(s.ConfigLoader))
+	suite.Run(t, &s)
 }
 
 func (s *CreateTestSuite) SetupTest() {
-	config.SetGlobal(config.Config{
-		VaultPath:  file.NewPath(s.T(), "vault"),
-		OutputPath: file.NewPath(s.T(), ""),
-	})
+	*s.ConfigLoader = config.MockLoader[config.Config]{
+		Config: config.Config{
+			VaultPath:  file.NewPath(s.T(), "vault"),
+			OutputPath: file.NewPath(s.T(), ""),
+		},
+	}
 
-	_, err := vault.InitializeNew(config.Global.VaultPath)
+	_, err := vault.InitializeNew(s.ConfigLoader.Config.VaultPath)
 	s.Require().NoError(err)
 }
 
 //=====================================
+
+func (s *CreateTestSuite) TestRunFailErrorLoadingConfig() {
+	//-- arrange
+	s.ConfigLoader.Error = errors.New("")
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultFail("error loading config")
+}
 
 func (s *CreateTestSuite) TestRunNameNotEmpty() {
 	//-- act
@@ -50,7 +68,7 @@ func (s *CreateTestSuite) TestRunInvalidVaultPath() {
 	rand := rand.New(0)
 	NAME := rand.ASCII(15)
 
-	config.Global.VaultPath = "invalid"
+	s.ConfigLoader.Config.VaultPath = "invalid"
 
 	//-- act
 	s.RunCommand("-name", NAME)
@@ -64,7 +82,7 @@ func (s *CreateTestSuite) TestRunInvalidNameAlreadyExists() {
 	rand := rand.New(0)
 	NAME := rand.ASCII(15)
 
-	v, err := vault.Open(config.Global.VaultPath)
+	v, err := vault.Open(s.ConfigLoader.Config.VaultPath)
 	s.Require().NoError(err)
 
 	err = v.SaveRecord(record.NewFromName(NAME), rand.ASCII(30))
@@ -105,7 +123,7 @@ func (s *CreateTestSuite) TestRunInvalidOutputPath() {
 	NAME := rand.ASCII(15)
 	PASSWORD := rand.ASCII(30)
 
-	config.Global.OutputPath = "invalid"
+	s.ConfigLoader.Config.OutputPath = "invalid"
 
 	io := pipe.OpenStdio(2, 3, false)
 	defer io.Close()
@@ -148,8 +166,8 @@ func (s *CreateTestSuite) TestRunValid() {
 	s.Require().Contains(line, "[+] New Record: ")
 
 	ID := line[len(line)-36:]
-	VAULT_FILE := filepath.Join(config.Global.VaultPath, ID)
-	OUTPUT_FILE := filepath.Join(config.Global.OutputPath, ID+".json")
+	VAULT_FILE := filepath.Join(s.ConfigLoader.Config.VaultPath, ID)
+	OUTPUT_FILE := filepath.Join(s.ConfigLoader.Config.OutputPath, ID+".json")
 
 	s.Assert().Contains(io.ReadLine(), "[+] "+OUTPUT_FILE)
 	s.Assert().FileExists(VAULT_FILE)
