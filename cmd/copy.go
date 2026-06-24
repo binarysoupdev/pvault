@@ -4,24 +4,40 @@ import (
 	"pvault/cmd/flow"
 	"pvault/config"
 	"pvault/errors"
+	"pvault/tools/clipboard"
 	"pvault/vault"
 
-	"github.com/atotto/clipboard"
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
 )
 
 type CopyCommand struct {
 	command.FlagCommandBase
+	clipboard clipboard.Clipboard
 }
 
-func NewCopyCommand() *CopyCommand {
+func NewCopyCommand(clipboard clipboard.Clipboard) *CopyCommand {
 	return &CopyCommand{
 		FlagCommandBase: command.NewFlagCommandBase("copy", "copy password/username of a record"),
+		clipboard:       clipboard,
 	}
 }
 
+func (cmd CopyCommand) resolveDependencies() error {
+	err := cmd.clipboard.CheckUnsupported()
+	if err != nil {
+		return errors.Chain(err, "clipboard unsupported")
+	}
+
+	return nil
+}
+
 func (cmd CopyCommand) Run(args []string) error {
+	err := cmd.resolveDependencies()
+	if err != nil {
+		return err
+	}
+
 	search := flow.NewSearchFlow(cmd.Flags)
 	cmd.Flags.Parse(args)
 
@@ -44,7 +60,7 @@ func (cmd CopyCommand) Run(args []string) error {
 
 	style.BoldInfo.Printf("[=] Loaded Record: %s\n", r.ID.String())
 
-	err = clipboard.WriteAll(r.Password)
+	err = cmd.clipboard.Write(r.Password)
 	if err != nil {
 		return errors.Chain(err, "error copying to clipboard")
 	}

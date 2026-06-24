@@ -7,6 +7,7 @@ import (
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/errors"
+	"pvault/tools/clipboard"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
@@ -24,7 +25,7 @@ func main() {
 		cmd.NewUnlockCommand(),
 		cmd.NewDeleteCommand(),
 		cmd.NewSearchCommand(),
-		cmd.NewCopyCommand(),
+		cmd.NewCopyCommand(clipboard.AtottoClipboard{}),
 	)
 
 	if *ls || len(os.Args) < 2 {
