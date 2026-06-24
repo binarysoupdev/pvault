@@ -23,8 +23,9 @@ func NewConfigCommand(loader config.Loader[config.Config]) *ConfigCommand {
 	}
 }
 
-func (cmd *ConfigCommand) initialize() error {
+func (cmd *ConfigCommand) Initialize() error {
 	var err error
+	_ = cmd.FlagCommandBase.Initialize()
 
 	cmd.config, err = cmd.configLoader.Load()
 	if err != nil {
@@ -35,11 +36,6 @@ func (cmd *ConfigCommand) initialize() error {
 }
 
 func (cmd ConfigCommand) Run(args []string) error {
-	err := cmd.initialize()
-	if err != nil {
-		return err
-	}
-
 	style.BoldInfo.Printf("[=] Loaded from %s\n", cmd.configLoader.GetName())
 
 	style.Bold.Printf("Version: %s\n", cmd.config.Version)

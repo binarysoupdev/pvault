@@ -23,7 +23,9 @@ func NewCopyCommand(clipboard clipboard.Clipboard) *CopyCommand {
 	}
 }
 
-func (cmd CopyCommand) resolveDependencies() error {
+func (cmd *CopyCommand) Initialize() error {
+	_ = cmd.FlagCommandBase.Initialize()
+
 	err := cmd.clipboard.CheckUnsupported()
 	if err != nil {
 		return errors.Chain(err, "clipboard unsupported")
@@ -33,11 +35,6 @@ func (cmd CopyCommand) resolveDependencies() error {
 }
 
 func (cmd CopyCommand) Run(args []string) error {
-	err := cmd.resolveDependencies()
-	if err != nil {
-		return err
-	}
-
 	search := flow.NewSearchFlow(cmd.Flags)
 	username := cmd.Flags.Bool("username", false, "copy username instead of password")
 	cmd.Flags.Parse(args)
