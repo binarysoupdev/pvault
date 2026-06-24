@@ -15,12 +15,25 @@ import (
 
 type LockCommand struct {
 	command.FlagCommandBase
+	config.LoaderModule[config.Config]
 }
 
-func NewLockCommand() *LockCommand {
+func NewLockCommand(loader config.Loader[config.Config]) *LockCommand {
 	return &LockCommand{
 		FlagCommandBase: command.NewFlagCommandBase("lock", "lock a record in the vault"),
+		LoaderModule:    config.NewLoaderModule(loader),
 	}
+}
+
+func (cmd *LockCommand) Initialize() error {
+	_ = cmd.FlagCommandBase.Initialize()
+
+	err := cmd.LoadConfig()
+	if err != nil {
+		return errors.Chain(err, "error loading config")
+	}
+
+	return nil
 }
 
 func (cmd LockCommand) Run(args []string) error {
@@ -31,7 +44,7 @@ func (cmd LockCommand) Run(args []string) error {
 		return errors.New("\"path\" cannot be empty")
 	}
 
-	v, err := vault.Open(config.Global.VaultPath)
+	v, err := vault.Open(cmd.Config.VaultPath)
 	if err != nil {
 		return errors.Chain(err, "error opening vault")
 	}
