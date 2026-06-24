@@ -5,48 +5,43 @@ import (
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestValidatePathsInvalid(t *testing.T) {
+func TestValidateOutputPathNotFound(t *testing.T) {
 	//-- arrange
 	cfg := config.Config{
 		OutputPath: file.NewPath(t, "invalid"),
 	}
 
 	//-- act
-	res := cfg.Validate()
+	res := cfg.ValidateOutputPath()
 
 	//-- assert
-	require.Error(t, res)
-
-	assert.ErrorContains(t, res, "\"output_path\" invalid path")
+	require.ErrorContains(t, res, "error loading file stats")
 }
 
-func TestValidatePathsNoDirs(t *testing.T) {
+func TestValidateOutputPathNotDirectory(t *testing.T) {
 	//-- arrange
 	cfg := config.Config{
 		OutputPath: file.CreateEmpty(t, "file.txt"),
 	}
 
 	//-- act
-	res := cfg.Validate()
+	res := cfg.ValidateOutputPath()
 
 	//-- assert
-	require.Error(t, res)
-
-	assert.ErrorContains(t, res, "\"output_path\" not a directory")
+	require.ErrorContains(t, res, "path not a directory")
 }
 
-func TestValidateValid(t *testing.T) {
+func TestValidateOutputPathValid(t *testing.T) {
 	//-- arrange
 	cfg := config.Config{
 		OutputPath: file.NewPath(t, ""),
 	}
 
 	//-- act
-	res := cfg.Validate()
+	res := cfg.ValidateOutputPath()
 
 	//-- assert
 	require.NoError(t, res)

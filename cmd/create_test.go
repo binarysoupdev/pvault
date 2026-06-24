@@ -55,6 +55,17 @@ func (s *CreateTestSuite) TestRunFailErrorLoadingConfig() {
 	s.RequireResultFail("error loading config")
 }
 
+func (s *CreateTestSuite) TestRunFailConfigOutputPathInvalid() {
+	//-- arrange
+	s.ConfigLoader.Config.OutputPath = "invalid"
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultFail("error validating config \"output_path\"")
+}
+
 func (s *CreateTestSuite) TestRunNameNotEmpty() {
 	//-- act
 	s.RunCommand("-name", "")
@@ -115,30 +126,6 @@ func (s *CreateTestSuite) TestRunIncorrectVerifyPassword() {
 	s.RequireResultFail("passwords do not match")
 	s.Assert().Contains(io.ReadLine(), "New PASSWORD")
 	s.Assert().Contains(io.ReadLine(), "Verify PASSWORD")
-}
-
-func (s *CreateTestSuite) TestRunInvalidOutputPath() {
-	//-- arrange
-	rand := rand.New(0)
-	NAME := rand.ASCII(15)
-	PASSWORD := rand.ASCII(30)
-
-	s.ConfigLoader.Config.OutputPath = "invalid"
-
-	io := pipe.OpenStdio(2, 3, false)
-	defer io.Close()
-
-	//-- act
-	io.Queue("PASSWORD: ", PASSWORD)
-	io.Queue("PASSWORD: ", PASSWORD)
-	io.EndQueue()
-
-	s.RunCommand("-name", NAME)
-
-	//-- assert
-	s.RequireResultFail("error creating output record")
-	io.SkipLines(2)
-	s.Assert().Contains(io.ReadLine(), "[+] New Record: ")
 }
 
 func (s *CreateTestSuite) TestRunValid() {

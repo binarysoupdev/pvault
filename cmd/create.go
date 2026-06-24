@@ -33,6 +33,11 @@ func (cmd *CreateCommand) Initialize() error {
 		return errors.Chain(err, "error loading config")
 	}
 
+	err = cmd.Config.ValidateOutputPath()
+	if err != nil {
+		return errors.Chain(err, "error validating config \"output_path\"")
+	}
+
 	return nil
 }
 

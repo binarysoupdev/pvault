@@ -69,6 +69,17 @@ func (s *UnlockTestSuite) TestRunFailErrorLoadingConfig() {
 	s.RequireResultFail("error loading config")
 }
 
+func (s *UnlockTestSuite) TestRunFailConfigOutputPathInvalid() {
+	//-- arrange
+	s.ConfigLoader.Config.OutputPath = "invalid"
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultFail("error validating config \"output_path\"")
+}
+
 func (s *UnlockTestSuite) TestRunInvalidVaultPath() {
 	//-- arrange
 	s.ConfigLoader.Config.VaultPath = "invalid"
@@ -125,27 +136,6 @@ func (s *UnlockTestSuite) TestRunIncorrectPassword() {
 
 	s.Assert().Contains(io.ReadLine(), s.Record.Name)
 	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")
-}
-
-func (s *UnlockTestSuite) TestRunInvalidOutputPath() {
-	//-- arrange
-	s.ConfigLoader.Config.OutputPath = "invalid"
-
-	io := pipe.OpenStdio(1, 3, false)
-	defer io.Close()
-
-	//-- act
-	io.Queue("PASSWORD: ", s.Password)
-	io.EndQueue()
-
-	s.RunCommand("-s", s.Record.Name)
-
-	//-- assert
-	s.RequireResultFail("error creating output record")
-
-	s.Assert().Contains(io.ReadLine(), s.Record.Name)
-	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")
-	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
 }
 
 func (s *UnlockTestSuite) TestRunValid() {

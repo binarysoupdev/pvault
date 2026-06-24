@@ -11,15 +11,15 @@ type Config struct {
 	OutputPath string `json:"output_path"`
 }
 
-func (c Config) Validate() error {
-	errs := errors.Errors{}
-
+func (c Config) ValidateOutputPath() error {
 	stat, err := os.Stat(c.OutputPath)
 	if err != nil {
-		errs.Add("\"output_path\" invalid path")
-	} else if !stat.IsDir() {
-		errs.Add("\"output_path\" not a directory")
+		return errors.Chain(err, "error loading file stats")
 	}
 
-	return errs.Collapse(", ")
+	if !stat.IsDir() {
+		return errors.New("path not a directory")
+	}
+
+	return nil
 }
