@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"pvault/config"
-	"pvault/errors"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
@@ -11,39 +10,32 @@ import (
 
 type ConfigCommand struct {
 	command.FlagCommandBase
-
-	configLoader config.Loader[config.Config]
-	config       config.Config
+	config.LoaderModule[config.Config]
 }
 
 func NewConfigCommand(loader config.Loader[config.Config]) *ConfigCommand {
 	return &ConfigCommand{
 		FlagCommandBase: command.NewFlagCommandBase("config", "display configuration"),
-		configLoader:    loader,
+		LoaderModule:    config.NewLoaderModule(loader),
 	}
 }
 
 func (cmd *ConfigCommand) Initialize() error {
-	var err error
 	_ = cmd.FlagCommandBase.Initialize()
 
-	cmd.config, err = cmd.configLoader.Load()
-	if err != nil {
-		return errors.Chain(err, "error loading config")
-	}
-
-	return nil
+	err := cmd.LoadConfig()
+	return err
 }
 
 func (cmd ConfigCommand) Run(args []string) error {
-	style.BoldInfo.Printf("[=] Loaded from %s\n", cmd.configLoader.GetName())
+	style.BoldInfo.Printf("[=] Loaded from %s\n", cmd.ConfigLoader.GetName())
 
-	style.Bold.Printf("Version: %s\n", cmd.config.Version)
+	style.Bold.Printf("Version: %s\n", cmd.Config.Version)
 	fmt.Println("---")
 
 	pathStyle := style.New(style.MAGENTA)
-	pathStyle.Printf("Vault Path: %s\n", cmd.config.VaultPath)
-	pathStyle.Printf("Output Path: %s\n", cmd.config.OutputPath)
+	pathStyle.Printf("Vault Path: %s\n", cmd.Config.VaultPath)
+	pathStyle.Printf("Output Path: %s\n", cmd.Config.OutputPath)
 
 	return nil
 }
