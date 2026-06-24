@@ -24,6 +24,7 @@ func main() {
 		cmd.NewUnlockCommand(),
 		cmd.NewDeleteCommand(),
 		cmd.NewSearchCommand(),
+		cmd.NewCopyCommand(),
 	)
 
 	if *ls || len(os.Args) < 2 {

@@ -1,3 +1,5 @@
+github.com/atotto/clipboard v0.1.4 h1:EH0zSVneZPSuFR11BlR9YppQTVDbh5+16AmcJi4g1z4=
+github.com/atotto/clipboard v0.1.4/go.mod h1:ZY9tmq7sm5xIbd9bOK4onWV4S6X0u6GY7Vn0Yu86PYI=
 github.com/binarysoupdev/cryptool v1.0.0 h1:jMrM7jlTmw+p2hPHn+LNp4EmINPI60DdDbj3CUWEQwc=
 github.com/binarysoupdev/cryptool v1.0.0/go.mod h1:TjlWiLszDprJ6Tpc8ff4zHjoF+VPicykFxNElNyumPU=
 github.com/binarysoupdev/go-commando v1.3.0 h1:QoQs9Ekq9vUo+aDylgNXW1Ijo7amlrVG4kEz7jDct1U=
