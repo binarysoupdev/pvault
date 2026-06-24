@@ -6,6 +6,7 @@ import (
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/data"
+	"pvault/errors"
 	"pvault/vault"
 	"pvault/vault/record"
 	"testing"
@@ -19,29 +20,36 @@ import (
 
 type UnlockTestSuite struct {
 	test.CommandSuite[*cmd.UnlockCommand]
+	ConfigLoader *config.MockLoader[config.Config]
+
 	Vault    vault.Vault
 	Record   record.Record
 	Password string
 }
 
 func TestUnlockCommandSuite(t *testing.T) {
-	suite.Run(t, &UnlockTestSuite{
-		CommandSuite: test.NewCommandSuite(cmd.NewUnlockCommand()),
-	})
+	s := UnlockTestSuite{
+		ConfigLoader: &config.MockLoader[config.Config]{},
+	}
+
+	s.CommandSuite = test.NewCommandSuite(cmd.NewUnlockCommand(s.ConfigLoader))
+	suite.Run(t, &s)
 }
 
 func (s *UnlockTestSuite) SetupTest() {
-	config.SetGlobal(config.Config{
-		VaultPath:  file.NewPath(s.T(), "vault"),
-		OutputPath: file.NewPath(s.T(), ""),
-	})
+	*s.ConfigLoader = config.MockLoader[config.Config]{
+		Config: config.Config{
+			VaultPath:  file.NewPath(s.T(), "vault"),
+			OutputPath: file.NewPath(s.T(), ""),
+		},
+	}
 
 	rand := rand.New(0)
 	s.Record = record.NewFromName(rand.ASCII(15))
 	s.Password = rand.ASCII(30)
 
 	var err error
-	s.Vault, err = vault.InitializeNew(config.Global.VaultPath)
+	s.Vault, err = vault.InitializeNew(s.ConfigLoader.Config.VaultPath)
 	s.Require().NoError(err)
 
 	err = s.Vault.SaveRecord(s.Record, s.Password)
@@ -50,9 +58,20 @@ func (s *UnlockTestSuite) SetupTest() {
 
 //=====================================
 
+func (s *UnlockTestSuite) TestRunFailErrorLoadingConfig() {
+	//-- arrange
+	s.ConfigLoader.Error = errors.New("")
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultFail("error loading config")
+}
+
 func (s *UnlockTestSuite) TestRunInvalidVaultPath() {
 	//-- arrange
-	config.Global.VaultPath = "invalid"
+	s.ConfigLoader.Config.VaultPath = "invalid"
 
 	//-- act
 	s.RunCommand("-s", s.Record.Name)
@@ -110,7 +129,7 @@ func (s *UnlockTestSuite) TestRunIncorrectPassword() {
 
 func (s *UnlockTestSuite) TestRunInvalidOutputPath() {
 	//-- arrange
-	config.Global.OutputPath = "invalid"
+	s.ConfigLoader.Config.OutputPath = "invalid"
 
 	io := pipe.OpenStdio(1, 3, false)
 	defer io.Close()
@@ -131,7 +150,7 @@ func (s *UnlockTestSuite) TestRunInvalidOutputPath() {
 
 func (s *UnlockTestSuite) TestRunValid() {
 	//-- arrange
-	OUTPUT_FILE := filepath.Join(config.Global.OutputPath, s.Record.ID.String()+".json")
+	OUTPUT_FILE := filepath.Join(s.ConfigLoader.Config.OutputPath, s.Record.ID.String()+".json")
 
 	io := pipe.OpenStdio(1, 4, false)
 	defer io.Close()

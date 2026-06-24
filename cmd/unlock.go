@@ -14,19 +14,32 @@ import (
 
 type UnlockCommand struct {
 	command.FlagCommandBase
+	config.LoaderModule[config.Config]
 }
 
-func NewUnlockCommand() *UnlockCommand {
+func NewUnlockCommand(loader config.Loader[config.Config]) *UnlockCommand {
 	return &UnlockCommand{
 		FlagCommandBase: command.NewFlagCommandBase("unlock", "unlock a record from the vault"),
+		LoaderModule:    config.NewLoaderModule(loader),
 	}
+}
+
+func (cmd *UnlockCommand) Initialize() error {
+	_ = cmd.FlagCommandBase.Initialize()
+
+	err := cmd.LoadConfig()
+	if err != nil {
+		return errors.Chain(err, "error loading config")
+	}
+
+	return nil
 }
 
 func (cmd UnlockCommand) Run(args []string) error {
 	search := flow.NewSearchFlow(cmd.Flags)
 	cmd.Flags.Parse(args)
 
-	v, err := vault.Open(config.Global.VaultPath)
+	v, err := vault.Open(cmd.Config.VaultPath)
 	if err != nil {
 		return errors.Chain(err, "error opening vault")
 	}
@@ -45,7 +58,7 @@ func (cmd UnlockCommand) Run(args []string) error {
 
 	style.BoldInfo.Printf("[=] Loaded Record: %s\n", r.ID.String())
 
-	path := filepath.Join(config.Global.OutputPath, r.ID.String()+".json")
+	path := filepath.Join(cmd.Config.OutputPath, r.ID.String()+".json")
 	err = data.SaveJSON(r, path)
 	if err != nil {
 		return errors.Chain(err, "error creating output record")
