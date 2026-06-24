@@ -17,19 +17,19 @@ func main() {
 	ls := flag.Bool("ls", false, "list all commands")
 	flag.Parse()
 
-	cfgLoader := config.JSONLoader[config.Config]{
+	configLoader := &config.JSONLoader[config.Config]{
 		Path: configPath(),
 	}
 
 	runner := command.NewRunner(
-		cmd.NewConfigCommand(cfgLoader),
+		cmd.NewConfigCommand(configLoader),
 		cmd.NewInitCommand(),
 		cmd.NewCreateCommand(),
 		cmd.NewLockCommand(),
 		cmd.NewUnlockCommand(),
 		cmd.NewDeleteCommand(),
 		cmd.NewSearchCommand(),
-		cmd.NewCopyCommand(clipboard.AtottoClipboard{}),
+		cmd.NewCopyCommand(configLoader, clipboard.AtottoClipboard{}),
 	)
 
 	if *ls || len(os.Args) < 2 {

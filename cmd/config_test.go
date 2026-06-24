@@ -1,9 +1,9 @@
 package cmd_test
 
 import (
+	"errors"
 	"pvault/cmd"
 	"pvault/config"
-	"pvault/errors"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/test"
@@ -14,25 +14,27 @@ import (
 
 type ConfigTestSuite struct {
 	test.CommandSuite[*cmd.ConfigCommand]
-	Loader *config.MockLoader[config.Config]
+	ConfigLoader *config.MockLoader[config.Config]
 }
 
 func TestConfigCommandSuite(t *testing.T) {
 	s := ConfigTestSuite{
-		Loader: &config.MockLoader[config.Config]{},
+		ConfigLoader: &config.MockLoader[config.Config]{},
 	}
 
-	s.CommandSuite = test.NewCommandSuite(cmd.NewConfigCommand(s.Loader))
+	s.CommandSuite = test.NewCommandSuite(cmd.NewConfigCommand(s.ConfigLoader))
 	suite.Run(t, &s)
 }
 
 func (s *ConfigTestSuite) SetupTest() {
-	*s.Loader = config.MockLoader[config.Config]{}
+	*s.ConfigLoader = config.MockLoader[config.Config]{}
 }
+
+//=====================================
 
 func (s *ConfigTestSuite) TestRunFailErrorLoadingConfig() {
 	//-- arrange
-	s.Loader.Error = errors.New("")
+	s.ConfigLoader.Error = errors.New("")
 
 	//-- act
 	s.RunCommand()
@@ -52,8 +54,8 @@ func (s *ConfigTestSuite) TestRunValidConfigPrintsConfig() {
 		OutputPath: r.ASCII(15),
 	}
 
-	s.Loader.Name = NAME
-	s.Loader.Config = CONFIG
+	s.ConfigLoader.Name = NAME
+	s.ConfigLoader.Config = CONFIG
 
 	out := pipe.OpenStdout(5)
 	defer out.Close()

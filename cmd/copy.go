@@ -13,12 +13,15 @@ import (
 
 type CopyCommand struct {
 	command.FlagCommandBase
+	config.LoaderModule[config.Config]
+
 	clipboard clipboard.Clipboard
 }
 
-func NewCopyCommand(clipboard clipboard.Clipboard) *CopyCommand {
+func NewCopyCommand(loader config.Loader[config.Config], clipboard clipboard.Clipboard) *CopyCommand {
 	return &CopyCommand{
 		FlagCommandBase: command.NewFlagCommandBase("copy", "copy password/username of a record"),
+		LoaderModule:    config.NewLoaderModule(loader),
 		clipboard:       clipboard,
 	}
 }
@@ -31,6 +34,11 @@ func (cmd *CopyCommand) Initialize() error {
 		return errors.Chain(err, "clipboard unsupported")
 	}
 
+	err = cmd.LoadConfig()
+	if err != nil {
+		return errors.Chain(err, "error loading config")
+	}
+
 	return nil
 }
 
@@ -39,7 +47,7 @@ func (cmd CopyCommand) Run(args []string) error {
 	username := cmd.Flags.Bool("username", false, "copy username instead of password")
 	cmd.Flags.Parse(args)
 
-	v, err := vault.Open(config.Global.VaultPath)
+	v, err := vault.Open(cmd.Config.VaultPath)
 	if err != nil {
 		return errors.Chain(err, "error opening vault")
 	}

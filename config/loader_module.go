@@ -1,7 +1,5 @@
 package config
 
-import "pvault/errors"
-
 type LoaderModule[Config any] struct {
 	Config       Config
 	ConfigLoader Loader[Config]
@@ -17,9 +15,5 @@ func (cfg *LoaderModule[Config]) LoadConfig() error {
 	var err error
 
 	cfg.Config, err = cfg.ConfigLoader.Load()
-	if err != nil {
-		return errors.Chain(err, "error loading config")
-	}
-
-	return nil
+	return err
 }

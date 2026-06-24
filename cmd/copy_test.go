@@ -19,7 +19,8 @@ import (
 
 type CopyTestSuite struct {
 	test.CommandSuite[*cmd.CopyCommand]
-	Clipboard *clipboard.MockClipboard
+	ConfigLoader *config.MockLoader[config.Config]
+	Clipboard    *clipboard.MockClipboard
 
 	Vault    vault.Vault
 	Record   record.Record
@@ -28,19 +29,21 @@ type CopyTestSuite struct {
 
 func TestCopyCommandSuite(t *testing.T) {
 	s := CopyTestSuite{
-		Clipboard: clipboard.Mock(),
+		ConfigLoader: &config.MockLoader[config.Config]{},
+		Clipboard:    clipboard.Mock(),
 	}
 
-	s.CommandSuite = test.NewCommandSuite(cmd.NewCopyCommand(s.Clipboard))
+	s.CommandSuite = test.NewCommandSuite(cmd.NewCopyCommand(s.ConfigLoader, s.Clipboard))
 	suite.Run(t, &s)
 }
 
 func (s *CopyTestSuite) SetupTest() {
+	*s.ConfigLoader = config.MockLoader[config.Config]{
+		Config: config.Config{
+			VaultPath: file.NewPath(s.T(), "vault"),
+		},
+	}
 	*s.Clipboard = clipboard.MockClipboard{}
-
-	config.SetGlobal(config.Config{
-		VaultPath: file.NewPath(s.T(), "vault"),
-	})
 
 	rand := rand.New(0)
 	s.Record = record.NewFromName(rand.ASCII(15))
@@ -50,7 +53,7 @@ func (s *CopyTestSuite) SetupTest() {
 	s.Password = rand.ASCII(30)
 
 	var err error
-	s.Vault, err = vault.InitializeNew(config.Global.VaultPath)
+	s.Vault, err = vault.InitializeNew(s.ConfigLoader.Config.VaultPath)
 	s.Require().NoError(err)
 
 	err = s.Vault.SaveRecord(s.Record, s.Password)
@@ -70,9 +73,20 @@ func (s *CopyTestSuite) TestRunFailClipboardUnsupported() {
 	s.RequireResultFail("clipboard unsupported")
 }
 
+func (s *CopyTestSuite) TestRunFailErrorLoadingConfig() {
+	//-- arrange
+	s.ConfigLoader.Error = errors.New("")
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultFail("error loading config")
+}
+
 func (s *CopyTestSuite) TestRunFailInvalidVaultPath() {
 	//-- arrange
-	config.Global.VaultPath = "invalid"
+	s.ConfigLoader.Config.VaultPath = "invalid"
 
 	//-- act
 	s.RunCommand("-s", s.Record.Name)

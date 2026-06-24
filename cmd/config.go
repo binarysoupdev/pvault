@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"pvault/config"
+	"pvault/errors"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
@@ -24,7 +25,11 @@ func (cmd *ConfigCommand) Initialize() error {
 	_ = cmd.FlagCommandBase.Initialize()
 
 	err := cmd.LoadConfig()
-	return err
+	if err != nil {
+		return errors.Chain(err, "error loading config")
+	}
+
+	return nil
 }
 
 func (cmd ConfigCommand) Run(args []string) error {
