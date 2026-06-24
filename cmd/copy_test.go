@@ -44,6 +44,7 @@ func (s *CopyTestSuite) SetupTest() {
 
 	rand := rand.New(0)
 	s.Record = record.NewFromName(rand.ASCII(15))
+	s.Record.Username = rand.ASCII(10)
 	s.Record.Password = rand.ASCII(30)
 
 	s.Password = rand.ASCII(30)
@@ -168,4 +169,26 @@ func (s *CopyTestSuite) TestRunPassPasswordCopied() {
 	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")
 	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
 	s.Assert().Contains(io.ReadLine(), "[=] PASSWORD copied to clipboard")
+}
+
+func (s *CopyTestSuite) TestRunPassUsernameCopied() {
+	//-- arrange
+	io := pipe.OpenStdio(1, 4, false)
+	defer io.Close()
+
+	//-- act
+	io.Queue("PASSWORD: ", s.Password)
+	io.EndQueue()
+
+	s.RunCommand("-s", s.Record.Name, "-username")
+
+	//-- assert
+	s.RequireResultPass()
+
+	s.Assert().Equal(s.Record.Username, s.Clipboard.Data)
+
+	s.Assert().Contains(io.ReadLine(), s.Record.Name)
+	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")
+	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
+	s.Assert().Contains(io.ReadLine(), "[=] USERNAME copied to clipboard")
 }

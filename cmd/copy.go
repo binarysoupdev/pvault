@@ -39,6 +39,7 @@ func (cmd CopyCommand) Run(args []string) error {
 	}
 
 	search := flow.NewSearchFlow(cmd.Flags)
+	username := cmd.Flags.Bool("username", false, "copy username instead of password")
 	cmd.Flags.Parse(args)
 
 	v, err := vault.Open(config.Global.VaultPath)
@@ -60,12 +61,19 @@ func (cmd CopyCommand) Run(args []string) error {
 
 	style.BoldInfo.Printf("[=] Loaded Record: %s\n", r.ID.String())
 
-	err = cmd.clipboard.Write(r.Password)
+	if *username {
+		return cmd.copyToClipboard("USERNAME", r.Username)
+	} else {
+		return cmd.copyToClipboard("PASSWORD", r.Password)
+	}
+}
+
+func (cmd CopyCommand) copyToClipboard(field string, val string) error {
+	err := cmd.clipboard.Write(val)
 	if err != nil {
 		return errors.Chain(err, "error copying to clipboard")
 	}
 
-	style.Info.Println("[=] PASSWORD copied to clipboard")
-
+	style.Info.Printf("[=] %s copied to clipboard\n", field)
 	return nil
 }
