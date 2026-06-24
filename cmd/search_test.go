@@ -3,6 +3,7 @@ package cmd_test
 import (
 	"pvault/cmd"
 	"pvault/config"
+	"pvault/errors"
 	"pvault/vault"
 	"pvault/vault/record"
 	"testing"
@@ -16,31 +17,48 @@ import (
 
 type SearchTestSuite struct {
 	test.CommandSuite[*cmd.SearchCommand]
+	ConfigLoader *config.MockLoader[config.Config]
 }
 
 func TestSearchCommandSuite(t *testing.T) {
-	suite.Run(t, &SearchTestSuite{
-		CommandSuite: test.NewCommandSuite(cmd.NewSearchCommand()),
-	})
+	s := SearchTestSuite{
+		ConfigLoader: &config.MockLoader[config.Config]{},
+	}
+
+	s.CommandSuite = test.NewCommandSuite(cmd.NewSearchCommand(s.ConfigLoader))
+	suite.Run(t, &s)
 }
 
 func (s *SearchTestSuite) SetupTest() {
-	config.SetGlobal(config.Config{
-		VaultPath: file.NewPath(s.T(), "vault"),
-	})
+	*s.ConfigLoader = config.MockLoader[config.Config]{
+		Config: config.Config{
+			VaultPath: file.NewPath(s.T(), "vault"),
+		},
+	}
 
-	_, err := vault.InitializeNew(config.Global.VaultPath)
+	_, err := vault.InitializeNew(s.ConfigLoader.Config.VaultPath)
 	s.Require().NoError(err)
 }
 
 //=====================================
+
+func (s *SearchTestSuite) TestRunFailErrorLoadingConfig() {
+	//-- arrange
+	s.ConfigLoader.Error = errors.New("")
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultFail("error loading config")
+}
 
 func (s *SearchTestSuite) TestRunInvalidVaultPath() {
 	//-- arrange
 	rand := rand.New(0)
 	NAME := rand.ASCII(15)
 
-	config.Global.VaultPath = "invalid"
+	s.ConfigLoader.Config.VaultPath = "invalid"
 
 	//-- act
 	s.RunCommand("-s", NAME)
@@ -62,7 +80,7 @@ func (s *SearchTestSuite) TestRunValidDisplaySearchResults() {
 	rand := rand.New(0)
 	NAME := rand.ASCII(15)
 
-	v, err := vault.Open(config.Global.VaultPath)
+	v, err := vault.Open(s.ConfigLoader.Config.VaultPath)
 	s.Require().NoError(err)
 
 	err = v.SaveRecord(record.NewFromName(NAME), rand.ASCII(30))
