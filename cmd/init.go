@@ -38,7 +38,7 @@ func (cmd InitCommand) Run(_ []string) error {
 		return errors.Chain(err, "error initializing new vault")
 	}
 
-	style.BoldCreate.Printf("[+] New Vault Initialized: %s\n", config.Global.VaultPath)
+	style.BoldCreate.Printf("[+] New Vault Initialized: %s\n", cmd.Config.VaultPath)
 
 	return nil
 }

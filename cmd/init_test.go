@@ -74,5 +74,5 @@ func (s *InitTestSuite) TestRunValid() {
 
 	//-- assert
 	s.RequireResultPass()
-	s.Assert().Contains(out.ReadLine(), "[+] New Vault Initialized")
+	s.Assert().Contains(out.ReadLine(), "[+] New Vault Initialized: "+s.ConfigLoader.Config.VaultPath)
 }
