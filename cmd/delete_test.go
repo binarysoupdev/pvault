@@ -4,6 +4,7 @@ import (
 	"os"
 	"pvault/cmd"
 	"pvault/config"
+	"pvault/errors"
 	"pvault/vault"
 	"pvault/vault/record"
 	"testing"
@@ -17,26 +18,33 @@ import (
 
 type DeleteTestSuite struct {
 	test.CommandSuite[*cmd.DeleteCommand]
+	ConfigLoader *config.MockLoader[config.Config]
+
 	Vault  vault.Vault
 	Record record.Record
 }
 
 func TestDeleteCommandSuite(t *testing.T) {
-	suite.Run(t, &DeleteTestSuite{
-		CommandSuite: test.NewCommandSuite(cmd.NewDeleteCommand()),
-	})
+	s := DeleteTestSuite{
+		ConfigLoader: &config.MockLoader[config.Config]{},
+	}
+
+	s.CommandSuite = test.NewCommandSuite(cmd.NewDeleteCommand(s.ConfigLoader))
+	suite.Run(t, &s)
 }
 
 func (s *DeleteTestSuite) SetupTest() {
-	config.SetGlobal(config.Config{
-		VaultPath: file.NewPath(s.T(), "vault"),
-	})
+	*s.ConfigLoader = config.MockLoader[config.Config]{
+		Config: config.Config{
+			VaultPath: file.NewPath(s.T(), "vault"),
+		},
+	}
 
 	rand := rand.New(0)
 	s.Record = record.NewFromName(rand.ASCII(15))
 
 	var err error
-	s.Vault, err = vault.InitializeNew(config.Global.VaultPath)
+	s.Vault, err = vault.InitializeNew(s.ConfigLoader.Config.VaultPath)
 	s.Require().NoError(err)
 
 	err = s.Vault.SaveRecord(s.Record, rand.ASCII(30))
@@ -45,9 +53,20 @@ func (s *DeleteTestSuite) SetupTest() {
 
 //=====================================
 
+func (s *DeleteTestSuite) TestRunFailErrorLoadingConfig() {
+	//-- arrange
+	s.ConfigLoader.Error = errors.New("")
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultFail("error loading config")
+}
+
 func (s *DeleteTestSuite) TestRunInvalidVaultPath() {
 	//-- arrange
-	config.Global.VaultPath = "invalid"
+	s.ConfigLoader.Config.VaultPath = "invalid"
 
 	//-- act
 	s.RunCommand("-s", s.Record.Name)

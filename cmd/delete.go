@@ -12,19 +12,32 @@ import (
 
 type DeleteCommand struct {
 	command.FlagCommandBase
+	config.LoaderModule[config.Config]
 }
 
-func NewDeleteCommand() *DeleteCommand {
+func NewDeleteCommand(loader config.Loader[config.Config]) *DeleteCommand {
 	return &DeleteCommand{
 		FlagCommandBase: command.NewFlagCommandBase("delete", "delete a record from the vault"),
+		LoaderModule:    config.NewLoaderModule(loader),
 	}
+}
+
+func (cmd *DeleteCommand) Initialize() error {
+	_ = cmd.FlagCommandBase.Initialize()
+
+	err := cmd.LoadConfig()
+	if err != nil {
+		return errors.Chain(err, "error loading config")
+	}
+
+	return nil
 }
 
 func (cmd DeleteCommand) Run(args []string) error {
 	search := flow.NewSearchFlow(cmd.Flags)
 	cmd.Flags.Parse(args)
 
-	v, err := vault.Open(config.Global.VaultPath)
+	v, err := vault.Open(cmd.Config.VaultPath)
 	if err != nil {
 		return errors.Chain(err, "error opening vault")
 	}
