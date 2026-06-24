@@ -65,7 +65,7 @@ func (cmd CopyCommand) Run(args []string) error {
 		return errors.Chain(err, "error copying to clipboard")
 	}
 
-	style.Info.Printf("[=] PASSWORD copied to clipboard\n")
+	style.Info.Println("[=] PASSWORD copied to clipboard")
 
 	return nil
 }
