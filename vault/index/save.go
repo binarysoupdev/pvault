@@ -32,7 +32,7 @@ func (idx IndexMap) Save(path string) error {
 
 func (idx IndexMap) writeHeader(file *os.File) error {
 	header := make([]byte, 4)
-	binary.BigEndian.PutUint16(header, uint16(INDEX_VERSION))
+	binary.BigEndian.PutUint16(header, uint16(VERSION))
 	binary.BigEndian.PutUint16(header[2:], uint16(len(idx)))
 
 	_, err := file.Write(header)

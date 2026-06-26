@@ -19,7 +19,7 @@ func LoadIndex(path string) (IndexMap, error) {
 	header := raw[:4]
 
 	version := binary.BigEndian.Uint16(header)
-	if version > INDEX_VERSION {
+	if version > VERSION {
 		return idx, errors.Format("unsupported version \"%d\"", version)
 	}
 

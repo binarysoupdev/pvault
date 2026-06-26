@@ -7,6 +7,7 @@ import (
 	"pvault/vault/index"
 )
 
+const VERSION = index.VERSION
 const INDEX_FILE = "index.bin"
 
 type Vault struct {

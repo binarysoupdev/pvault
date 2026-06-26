@@ -71,7 +71,7 @@ func TestValidateOutputPathNotFound(t *testing.T) {
 	res := cfg.ValidateOutputPath()
 
 	//-- assert
-	require.ErrorContains(t, res, "error loading file stats")
+	require.ErrorContains(t, res, "path not found")
 }
 
 func TestValidateOutputPathNotDirectory(t *testing.T) {

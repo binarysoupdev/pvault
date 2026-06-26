@@ -27,7 +27,7 @@ func (c Config) ValidateVersion() error {
 func (c Config) ValidateOutputPath() error {
 	stat, err := os.Stat(c.OutputPath)
 	if err != nil {
-		return errors.Chain(err, "error loading file stats")
+		return errors.New("path not found/inaccessible")
 	}
 
 	if !stat.IsDir() {

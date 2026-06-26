@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"pvault/cmd/flow"
 	"pvault/config"
+	"pvault/vault"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
@@ -26,15 +27,36 @@ func (cmd ConfigCommand) Run(args []string) error {
 	if err != nil {
 		return err
 	}
-	style.BoldInfo.Printf("[=] Loaded from %s\n", cmd.ConfigPath)
+	style.BoldInfo.Printf("[=] Loaded from \"%s\"\n", cmd.ConfigPath)
 
-	style.Bold.Printf("Version [%d]", cmd.Config.Version)
-	fmt.Println(" (current version)")
+	fmt.Printf("%s (current version)\n", style.New(style.MAGENTA, style.BOLD).Sprintf("Version [%d]", cmd.Config.Version))
 	fmt.Println("---")
 
-	pathStyle := style.New(style.MAGENTA)
-	pathStyle.Printf("Vault Path: %s\n", cmd.Config.VaultPath)
-	pathStyle.Printf("Output Path: %s\n", cmd.Config.OutputPath)
+	cmd.validateVaultPath()
+	cmd.validateOutputPath()
 
 	return nil
+}
+
+func (cmd ConfigCommand) validateVaultPath() {
+	fmt.Printf("%s \"%s\" ", style.Bold.Sprint("Vault Path:"), cmd.Config.VaultPath)
+
+	_, err := vault.Open(cmd.Config.VaultPath)
+	if err != nil {
+		style.Error.Println("-> error opening vault (run \"config -init\" to repair)")
+	} else {
+		fmt.Printf("(vault@v%d)", vault.VERSION)
+		style.Success.Println(" -> verified!")
+	}
+}
+
+func (cmd ConfigCommand) validateOutputPath() {
+	fmt.Printf("%s \"%s\" ", style.Bold.Sprint("Output Path:"), cmd.Config.OutputPath)
+
+	err := cmd.Config.ValidateOutputPath()
+	if err != nil {
+		style.Error.Printf("-> %s\n", err.Error())
+	} else {
+		style.Success.Println("-> verified!")
+	}
 }
