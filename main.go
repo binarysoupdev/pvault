@@ -45,7 +45,7 @@ func main() {
 
 func configPath() string {
 	// check for ENV variable override
-	val := os.Getenv("CFG_PATH")
+	val := os.Getenv("CONFIG")
 	if val != "" {
 		return val
 	}
