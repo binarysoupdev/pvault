@@ -24,13 +24,7 @@ func NewDeleteCommand(loader config.Loader[config.Config]) *DeleteCommand {
 
 func (cmd *DeleteCommand) Initialize() error {
 	_ = cmd.FlagCommandBase.Initialize()
-
-	err := cmd.LoadConfig()
-	if err != nil {
-		return errors.Chain(err, "error loading config")
-	}
-
-	return nil
+	return flow.LoadConfig(&cmd.Loader)
 }
 
 func (cmd DeleteCommand) Run(args []string) error {

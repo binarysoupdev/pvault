@@ -23,13 +23,7 @@ func NewSearchCommand(loader config.Loader[config.Config]) *SearchCommand {
 
 func (cmd *SearchCommand) Initialize() error {
 	_ = cmd.FlagCommandBase.Initialize()
-
-	err := cmd.LoadConfig()
-	if err != nil {
-		return errors.Chain(err, "error loading config")
-	}
-
-	return nil
+	return flow.LoadConfig(&cmd.Loader)
 }
 
 func (cmd SearchCommand) Run(args []string) error {

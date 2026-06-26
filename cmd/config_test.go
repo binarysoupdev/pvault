@@ -1,6 +1,7 @@
 package cmd_test
 
 import (
+	"fmt"
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/data"
@@ -42,7 +43,7 @@ func (s *ConfigTestSuite) TestRunValidConfigPrintsConfig() {
 	rand := rand.New(0)
 
 	CONFIG := config.Config{
-		Version:    rand.ASCII(3),
+		Version:    config.VERSION,
 		VaultPath:  rand.ASCII(15),
 		OutputPath: rand.ASCII(15),
 	}
@@ -59,7 +60,7 @@ func (s *ConfigTestSuite) TestRunValidConfigPrintsConfig() {
 	s.RequireResultPass()
 
 	s.Assert().Contains(out.ReadLine(), "Loaded from "+s.ConfigLoader.ConfigPath)
-	s.Assert().Contains(out.ReadLine(), "Version: "+CONFIG.Version)
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Version %d", CONFIG.Version))
 	out.SkipLines(1)
 	s.Assert().Contains(out.ReadLine(), "Vault Path: "+CONFIG.VaultPath)
 	s.Assert().Contains(out.ReadLine(), "Output Path: "+CONFIG.OutputPath)

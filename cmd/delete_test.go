@@ -36,6 +36,7 @@ func TestDeleteCommandSuite(t *testing.T) {
 
 func (s *DeleteTestSuite) SetupTest() {
 	s.Config = config.Config{
+		Version:    config.VERSION,
 		VaultPath:  file.NewPath(s.T(), "vault"),
 		OutputPath: file.NewPath(s.T(), ""),
 	}

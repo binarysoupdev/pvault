@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"pvault/cmd/flow"
 	"pvault/config"
 	"pvault/errors"
 	"pvault/vault"
@@ -23,13 +24,7 @@ func NewInitCommand(loader config.Loader[config.Config]) *InitCommand {
 
 func (cmd *InitCommand) Initialize() error {
 	_ = cmd.FlagCommandBase.Initialize()
-
-	err := cmd.LoadConfig()
-	if err != nil {
-		return errors.Chain(err, "error loading config")
-	}
-
-	return nil
+	return flow.LoadConfig(&cmd.Loader)
 }
 
 func (cmd InitCommand) Run(_ []string) error {

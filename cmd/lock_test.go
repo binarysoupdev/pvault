@@ -36,6 +36,7 @@ func TestLockCommandSuite(t *testing.T) {
 
 func (s *LockTestSuite) SetupTest() {
 	s.Config = config.Config{
+		Version:    config.VERSION,
 		VaultPath:  file.NewPath(s.T(), "vault"),
 		OutputPath: file.NewPath(s.T(), ""),
 	}

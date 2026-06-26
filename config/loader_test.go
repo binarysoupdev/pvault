@@ -28,7 +28,7 @@ func TestLoadConfigLoadsConfig(t *testing.T) {
 	loader := config.NewLoader[config.Config](file.NewPath(t, rand.ASCII(10)))
 
 	CONFIG := config.Config{
-		Version:    rand.ASCII(3),
+		Version:    rand.Int(),
 		VaultPath:  rand.ASCII(15),
 		OutputPath: rand.ASCII(15),
 	}

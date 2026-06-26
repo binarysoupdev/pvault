@@ -27,13 +27,7 @@ func NewLockCommand(loader config.Loader[config.Config]) *LockCommand {
 
 func (cmd *LockCommand) Initialize() error {
 	_ = cmd.FlagCommandBase.Initialize()
-
-	err := cmd.LoadConfig()
-	if err != nil {
-		return errors.Chain(err, "error loading config")
-	}
-
-	return nil
+	return flow.LoadConfig(&cmd.Loader)
 }
 
 func (cmd LockCommand) Run(args []string) error {

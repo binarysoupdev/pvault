@@ -39,6 +39,7 @@ func (s *InitTestSuite) TestRunFailConfigNotFound() {
 func (s *InitTestSuite) TestRunInvalidVaultPath() {
 	//-- arrange
 	CONFIG := config.Config{
+		Version:   config.VERSION,
 		VaultPath: file.NewPath(s.T(), ""),
 	}
 	err := data.SaveJSON(CONFIG, s.ConfigLoader.ConfigPath)
@@ -54,6 +55,7 @@ func (s *InitTestSuite) TestRunInvalidVaultPath() {
 func (s *InitTestSuite) TestRunValid() {
 	//-- arrange
 	CONFIG := config.Config{
+		Version:   config.VERSION,
 		VaultPath: file.NewPath(s.T(), "vault"),
 	}
 	err := data.SaveJSON(CONFIG, s.ConfigLoader.ConfigPath)

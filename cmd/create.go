@@ -28,9 +28,9 @@ func NewCreateCommand(loader config.Loader[config.Config]) *CreateCommand {
 func (cmd *CreateCommand) Initialize() error {
 	_ = cmd.FlagCommandBase.Initialize()
 
-	err := cmd.LoadConfig()
+	err := flow.LoadConfig(&cmd.Loader)
 	if err != nil {
-		return errors.Chain(err, "error loading config")
+		return err
 	}
 
 	err = cmd.Config.ValidateOutputPath()

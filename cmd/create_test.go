@@ -34,6 +34,7 @@ func TestCreateCommandSuite(t *testing.T) {
 
 func (s *CreateTestSuite) SetupTest() {
 	s.Config = config.Config{
+		Version:    config.VERSION,
 		VaultPath:  file.NewPath(s.T(), "vault"),
 		OutputPath: file.NewPath(s.T(), ""),
 	}

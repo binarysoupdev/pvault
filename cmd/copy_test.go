@@ -20,8 +20,10 @@ import (
 
 type CopyTestSuite struct {
 	test.CommandSuite[*cmd.CopyCommand]
+	Clipboard *clipboard.MockClipboard
+
 	ConfigLoader config.Loader[config.Config]
-	Clipboard    *clipboard.MockClipboard
+	Config       config.Config
 
 	Vault    vault.Vault
 	Record   record.Record
@@ -41,10 +43,11 @@ func TestCopyCommandSuite(t *testing.T) {
 func (s *CopyTestSuite) SetupTest() {
 	*s.Clipboard = clipboard.MockClipboard{}
 
-	CONFIG := config.Config{
+	s.Config = config.Config{
+		Version:   config.VERSION,
 		VaultPath: file.NewPath(s.T(), "vault"),
 	}
-	err := data.SaveJSON(CONFIG, s.ConfigLoader.ConfigPath)
+	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
@@ -54,7 +57,7 @@ func (s *CopyTestSuite) SetupTest() {
 
 	s.Password = rand.ASCII(30)
 
-	s.Vault, err = vault.InitializeNew(CONFIG.VaultPath)
+	s.Vault, err = vault.InitializeNew(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	err = s.Vault.SaveRecord(s.Record, s.Password)
@@ -88,10 +91,8 @@ func (s *CopyTestSuite) TestRunFailErrorLoadingConfig() {
 
 func (s *CopyTestSuite) TestRunFailInvalidVaultPath() {
 	//-- arrange
-	CONFIG := config.Config{
-		VaultPath: "invalid",
-	}
-	err := data.SaveJSON(CONFIG, s.ConfigLoader.ConfigPath)
+	s.Config.VaultPath = "invalid"
+	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
 	//-- act

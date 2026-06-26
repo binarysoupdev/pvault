@@ -34,12 +34,7 @@ func (cmd *CopyCommand) Initialize() error {
 		return errors.Chain(err, "clipboard unsupported")
 	}
 
-	err = cmd.LoadConfig()
-	if err != nil {
-		return errors.Chain(err, "error loading config")
-	}
-
-	return nil
+	return flow.LoadConfig(&cmd.Loader)
 }
 
 func (cmd CopyCommand) Run(args []string) error {
