@@ -5,6 +5,7 @@ import (
 	"os"
 	"pvault/cmd"
 	"pvault/config"
+	"pvault/data"
 	"pvault/tools/clipboard"
 	"pvault/vault"
 	"pvault/vault/record"
@@ -19,7 +20,7 @@ import (
 
 type CopyTestSuite struct {
 	test.CommandSuite[*cmd.CopyCommand]
-	ConfigLoader *config.MockLoader[config.Config]
+	ConfigLoader config.Loader[config.Config]
 	Clipboard    *clipboard.MockClipboard
 
 	Vault    vault.Vault
@@ -29,7 +30,7 @@ type CopyTestSuite struct {
 
 func TestCopyCommandSuite(t *testing.T) {
 	s := CopyTestSuite{
-		ConfigLoader: &config.MockLoader[config.Config]{},
+		ConfigLoader: config.NewLoader[config.Config](file.NewPath(t, "config.json")),
 		Clipboard:    clipboard.Mock(),
 	}
 
@@ -38,12 +39,13 @@ func TestCopyCommandSuite(t *testing.T) {
 }
 
 func (s *CopyTestSuite) SetupTest() {
-	*s.ConfigLoader = config.MockLoader[config.Config]{
-		Config: config.Config{
-			VaultPath: file.NewPath(s.T(), "vault"),
-		},
-	}
 	*s.Clipboard = clipboard.MockClipboard{}
+
+	CONFIG := config.Config{
+		VaultPath: file.NewPath(s.T(), "vault"),
+	}
+	err := data.SaveJSON(CONFIG, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
 	rand := rand.New(0)
 	s.Record = record.NewFromName(rand.ASCII(15))
@@ -52,8 +54,7 @@ func (s *CopyTestSuite) SetupTest() {
 
 	s.Password = rand.ASCII(30)
 
-	var err error
-	s.Vault, err = vault.InitializeNew(s.ConfigLoader.Config.VaultPath)
+	s.Vault, err = vault.InitializeNew(CONFIG.VaultPath)
 	s.Require().NoError(err)
 
 	err = s.Vault.SaveRecord(s.Record, s.Password)
@@ -75,7 +76,8 @@ func (s *CopyTestSuite) TestRunFailClipboardUnsupported() {
 
 func (s *CopyTestSuite) TestRunFailErrorLoadingConfig() {
 	//-- arrange
-	s.ConfigLoader.Error = errors.New("")
+	err := os.Remove(s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
 	//-- act
 	s.RunCommand()
@@ -86,7 +88,11 @@ func (s *CopyTestSuite) TestRunFailErrorLoadingConfig() {
 
 func (s *CopyTestSuite) TestRunFailInvalidVaultPath() {
 	//-- arrange
-	s.ConfigLoader.Config.VaultPath = "invalid"
+	CONFIG := config.Config{
+		VaultPath: "invalid",
+	}
+	err := data.SaveJSON(CONFIG, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
 	//-- act
 	s.RunCommand("-s", s.Record.Name)

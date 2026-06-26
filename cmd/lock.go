@@ -15,13 +15,13 @@ import (
 
 type LockCommand struct {
 	command.FlagCommandBase
-	config.LoaderModule[config.Config]
+	config.Loader[config.Config]
 }
 
 func NewLockCommand(loader config.Loader[config.Config]) *LockCommand {
 	return &LockCommand{
 		FlagCommandBase: command.NewFlagCommandBase("lock", "lock a record in the vault"),
-		LoaderModule:    config.NewLoaderModule(loader),
+		Loader:          loader,
 	}
 }
 

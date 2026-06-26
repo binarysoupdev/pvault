@@ -11,13 +11,13 @@ import (
 
 type ConfigCommand struct {
 	command.FlagCommandBase
-	config.LoaderModule[config.Config]
+	config.Loader[config.Config]
 }
 
 func NewConfigCommand(loader config.Loader[config.Config]) *ConfigCommand {
 	return &ConfigCommand{
 		FlagCommandBase: command.NewFlagCommandBase("config", "display configuration"),
-		LoaderModule:    config.NewLoaderModule(loader),
+		Loader:          loader,
 	}
 }
 
@@ -33,7 +33,7 @@ func (cmd *ConfigCommand) Initialize() error {
 }
 
 func (cmd ConfigCommand) Run(args []string) error {
-	style.BoldInfo.Printf("[=] Loaded from %s\n", cmd.ConfigLoader.GetName())
+	style.BoldInfo.Printf("[=] Loaded from %s\n", cmd.ConfigPath)
 
 	style.Bold.Printf("Version: %s\n", cmd.Config.Version)
 	fmt.Println("---")

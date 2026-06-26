@@ -1,12 +1,13 @@
 package cmd_test
 
 import (
-	"errors"
 	"pvault/cmd"
 	"pvault/config"
+	"pvault/data"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/test"
+	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
 	"github.com/binarysoupdev/tinsel/rand"
 	"github.com/stretchr/testify/suite"
@@ -14,28 +15,21 @@ import (
 
 type ConfigTestSuite struct {
 	test.CommandSuite[*cmd.ConfigCommand]
-	ConfigLoader *config.MockLoader[config.Config]
+	ConfigLoader config.Loader[config.Config]
 }
 
 func TestConfigCommandSuite(t *testing.T) {
 	s := ConfigTestSuite{
-		ConfigLoader: &config.MockLoader[config.Config]{},
+		ConfigLoader: config.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewConfigCommand(s.ConfigLoader))
 	suite.Run(t, &s)
 }
 
-func (s *ConfigTestSuite) SetupTest() {
-	*s.ConfigLoader = config.MockLoader[config.Config]{}
-}
-
 //=====================================
 
-func (s *ConfigTestSuite) TestRunFailErrorLoadingConfig() {
-	//-- arrange
-	s.ConfigLoader.Error = errors.New("")
-
+func (s *ConfigTestSuite) TestRunFailConfigNotFound() {
 	//-- act
 	s.RunCommand()
 
@@ -45,17 +39,15 @@ func (s *ConfigTestSuite) TestRunFailErrorLoadingConfig() {
 
 func (s *ConfigTestSuite) TestRunValidConfigPrintsConfig() {
 	//-- arrange
-	r := rand.New(0)
+	rand := rand.New(0)
 
-	NAME := r.ASCII(15)
 	CONFIG := config.Config{
-		Version:    r.ASCII(3),
-		VaultPath:  r.ASCII(15),
-		OutputPath: r.ASCII(15),
+		Version:    rand.ASCII(3),
+		VaultPath:  rand.ASCII(15),
+		OutputPath: rand.ASCII(15),
 	}
-
-	s.ConfigLoader.Name = NAME
-	s.ConfigLoader.Config = CONFIG
+	err := data.SaveJSON(CONFIG, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(5)
 	defer out.Close()
@@ -66,7 +58,7 @@ func (s *ConfigTestSuite) TestRunValidConfigPrintsConfig() {
 	//-- assert
 	s.RequireResultPass()
 
-	s.Assert().Contains(out.ReadLine(), "Loaded from "+NAME)
+	s.Assert().Contains(out.ReadLine(), "Loaded from "+s.ConfigLoader.ConfigPath)
 	s.Assert().Contains(out.ReadLine(), "Version: "+CONFIG.Version)
 	out.SkipLines(1)
 	s.Assert().Contains(out.ReadLine(), "Vault Path: "+CONFIG.VaultPath)

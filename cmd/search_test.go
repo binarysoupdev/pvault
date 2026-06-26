@@ -1,9 +1,10 @@
 package cmd_test
 
 import (
+	"os"
 	"pvault/cmd"
 	"pvault/config"
-	"pvault/errors"
+	"pvault/data"
 	"pvault/vault"
 	"pvault/vault/record"
 	"testing"
@@ -17,12 +18,13 @@ import (
 
 type SearchTestSuite struct {
 	test.CommandSuite[*cmd.SearchCommand]
-	ConfigLoader *config.MockLoader[config.Config]
+	ConfigLoader config.Loader[config.Config]
+	Config       config.Config
 }
 
 func TestSearchCommandSuite(t *testing.T) {
 	s := SearchTestSuite{
-		ConfigLoader: &config.MockLoader[config.Config]{},
+		ConfigLoader: config.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewSearchCommand(s.ConfigLoader))
@@ -30,13 +32,14 @@ func TestSearchCommandSuite(t *testing.T) {
 }
 
 func (s *SearchTestSuite) SetupTest() {
-	*s.ConfigLoader = config.MockLoader[config.Config]{
-		Config: config.Config{
-			VaultPath: file.NewPath(s.T(), "vault"),
-		},
+	s.Config = config.Config{
+		VaultPath:  file.NewPath(s.T(), "vault"),
+		OutputPath: file.NewPath(s.T(), ""),
 	}
+	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
-	_, err := vault.InitializeNew(s.ConfigLoader.Config.VaultPath)
+	_, err = vault.InitializeNew(s.Config.VaultPath)
 	s.Require().NoError(err)
 }
 
@@ -44,7 +47,8 @@ func (s *SearchTestSuite) SetupTest() {
 
 func (s *SearchTestSuite) TestRunFailErrorLoadingConfig() {
 	//-- arrange
-	s.ConfigLoader.Error = errors.New("")
+	err := os.Remove(s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
 	//-- act
 	s.RunCommand()
@@ -58,7 +62,9 @@ func (s *SearchTestSuite) TestRunInvalidVaultPath() {
 	rand := rand.New(0)
 	NAME := rand.ASCII(15)
 
-	s.ConfigLoader.Config.VaultPath = "invalid"
+	s.Config.VaultPath = "invalid"
+	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
 	//-- act
 	s.RunCommand("-s", NAME)
@@ -80,7 +86,7 @@ func (s *SearchTestSuite) TestRunValidDisplaySearchResults() {
 	rand := rand.New(0)
 	NAME := rand.ASCII(15)
 
-	v, err := vault.Open(s.ConfigLoader.Config.VaultPath)
+	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	err = v.SaveRecord(record.NewFromName(NAME), rand.ASCII(30))

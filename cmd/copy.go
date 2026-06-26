@@ -13,7 +13,7 @@ import (
 
 type CopyCommand struct {
 	command.FlagCommandBase
-	config.LoaderModule[config.Config]
+	config.Loader[config.Config]
 
 	clipboard clipboard.Clipboard
 }
@@ -21,7 +21,7 @@ type CopyCommand struct {
 func NewCopyCommand(loader config.Loader[config.Config], clipboard clipboard.Clipboard) *CopyCommand {
 	return &CopyCommand{
 		FlagCommandBase: command.NewFlagCommandBase("copy", "copy password/username of a record"),
-		LoaderModule:    config.NewLoaderModule(loader),
+		Loader:          loader,
 		clipboard:       clipboard,
 	}
 }

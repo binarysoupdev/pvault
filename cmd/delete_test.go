@@ -4,7 +4,7 @@ import (
 	"os"
 	"pvault/cmd"
 	"pvault/config"
-	"pvault/errors"
+	"pvault/data"
 	"pvault/vault"
 	"pvault/vault/record"
 	"testing"
@@ -18,7 +18,8 @@ import (
 
 type DeleteTestSuite struct {
 	test.CommandSuite[*cmd.DeleteCommand]
-	ConfigLoader *config.MockLoader[config.Config]
+	ConfigLoader config.Loader[config.Config]
+	Config       config.Config
 
 	Vault  vault.Vault
 	Record record.Record
@@ -26,7 +27,7 @@ type DeleteTestSuite struct {
 
 func TestDeleteCommandSuite(t *testing.T) {
 	s := DeleteTestSuite{
-		ConfigLoader: &config.MockLoader[config.Config]{},
+		ConfigLoader: config.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewDeleteCommand(s.ConfigLoader))
@@ -34,17 +35,17 @@ func TestDeleteCommandSuite(t *testing.T) {
 }
 
 func (s *DeleteTestSuite) SetupTest() {
-	*s.ConfigLoader = config.MockLoader[config.Config]{
-		Config: config.Config{
-			VaultPath: file.NewPath(s.T(), "vault"),
-		},
+	s.Config = config.Config{
+		VaultPath:  file.NewPath(s.T(), "vault"),
+		OutputPath: file.NewPath(s.T(), ""),
 	}
+	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
 	rand := rand.New(0)
 	s.Record = record.NewFromName(rand.ASCII(15))
 
-	var err error
-	s.Vault, err = vault.InitializeNew(s.ConfigLoader.Config.VaultPath)
+	s.Vault, err = vault.InitializeNew(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	err = s.Vault.SaveRecord(s.Record, rand.ASCII(30))
@@ -55,7 +56,8 @@ func (s *DeleteTestSuite) SetupTest() {
 
 func (s *DeleteTestSuite) TestRunFailErrorLoadingConfig() {
 	//-- arrange
-	s.ConfigLoader.Error = errors.New("")
+	err := os.Remove(s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
 	//-- act
 	s.RunCommand()
@@ -66,7 +68,9 @@ func (s *DeleteTestSuite) TestRunFailErrorLoadingConfig() {
 
 func (s *DeleteTestSuite) TestRunInvalidVaultPath() {
 	//-- arrange
-	s.ConfigLoader.Config.VaultPath = "invalid"
+	s.Config.VaultPath = "invalid"
+	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
 	//-- act
 	s.RunCommand("-s", s.Record.Name)

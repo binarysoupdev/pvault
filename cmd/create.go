@@ -15,13 +15,13 @@ import (
 
 type CreateCommand struct {
 	command.FlagCommandBase
-	config.LoaderModule[config.Config]
+	config.Loader[config.Config]
 }
 
 func NewCreateCommand(loader config.Loader[config.Config]) *CreateCommand {
 	return &CreateCommand{
 		FlagCommandBase: command.NewFlagCommandBase("create", "create a new vault record"),
-		LoaderModule:    config.NewLoaderModule(loader),
+		Loader:          loader,
 	}
 }
 

@@ -1,10 +1,10 @@
 package cmd_test
 
 import (
+	"os"
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/data"
-	"pvault/errors"
 	"pvault/vault"
 	"pvault/vault/record"
 	"testing"
@@ -18,7 +18,8 @@ import (
 
 type LockTestSuite struct {
 	test.CommandSuite[*cmd.LockCommand]
-	ConfigLoader *config.MockLoader[config.Config]
+	ConfigLoader config.Loader[config.Config]
+	Config       config.Config
 
 	RecordPath string
 	Record     record.Record
@@ -26,7 +27,7 @@ type LockTestSuite struct {
 
 func TestLockCommandSuite(t *testing.T) {
 	s := LockTestSuite{
-		ConfigLoader: &config.MockLoader[config.Config]{},
+		ConfigLoader: config.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewLockCommand(s.ConfigLoader))
@@ -34,13 +35,14 @@ func TestLockCommandSuite(t *testing.T) {
 }
 
 func (s *LockTestSuite) SetupTest() {
-	*s.ConfigLoader = config.MockLoader[config.Config]{
-		Config: config.Config{
-			VaultPath: file.NewPath(s.T(), "vault"),
-		},
+	s.Config = config.Config{
+		VaultPath:  file.NewPath(s.T(), "vault"),
+		OutputPath: file.NewPath(s.T(), ""),
 	}
+	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
-	_, err := vault.InitializeNew(s.ConfigLoader.Config.VaultPath)
+	_, err = vault.InitializeNew(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
@@ -55,7 +57,8 @@ func (s *LockTestSuite) SetupTest() {
 
 func (s *LockTestSuite) TestRunFailErrorLoadingConfig() {
 	//-- arrange
-	s.ConfigLoader.Error = errors.New("")
+	err := os.Remove(s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
 	//-- act
 	s.RunCommand()
@@ -74,7 +77,9 @@ func (s *LockTestSuite) TestRunPathNotEmpty() {
 
 func (s *LockTestSuite) TestRunInvalidVaultPath() {
 	//-- arrange
-	s.ConfigLoader.Config.VaultPath = "invalid"
+	s.Config.VaultPath = "invalid"
+	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
 	//-- act
 	s.RunCommand("-path", s.RecordPath)
@@ -107,7 +112,7 @@ func (s *LockTestSuite) TestRunInvalidRecord() {
 
 func (s *LockTestSuite) TestRunInvalidNameAlreadyExists() {
 	//-- arrange
-	v, err := vault.Open(s.ConfigLoader.Config.VaultPath)
+	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
@@ -166,7 +171,7 @@ func (s *LockTestSuite) TestRunValidSaveNew() {
 	s.Assert().Contains(io.ReadLine(), "[-] "+s.RecordPath)
 	s.Assert().NoFileExists(s.RecordPath)
 
-	v, err := vault.Open(s.ConfigLoader.Config.VaultPath)
+	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	res, err := v.LoadRecord(s.Record.Name, PASSWORD)
@@ -182,7 +187,7 @@ func (s *LockTestSuite) TestRunValidUpdateExisting() {
 	rand := rand.New(0)
 	PASSWORD := rand.ASCII(30)
 
-	v, err := vault.Open(s.ConfigLoader.Config.VaultPath)
+	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	err = v.SaveRecord(OLD_RECORD, PASSWORD+"x")

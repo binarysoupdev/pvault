@@ -3,7 +3,7 @@ package cmd_test
 import (
 	"pvault/cmd"
 	"pvault/config"
-	"pvault/errors"
+	"pvault/data"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/test"
@@ -14,28 +14,21 @@ import (
 
 type InitTestSuite struct {
 	test.CommandSuite[*cmd.InitCommand]
-	ConfigLoader *config.MockLoader[config.Config]
+	ConfigLoader config.Loader[config.Config]
 }
 
 func TestInitCommandSuite(t *testing.T) {
 	s := InitTestSuite{
-		ConfigLoader: &config.MockLoader[config.Config]{},
+		ConfigLoader: config.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewInitCommand(s.ConfigLoader))
 	suite.Run(t, &s)
 }
 
-func (s *InitTestSuite) SetupTest() {
-	*s.ConfigLoader = config.MockLoader[config.Config]{}
-}
-
 //=====================================
 
-func (s *InitTestSuite) TestRunFailErrorLoadingConfig() {
-	//-- arrange
-	s.ConfigLoader.Error = errors.New("")
-
+func (s *InitTestSuite) TestRunFailConfigNotFound() {
 	//-- act
 	s.RunCommand()
 
@@ -45,11 +38,11 @@ func (s *InitTestSuite) TestRunFailErrorLoadingConfig() {
 
 func (s *InitTestSuite) TestRunInvalidVaultPath() {
 	//-- arrange
-	*s.ConfigLoader = config.MockLoader[config.Config]{
-		Config: config.Config{
-			VaultPath: file.NewPath(s.T(), ""),
-		},
+	CONFIG := config.Config{
+		VaultPath: file.NewPath(s.T(), ""),
 	}
+	err := data.SaveJSON(CONFIG, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
 	//-- act
 	s.RunCommand()
@@ -60,11 +53,11 @@ func (s *InitTestSuite) TestRunInvalidVaultPath() {
 
 func (s *InitTestSuite) TestRunValid() {
 	//-- arrange
-	*s.ConfigLoader = config.MockLoader[config.Config]{
-		Config: config.Config{
-			VaultPath: file.NewPath(s.T(), "vault"),
-		},
+	CONFIG := config.Config{
+		VaultPath: file.NewPath(s.T(), "vault"),
 	}
+	err := data.SaveJSON(CONFIG, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(1)
 	defer out.Close()

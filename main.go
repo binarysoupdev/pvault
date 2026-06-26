@@ -17,9 +17,7 @@ func main() {
 	ls := flag.Bool("ls", false, "list all commands")
 	flag.Parse()
 
-	configLoader := &config.JSONLoader[config.Config]{
-		Path: configPath(),
-	}
+	configLoader := config.NewLoader[config.Config](configPath())
 
 	runner := command.NewRunner(
 		cmd.NewConfigCommand(configLoader),

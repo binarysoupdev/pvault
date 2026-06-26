@@ -11,13 +11,13 @@ import (
 
 type SearchCommand struct {
 	command.FlagCommandBase
-	config.LoaderModule[config.Config]
+	config.Loader[config.Config]
 }
 
 func NewSearchCommand(loader config.Loader[config.Config]) *SearchCommand {
 	return &SearchCommand{
 		FlagCommandBase: command.NewFlagCommandBase("search", "search records in the vault"),
-		LoaderModule:    config.NewLoaderModule(loader),
+		Loader:          loader,
 	}
 }
 

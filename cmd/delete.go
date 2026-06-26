@@ -12,13 +12,13 @@ import (
 
 type DeleteCommand struct {
 	command.FlagCommandBase
-	config.LoaderModule[config.Config]
+	config.Loader[config.Config]
 }
 
 func NewDeleteCommand(loader config.Loader[config.Config]) *DeleteCommand {
 	return &DeleteCommand{
 		FlagCommandBase: command.NewFlagCommandBase("delete", "delete a record from the vault"),
-		LoaderModule:    config.NewLoaderModule(loader),
+		Loader:          loader,
 	}
 }
 

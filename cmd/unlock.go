@@ -14,13 +14,13 @@ import (
 
 type UnlockCommand struct {
 	command.FlagCommandBase
-	config.LoaderModule[config.Config]
+	config.Loader[config.Config]
 }
 
 func NewUnlockCommand(loader config.Loader[config.Config]) *UnlockCommand {
 	return &UnlockCommand{
 		FlagCommandBase: command.NewFlagCommandBase("unlock", "unlock a record from the vault"),
-		LoaderModule:    config.NewLoaderModule(loader),
+		Loader:          loader,
 	}
 }
 

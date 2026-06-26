@@ -6,7 +6,6 @@ import (
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/data"
-	"pvault/errors"
 	"pvault/vault"
 	"pvault/vault/record"
 	"testing"
@@ -20,7 +19,8 @@ import (
 
 type UnlockTestSuite struct {
 	test.CommandSuite[*cmd.UnlockCommand]
-	ConfigLoader *config.MockLoader[config.Config]
+	ConfigLoader config.Loader[config.Config]
+	Config       config.Config
 
 	Vault    vault.Vault
 	Record   record.Record
@@ -29,7 +29,7 @@ type UnlockTestSuite struct {
 
 func TestUnlockCommandSuite(t *testing.T) {
 	s := UnlockTestSuite{
-		ConfigLoader: &config.MockLoader[config.Config]{},
+		ConfigLoader: config.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewUnlockCommand(s.ConfigLoader))
@@ -37,19 +37,18 @@ func TestUnlockCommandSuite(t *testing.T) {
 }
 
 func (s *UnlockTestSuite) SetupTest() {
-	*s.ConfigLoader = config.MockLoader[config.Config]{
-		Config: config.Config{
-			VaultPath:  file.NewPath(s.T(), "vault"),
-			OutputPath: file.NewPath(s.T(), ""),
-		},
+	s.Config = config.Config{
+		VaultPath:  file.NewPath(s.T(), "vault"),
+		OutputPath: file.NewPath(s.T(), ""),
 	}
+	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
 	rand := rand.New(0)
 	s.Record = record.NewFromName(rand.ASCII(15))
 	s.Password = rand.ASCII(30)
 
-	var err error
-	s.Vault, err = vault.InitializeNew(s.ConfigLoader.Config.VaultPath)
+	s.Vault, err = vault.InitializeNew(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	err = s.Vault.SaveRecord(s.Record, s.Password)
@@ -60,7 +59,8 @@ func (s *UnlockTestSuite) SetupTest() {
 
 func (s *UnlockTestSuite) TestRunFailErrorLoadingConfig() {
 	//-- arrange
-	s.ConfigLoader.Error = errors.New("")
+	err := os.Remove(s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
 	//-- act
 	s.RunCommand()
@@ -71,7 +71,9 @@ func (s *UnlockTestSuite) TestRunFailErrorLoadingConfig() {
 
 func (s *UnlockTestSuite) TestRunFailConfigOutputPathInvalid() {
 	//-- arrange
-	s.ConfigLoader.Config.OutputPath = "invalid"
+	s.Config.OutputPath = "invalid"
+	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
 	//-- act
 	s.RunCommand()
@@ -82,7 +84,9 @@ func (s *UnlockTestSuite) TestRunFailConfigOutputPathInvalid() {
 
 func (s *UnlockTestSuite) TestRunInvalidVaultPath() {
 	//-- arrange
-	s.ConfigLoader.Config.VaultPath = "invalid"
+	s.Config.VaultPath = "invalid"
+	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
 	//-- act
 	s.RunCommand("-s", s.Record.Name)
@@ -140,7 +144,7 @@ func (s *UnlockTestSuite) TestRunIncorrectPassword() {
 
 func (s *UnlockTestSuite) TestRunValid() {
 	//-- arrange
-	OUTPUT_FILE := filepath.Join(s.ConfigLoader.Config.OutputPath, s.Record.ID.String()+".json")
+	OUTPUT_FILE := filepath.Join(s.Config.OutputPath, s.Record.ID.String()+".json")
 
 	io := pipe.OpenStdio(1, 4, false)
 	defer io.Close()

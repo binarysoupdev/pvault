@@ -11,13 +11,13 @@ import (
 
 type InitCommand struct {
 	command.FlagCommandBase
-	config.LoaderModule[config.Config]
+	config.Loader[config.Config]
 }
 
 func NewInitCommand(loader config.Loader[config.Config]) *InitCommand {
 	return &InitCommand{
 		FlagCommandBase: command.NewFlagCommandBase("init", "initialize a new vault"),
-		LoaderModule:    config.NewLoaderModule(loader),
+		Loader:          loader,
 	}
 }
 
