@@ -17,7 +17,7 @@ func LoadConfig(loader *config.Loader[config.Config]) error {
 	}
 
 	if loader.Config.NeedsUpgrading() {
-		return errors.Format("config version \"%d\" out-of-date (run \"config -upgrade\" to repair)", loader.Config.Version)
+		return errors.Format("config version [%d] out-of-date (run \"config -upgrade\" to repair)", loader.Config.Version)
 	}
 
 	return nil

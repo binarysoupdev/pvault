@@ -60,7 +60,7 @@ func (s *ConfigTestSuite) TestRunValidConfigPrintsConfig() {
 	s.RequireResultPass()
 
 	s.Assert().Contains(out.ReadLine(), "Loaded from "+s.ConfigLoader.ConfigPath)
-	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Version %d", CONFIG.Version))
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Version [%d]", CONFIG.Version))
 	out.SkipLines(1)
 	s.Assert().Contains(out.ReadLine(), "Vault Path: "+CONFIG.VaultPath)
 	s.Assert().Contains(out.ReadLine(), "Output Path: "+CONFIG.OutputPath)

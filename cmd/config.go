@@ -28,8 +28,8 @@ func (cmd ConfigCommand) Run(args []string) error {
 	}
 	style.BoldInfo.Printf("[=] Loaded from %s\n", cmd.ConfigPath)
 
-	style.Bold.Printf("Version %d ", cmd.Config.Version)
-	fmt.Println("(current version)")
+	style.Bold.Printf("Version [%d]", cmd.Config.Version)
+	fmt.Println(" (current version)")
 	fmt.Println("---")
 
 	pathStyle := style.New(style.MAGENTA)

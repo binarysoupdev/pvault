@@ -57,7 +57,7 @@ func TestLoadConfigOlderVersionReturnsError(t *testing.T) {
 	res := flow.LoadConfig(&loader)
 
 	//-- assert
-	require.ErrorContains(t, res, fmt.Sprintf("config version \"%d\" out-of-date", CONFIG.Version))
+	require.ErrorContains(t, res, fmt.Sprintf("config version [%d] out-of-date", CONFIG.Version))
 }
 
 func TestLoadConfigValidLoadsConfig(t *testing.T) {
