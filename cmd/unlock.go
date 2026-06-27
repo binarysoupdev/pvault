@@ -6,7 +6,6 @@ import (
 	"pvault/config"
 	"pvault/data"
 	"pvault/errors"
-	"pvault/vault"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
@@ -44,9 +43,9 @@ func (cmd UnlockCommand) Run(args []string) error {
 	search := flow.NewSearchFlow(cmd.Flags)
 	cmd.Flags.Parse(args)
 
-	v, err := vault.Open(cmd.Config.VaultPath)
+	v, err := flow.OpenVault(cmd.Config.VaultPath)
 	if err != nil {
-		return errors.Chain(err, "error opening vault")
+		return err
 	}
 
 	name, err := search.Select(v)

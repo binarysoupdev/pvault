@@ -6,7 +6,6 @@ import (
 	"pvault/config"
 	"pvault/data"
 	"pvault/errors"
-	"pvault/vault"
 	"pvault/vault/record"
 
 	"github.com/binarysoupdev/go-commando/command"
@@ -49,9 +48,9 @@ func (cmd CreateCommand) Run(args []string) error {
 		return errors.New("\"name\" cannot be empty")
 	}
 
-	v, err := vault.Open(cmd.Config.VaultPath)
+	v, err := flow.OpenVault(cmd.Config.VaultPath)
 	if err != nil {
-		return errors.Chain(err, "error opening vault")
+		return err
 	}
 
 	r := record.NewFromName(*name)
