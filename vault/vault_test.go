@@ -3,6 +3,7 @@ package vault_test
 import (
 	"path/filepath"
 	"pvault/vault"
+	"pvault/vault/index"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -32,7 +33,7 @@ func TestInitializeNewSuccess(t *testing.T) {
 	require.NoError(t, res)
 
 	assert.DirExists(t, PATH)
-	assert.FileExists(t, filepath.Join(PATH, vault.INDEX_FILE))
+	assert.FileExists(t, filepath.Join(PATH, index.INDEX_FILE))
 }
 
 func TestOpenLoadIndexError(t *testing.T) {

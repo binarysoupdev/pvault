@@ -1,9 +1,10 @@
 .vscode/*
 
+tmp/legacy/*
 tmp/vault/*
-!tmp/vault/.keep
 
 tmp/output/*
 !tmp/output/.keep
 
 pvault
+coverage.out

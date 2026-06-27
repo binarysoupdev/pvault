@@ -2,15 +2,15 @@ package index_test
 
 import (
 	"fmt"
+	"path/filepath"
 	"pvault/vault/index"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
-	"github.com/binarysoupdev/tinsel/rand"
 	"github.com/stretchr/testify/require"
 )
 
-func TestLoadIndexInvalidPath(t *testing.T) {
+func TestLoadIndexIndexFileMissing(t *testing.T) {
 	//-- arrange
 	PATH := file.NewPath(t, "")
 
@@ -18,21 +18,31 @@ func TestLoadIndexInvalidPath(t *testing.T) {
 	_, res := index.LoadIndex(PATH + "/invalid")
 
 	//-- assert
-	require.ErrorContains(t, res, "error reading index file")
+	require.ErrorContains(t, res, "index file not found")
 }
 
 func TestLoadIndexUnsupportedVersion(t *testing.T) {
 	//-- arrange
-	rand := rand.New(0)
 	VERSION := 2
 
-	file, PATH := file.Create(t, rand.ASCII(10))
+	file, PATH := file.Create(t, index.INDEX_FILE)
 	file.Write([]byte{0, byte(VERSION), 0, 0})
 	file.Close()
 
 	//-- act
-	_, res := index.LoadIndex(PATH)
+	_, res := index.LoadIndex(filepath.Dir(PATH))
 
 	//-- assert
 	require.ErrorContains(t, res, fmt.Sprintf("unsupported version \"%d\"", VERSION))
+}
+
+func TestLoadIndexLegacyFileVersionOutOfDate(t *testing.T) {
+	//-- arrange
+	PATH := file.CreateEmpty(t, index.LEGACY_INDEX_FILE)
+
+	//-- act
+	_, res := index.LoadIndex(filepath.Dir(PATH))
+
+	//-- assert
+	require.ErrorContains(t, res, fmt.Sprintf("version \"%d\" out-of-date", 0))
 }

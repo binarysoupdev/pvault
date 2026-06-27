@@ -14,7 +14,7 @@ import (
 func TestSaveLoadIndex(t *testing.T) {
 	//-- arrange
 	rand := rand.New(0)
-	PATH := file.NewPath(t, rand.ASCII(10))
+	PATH := file.NewPath(t, "")
 
 	idx := index.IndexMap{
 		rand.ASCII(10): uuid.New(),

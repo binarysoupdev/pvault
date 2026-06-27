@@ -3,13 +3,14 @@ package index
 import (
 	"encoding/binary"
 	"os"
+	"path/filepath"
 	"pvault/errors"
 
 	"github.com/google/uuid"
 )
 
 func (idx IndexMap) Save(path string) error {
-	file, err := os.Create(path)
+	file, err := os.Create(filepath.Join(path, INDEX_FILE))
 	if err != nil {
 		return errors.Chain(err, "error creating index file")
 	}

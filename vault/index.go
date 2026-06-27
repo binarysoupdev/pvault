@@ -12,7 +12,7 @@ func (v Vault) updateIndex(r record.Record) error {
 	}
 	v.Index[r.Name] = r.ID
 
-	err := v.Index.Save(v.IndexPath())
+	err := v.Index.Save(v.Path)
 	if err != nil {
 		return errors.Chain(err, "error saving index file")
 	}
@@ -23,7 +23,7 @@ func (v Vault) updateIndex(r record.Record) error {
 func (v Vault) deleteIndex(name string) error {
 	delete(v.Index, name)
 
-	err := v.Index.Save(v.IndexPath())
+	err := v.Index.Save(v.Path)
 	if err != nil {
 		return errors.Chain(err, "error saving index file")
 	}

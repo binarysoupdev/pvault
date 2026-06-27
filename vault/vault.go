@@ -2,13 +2,11 @@ package vault
 
 import (
 	"os"
-	"path/filepath"
 	"pvault/errors"
 	"pvault/vault/index"
 )
 
 const VERSION = index.VERSION
-const INDEX_FILE = "index.bin"
 
 type Vault struct {
 	Path  string
@@ -31,7 +29,7 @@ func InitializeNew(path string) (Vault, error) {
 		return v, errors.Chain(err, "error creating vault directory")
 	}
 
-	err = v.Index.Save(filepath.Join(path, INDEX_FILE))
+	err = v.Index.Save(path)
 	if err != nil {
 		return v, errors.Chain(err, "error saving index file")
 	}
@@ -45,7 +43,7 @@ func Open(path string) (Vault, error) {
 	}
 
 	var err error
-	v.Index, err = index.LoadIndex(v.IndexPath())
+	v.Index, err = index.LoadIndex(v.Path)
 	if err != nil {
 		return v, errors.Chain(err, "error loading index file")
 	}
