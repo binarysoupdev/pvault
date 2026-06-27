@@ -3,21 +3,24 @@ package cmd_test
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/data"
+	"pvault/vault"
+	"pvault/vault/index"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/test"
 	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
-	"github.com/binarysoupdev/tinsel/rand"
 	"github.com/stretchr/testify/suite"
 )
 
 type ConfigTestSuite struct {
 	test.CommandSuite[*cmd.ConfigCommand]
 	ConfigLoader config.Loader[config.Config]
+	Config       config.Config
 }
 
 func TestConfigCommandSuite(t *testing.T) {
@@ -29,51 +32,20 @@ func TestConfigCommandSuite(t *testing.T) {
 	suite.Run(t, &s)
 }
 
+func (s *ConfigTestSuite) SetupTest() {
+	s.Config = config.Config{
+		Version:    config.VERSION,
+		VaultPath:  file.NewPath(s.T(), "vault"),
+		OutputPath: file.NewPath(s.T(), ""),
+	}
+
+	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
+}
+
 //=====================================
 
-func (s *ConfigTestSuite) TestRunFailConfigNotFound() {
-	//-- act
-	s.RunCommand()
-
-	//-- assert
-	s.RequireResultFail("error loading config")
-}
-
-func (s *ConfigTestSuite) TestRunValidateConfigPrintsConfig() {
-	//-- arrange
-	rand := rand.New(0)
-
-	CONFIG := config.Config{
-		Version:    config.VERSION,
-		VaultPath:  rand.ASCII(15),
-		OutputPath: rand.ASCII(15),
-	}
-	err := data.SaveJSON(CONFIG, s.ConfigLoader.ConfigPath)
-	s.Require().NoError(err)
-
-	out := pipe.OpenStdout(5)
-	defer out.Close()
-
-	//-- act
-	s.RunCommand()
-
-	//-- assert
-	s.RequireResultPass()
-
-	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Loaded from \"%s\"", s.ConfigLoader.ConfigPath))
-	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Version [%d]", CONFIG.Version))
-	out.SkipLines(1)
-
-	//TODO: test prints for valid/invalid values
-	s.Assert().Contains(out.ReadLine(), CONFIG.VaultPath)
-	s.Assert().Contains(out.ReadLine(), CONFIG.OutputPath)
-}
-
 func (s *ConfigTestSuite) TestRunNewWithExistingConfigReturnsError() {
-	//-- arrange
-	err := data.SaveJSON(config.Config{}, s.ConfigLoader.ConfigPath)
-	s.Require().NoError(err)
-
 	//-- act
 	s.RunCommand("-new")
 
@@ -83,7 +55,8 @@ func (s *ConfigTestSuite) TestRunNewWithExistingConfigReturnsError() {
 
 func (s *ConfigTestSuite) TestRunNewCreatesNewConfig() {
 	//-- arrange
-	_ = os.Remove(s.ConfigLoader.ConfigPath)
+	err := os.Remove(s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(1)
 	defer out.Close()
@@ -98,13 +71,22 @@ func (s *ConfigTestSuite) TestRunNewCreatesNewConfig() {
 	s.Assert().Contains(out.ReadLine(), "[+] Created New Config: "+s.ConfigLoader.ConfigPath)
 }
 
+func (s *ConfigTestSuite) TestRunNotNewConfigNotFoundReturnsError() {
+	//-- arrange
+	err := os.Remove(s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultFail("error loading config")
+}
+
 func (s *ConfigTestSuite) TestRunInitVaultInvalidPathReturnsError() {
 	//-- arrange
-	CONFIG := config.Config{
-		Version:   config.VERSION,
-		VaultPath: file.NewPath(s.T(), ""),
-	}
-	err := data.SaveJSON(CONFIG, s.ConfigLoader.ConfigPath)
+	s.Config.VaultPath = file.NewPath(s.T(), "")
+	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
 	//-- act
@@ -116,13 +98,6 @@ func (s *ConfigTestSuite) TestRunInitVaultInvalidPathReturnsError() {
 
 func (s *ConfigTestSuite) TestRunInitVaultInitializesVault() {
 	//-- arrange
-	CONFIG := config.Config{
-		Version:   config.VERSION,
-		VaultPath: file.NewPath(s.T(), "vault"),
-	}
-	err := data.SaveJSON(CONFIG, s.ConfigLoader.ConfigPath)
-	s.Require().NoError(err)
-
 	out := pipe.OpenStdout(1)
 	defer out.Close()
 
@@ -131,5 +106,95 @@ func (s *ConfigTestSuite) TestRunInitVaultInitializesVault() {
 
 	//-- assert
 	s.RequireResultPass()
-	s.Assert().Contains(out.ReadLine(), "[+] New Vault Initialized: "+CONFIG.VaultPath)
+	s.Assert().Contains(out.ReadLine(), "[+] New Vault Initialized: "+s.Config.VaultPath)
+}
+
+func (s *ConfigTestSuite) TestRunValidateConfigWithInvalidVaultPrintsError() {
+	//-- arrange
+	s.Config.VaultPath = file.NewPath(s.T(), "")
+	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
+
+	out := pipe.OpenStdout(3)
+	defer out.Close()
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultPass()
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Loaded from \"%s\"", s.ConfigLoader.ConfigPath))
+
+	vaultPath := out.ReadLine()
+	s.Assert().Contains(vaultPath, s.Config.VaultPath)
+	s.Assert().Contains(vaultPath, "error opening vault")
+}
+
+func (s *ConfigTestSuite) TestRunValidateConfigWithOutOfDateVaultPrintsError() {
+	//-- arrange
+	PATH := file.CreateEmpty(s.T(), vault.LEGACY_INDEX_FILE)
+
+	s.Config.VaultPath = filepath.Dir(PATH)
+	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
+
+	out := pipe.OpenStdout(3)
+	defer out.Close()
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultPass()
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Loaded from \"%s\"", s.ConfigLoader.ConfigPath))
+
+	vaultPath := out.ReadLine()
+	s.Assert().Contains(vaultPath, s.Config.VaultPath)
+	s.Assert().Contains(vaultPath, "vault out-of-date")
+}
+
+func (s *ConfigTestSuite) TestRunValidateConfigInvalidOutputPathPrintsError() {
+	//-- arrange
+	s.Config.OutputPath = "invalid"
+	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
+
+	out := pipe.OpenStdout(3)
+	defer out.Close()
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultPass()
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Loaded from \"%s\"", s.ConfigLoader.ConfigPath))
+	out.SkipLines(1)
+
+	outputPath := out.ReadLine()
+	s.Assert().Contains(outputPath, s.Config.OutputPath)
+	s.Assert().Contains(outputPath, "path not found")
+}
+
+func (s *ConfigTestSuite) TestRunValidateConfigPrintsConfig() {
+	//-- arrange
+	_, err := vault.InitializeNew(s.Config.VaultPath)
+	s.Require().NoError(err)
+
+	out := pipe.OpenStdout(3)
+	defer out.Close()
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultPass()
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Loaded from \"%s\"", s.ConfigLoader.ConfigPath))
+
+	vaultPath := out.ReadLine()
+	s.Assert().Contains(vaultPath, s.Config.VaultPath)
+	s.Assert().Contains(vaultPath, fmt.Sprintf("verified (@v%d)", index.CURRENT_VERSION))
+
+	outputPath := out.ReadLine()
+	s.Assert().Contains(outputPath, s.Config.OutputPath)
+	s.Assert().Contains(outputPath, "verified")
 }
