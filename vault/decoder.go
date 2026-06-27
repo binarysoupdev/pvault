@@ -16,19 +16,15 @@ type Decoder interface {
 	Decode(path string) (index.IndexMap, error)
 }
 
-func selectDecoder(path string) (Decoder, error) {
-	// first try current format
-	indexPath := filepath.Join(path, INDEX_FILE)
-
-	_, err := os.Stat(indexPath)
+func (v Vault) selectDecoder(path string) (Decoder, error) {
+	// first try modern format
+	_, err := os.Stat(v.IndexPath())
 	if err == nil {
-		return selectCurrentDecoder(indexPath)
+		return v.selectDecoderFromHeader()
 	}
 
 	// else try legacy format
-	legacyPath := filepath.Join(path, LEGACY_INDEX_FILE)
-
-	_, err = os.Stat(legacyPath)
+	_, err = os.Stat(filepath.Join(path, LEGACY_INDEX_FILE))
 	if err == nil {
 		return legacy.DecoderV0{}, nil
 	}
@@ -36,21 +32,21 @@ func selectDecoder(path string) (Decoder, error) {
 	return nil, errors.New("index file not found")
 }
 
-func selectCurrentDecoder(path string) (Decoder, error) {
-	raw := make([]byte, 2)
+func (v Vault) selectDecoderFromHeader() (Decoder, error) {
+	header := make([]byte, 2)
 
-	file, err := os.Open(path)
+	file, err := os.Open(v.IndexPath())
 	if err != nil {
 		return nil, errors.Chain(err, "error opening index file")
 	}
 	defer file.Close()
 
-	_, err = file.Read(raw)
+	_, err = file.Read(header)
 	if err != nil {
-		return nil, errors.Chain(err, "error reading version from header")
+		return nil, errors.Chain(err, "error reading version header")
 	}
+	version := binary.BigEndian.Uint16(header)
 
-	version := binary.BigEndian.Uint16(raw[:2])
 	switch version {
 	case 1:
 		return index.Codec{}, nil

@@ -7,8 +7,9 @@ import (
 )
 
 type Vault struct {
-	Path  string
-	Index index.IndexMap
+	Version int
+	Path    string
+	Index   index.IndexMap
 }
 
 func InitializeNew(path string) (Vault, error) {
@@ -37,15 +38,16 @@ func InitializeNew(path string) (Vault, error) {
 
 func Open(path string) (Vault, error) {
 	v := Vault{
-		Path: path,
+		Version: index.CURRENT_VERSION,
+		Path:    path,
 	}
 
-	decoder, err := selectDecoder(v.Path)
+	decoder, err := v.selectDecoder(v.Path)
 	if err != nil {
 		return Vault{}, err
 	}
 
-	if decoder.Version() < index.CURRENT_VERSION {
+	if decoder.Version() < v.Version {
 		return Vault{}, newOutOfDateError(decoder.Version())
 	}
 
