@@ -38,7 +38,7 @@ func (s *ConfigTestSuite) TestRunFailConfigNotFound() {
 	s.RequireResultFail("error loading config")
 }
 
-func (s *ConfigTestSuite) TestRunValidConfigPrintsConfig() {
+func (s *ConfigTestSuite) TestRunValidateConfigPrintsConfig() {
 	//-- arrange
 	rand := rand.New(0)
 
@@ -66,4 +66,40 @@ func (s *ConfigTestSuite) TestRunValidConfigPrintsConfig() {
 	//TODO: test prints for valid/invalid values
 	s.Assert().Contains(out.ReadLine(), CONFIG.VaultPath)
 	s.Assert().Contains(out.ReadLine(), CONFIG.OutputPath)
+}
+
+func (s *ConfigTestSuite) TestRunInitVaultInvalidPathReturnsError() {
+	//-- arrange
+	CONFIG := config.Config{
+		Version:   config.VERSION,
+		VaultPath: file.NewPath(s.T(), ""),
+	}
+	err := data.SaveJSON(CONFIG, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
+
+	//-- act
+	s.RunCommand("-init")
+
+	//-- assert
+	s.RequireResultFail("error initializing new vault")
+}
+
+func (s *ConfigTestSuite) TestRunInitVaultInitializesVault() {
+	//-- arrange
+	CONFIG := config.Config{
+		Version:   config.VERSION,
+		VaultPath: file.NewPath(s.T(), "vault"),
+	}
+	err := data.SaveJSON(CONFIG, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
+
+	out := pipe.OpenStdout(1)
+	defer out.Close()
+
+	//-- act
+	s.RunCommand("-init")
+
+	//-- assert
+	s.RequireResultPass()
+	s.Assert().Contains(out.ReadLine(), "[+] New Vault Initialized: "+s.ConfigLoader.Config.VaultPath)
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"pvault/cmd/flow"
 	"pvault/config"
+	"pvault/errors"
 	"pvault/vault"
 
 	"github.com/binarysoupdev/go-commando/command"
@@ -23,10 +24,22 @@ func NewConfigCommand(loader config.Loader[config.Config]) *ConfigCommand {
 }
 
 func (cmd ConfigCommand) Run(args []string) error {
+	init := cmd.Flags.Bool("init", false, "initialize the vault")
+	cmd.Flags.Parse(args)
+
 	err := flow.LoadConfig(&cmd.Loader)
 	if err != nil {
 		return err
 	}
+
+	if *init {
+		return cmd.initializeVault()
+	} else {
+		return cmd.validate()
+	}
+}
+
+func (cmd ConfigCommand) validate() error {
 	style.BoldInfo.Printf("[=] Loaded from \"%s\"\n", cmd.ConfigPath)
 
 	fmt.Printf("%s (current version)\n", style.New(style.MAGENTA, style.BOLD).Sprintf("Version [%d]", cmd.Config.Version))
@@ -34,7 +47,6 @@ func (cmd ConfigCommand) Run(args []string) error {
 
 	cmd.validateVaultPath()
 	cmd.validateOutputPath()
-
 	return nil
 }
 
@@ -59,4 +71,14 @@ func (cmd ConfigCommand) validateOutputPath() {
 	} else {
 		style.Success.Println("-> verified!")
 	}
+}
+
+func (cmd ConfigCommand) initializeVault() error {
+	_, err := vault.InitializeNew(cmd.Config.VaultPath)
+	if err != nil {
+		return errors.Chain(err, "error initializing new vault")
+	}
+
+	style.BoldCreate.Printf("[+] New Vault Initialized: %s\n", cmd.Config.VaultPath)
+	return nil
 }

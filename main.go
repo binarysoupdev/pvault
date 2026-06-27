@@ -21,7 +21,6 @@ func main() {
 
 	runner := command.NewRunner(
 		cmd.NewConfigCommand(configLoader),
-		cmd.NewInitCommand(configLoader),
 		cmd.NewCreateCommand(configLoader),
 		cmd.NewLockCommand(configLoader),
 		cmd.NewUnlockCommand(configLoader),
