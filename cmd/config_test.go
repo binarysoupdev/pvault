@@ -2,6 +2,7 @@ package cmd_test
 
 import (
 	"fmt"
+	"os"
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/data"
@@ -68,6 +69,35 @@ func (s *ConfigTestSuite) TestRunValidateConfigPrintsConfig() {
 	s.Assert().Contains(out.ReadLine(), CONFIG.OutputPath)
 }
 
+func (s *ConfigTestSuite) TestRunNewWithExistingConfigReturnsError() {
+	//-- arrange
+	err := data.SaveJSON(config.Config{}, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
+
+	//-- act
+	s.RunCommand("-new")
+
+	//-- assert
+	s.RequireResultFail(fmt.Sprintf("config file \"%s\" already exists", s.ConfigLoader.ConfigPath))
+}
+
+func (s *ConfigTestSuite) TestRunNewCreatesNewConfig() {
+	//-- arrange
+	_ = os.Remove(s.ConfigLoader.ConfigPath)
+
+	out := pipe.OpenStdout(1)
+	defer out.Close()
+
+	//-- act
+	s.RunCommand("-new")
+
+	//-- assert
+	s.RequireResultPass()
+
+	s.Assert().FileExists(s.ConfigLoader.ConfigPath)
+	s.Assert().Contains(out.ReadLine(), "[+] Created New Config: "+s.ConfigLoader.ConfigPath)
+}
+
 func (s *ConfigTestSuite) TestRunInitVaultInvalidPathReturnsError() {
 	//-- arrange
 	CONFIG := config.Config{
@@ -101,5 +131,5 @@ func (s *ConfigTestSuite) TestRunInitVaultInitializesVault() {
 
 	//-- assert
 	s.RequireResultPass()
-	s.Assert().Contains(out.ReadLine(), "[+] New Vault Initialized: "+s.ConfigLoader.Config.VaultPath)
+	s.Assert().Contains(out.ReadLine(), "[+] New Vault Initialized: "+CONFIG.VaultPath)
 }
