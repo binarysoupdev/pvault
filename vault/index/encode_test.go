@@ -11,28 +11,28 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSaveLoadIndex(t *testing.T) {
+func TestEncodeDecodeIndex(t *testing.T) {
 	//-- arrange
 	rand := rand.New(0)
-	PATH := file.NewPath(t, "")
+	PATH := file.NewPath(t, rand.ASCII(10))
 
-	idx := index.IndexMap{
+	INDEX := index.IndexMap{
 		rand.ASCII(10): uuid.New(),
 		rand.ASCII(15): uuid.New(),
 		rand.ASCII(20): uuid.New(),
 	}
 
 	//-- act
-	err := idx.Save(PATH)
+	err := index.Codec{}.Encode(PATH, INDEX)
 	require.NoError(t, err)
 
-	res, err := index.LoadIndex(PATH)
+	res, err := index.Codec{}.Decode(PATH)
 	require.NoError(t, err)
 
 	//-- assert
-	require.Len(t, res, len(idx))
+	require.Len(t, res, len(INDEX))
 
-	for key, val := range idx {
+	for key, val := range INDEX {
 		assert.Contains(t, res, key)
 		assert.Equal(t, val, res[key])
 	}

@@ -9,6 +9,7 @@ import (
 	"pvault/data"
 	"pvault/errors"
 	"pvault/vault"
+	"pvault/vault/index"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
@@ -105,7 +106,7 @@ func (cmd ConfigCommand) validateVaultPath() {
 	if err != nil {
 		style.Error.Println("-> error opening vault (run \"config -init\" to repair)")
 	} else {
-		fmt.Printf("(vault@v%d)", vault.VERSION)
+		fmt.Printf("(vault@v%d)", index.CURRENT_VERSION)
 		style.Success.Println(" -> verified!")
 	}
 }

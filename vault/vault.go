@@ -6,8 +6,6 @@ import (
 	"pvault/vault/index"
 )
 
-const VERSION = index.VERSION
-
 type Vault struct {
 	Path  string
 	Index index.IndexMap
@@ -29,7 +27,7 @@ func InitializeNew(path string) (Vault, error) {
 		return v, errors.Chain(err, "error creating vault directory")
 	}
 
-	err = v.Index.Save(path)
+	err = index.Codec{}.Encode(v.IndexPath(), v.Index)
 	if err != nil {
 		return v, errors.Chain(err, "error saving index file")
 	}
@@ -42,10 +40,18 @@ func Open(path string) (Vault, error) {
 		Path: path,
 	}
 
-	var err error
-	v.Index, err = index.LoadIndex(v.Path)
+	decoder, err := selectDecoder(v.Path)
 	if err != nil {
-		return v, errors.Chain(err, "error loading index file")
+		return Vault{}, err
+	}
+
+	if decoder.Version() < index.CURRENT_VERSION {
+		return Vault{}, newOutOfDateError(decoder.Version())
+	}
+
+	v.Index, err = decoder.Decode(v.IndexPath())
+	if err != nil {
+		return v, errors.Chain(err, "error parsing index file")
 	}
 
 	return v, nil

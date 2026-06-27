@@ -1,6 +1,7 @@
 package vault_test
 
 import (
+	"fmt"
 	"path/filepath"
 	"pvault/vault"
 	"pvault/vault/index"
@@ -11,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestInitializeNewDirectoryExists(t *testing.T) {
+func TestInitializeNewDirectoryExistsReturnsError(t *testing.T) {
 	//-- arrange
 	PATH := file.NewPath(t, "")
 
@@ -22,7 +23,7 @@ func TestInitializeNewDirectoryExists(t *testing.T) {
 	require.ErrorContains(t, res, "vault path already exists")
 }
 
-func TestInitializeNewSuccess(t *testing.T) {
+func TestInitializeNewCreatesDirectoryAndIndexFile(t *testing.T) {
 	//-- arrange
 	PATH := file.NewPath(t, "vault")
 
@@ -33,21 +34,47 @@ func TestInitializeNewSuccess(t *testing.T) {
 	require.NoError(t, res)
 
 	assert.DirExists(t, PATH)
-	assert.FileExists(t, filepath.Join(PATH, index.INDEX_FILE))
+	assert.FileExists(t, filepath.Join(PATH, vault.INDEX_FILE))
 }
 
-func TestOpenLoadIndexError(t *testing.T) {
+func TestOpenIndexFileMissingReturnsError(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "vault")
+	PATH := file.NewPath(t, "")
 
 	//-- act
 	_, res := vault.Open(PATH)
 
 	//-- assert
-	require.ErrorContains(t, res, "error loading index file")
+	require.ErrorContains(t, res, "index file not found")
 }
 
-func TestOpenSuccess(t *testing.T) {
+func TestOpenUnsupportedVersionReturnsError(t *testing.T) {
+	//-- arrange
+	VERSION := index.CURRENT_VERSION + 1
+
+	file, PATH := file.Create(t, vault.INDEX_FILE)
+	file.Write([]byte{0, byte(VERSION), 0, 0})
+	file.Close()
+
+	//-- act
+	_, res := vault.Open(filepath.Dir(PATH))
+
+	//-- assert
+	require.ErrorContains(t, res, fmt.Sprintf("unsupported version \"%d\"", VERSION))
+}
+
+func TestOpenLegacyFileVersionOutOfDateReturnsError(t *testing.T) {
+	//-- arrange
+	PATH := file.CreateEmpty(t, vault.LEGACY_INDEX_FILE)
+
+	//-- act
+	_, res := vault.Open(filepath.Dir(PATH))
+
+	//-- assert
+	require.ErrorContains(t, res, fmt.Sprintf("version \"%d\" out-of-date", 0))
+}
+
+func TestOpenSetsPathAndLoadsIndex(t *testing.T) {
 	//-- arrange
 	PATH := file.NewPath(t, "vault")
 

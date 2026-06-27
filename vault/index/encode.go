@@ -3,26 +3,25 @@ package index
 import (
 	"encoding/binary"
 	"os"
-	"path/filepath"
 	"pvault/errors"
 
 	"github.com/google/uuid"
 )
 
-func (idx IndexMap) Save(path string) error {
-	file, err := os.Create(filepath.Join(path, INDEX_FILE))
+func (c Codec) Encode(path string, idx IndexMap) error {
+	file, err := os.Create(path)
 	if err != nil {
 		return errors.Chain(err, "error creating index file")
 	}
 	defer file.Close()
 
-	err = idx.writeHeader(file)
+	err = c.writeHeader(file, len(idx))
 	if err != nil {
 		return errors.Chain(err, "error writing header")
 	}
 
 	for name, id := range idx {
-		err = idx.writeEntry(file, name, id)
+		err = c.writeEntry(file, name, id)
 		if err != nil {
 			return errors.Chain(err, "error writing entry")
 		}
@@ -31,16 +30,16 @@ func (idx IndexMap) Save(path string) error {
 	return nil
 }
 
-func (idx IndexMap) writeHeader(file *os.File) error {
+func (Codec) writeHeader(file *os.File, numRecords int) error {
 	header := make([]byte, 4)
-	binary.BigEndian.PutUint16(header, uint16(VERSION))
-	binary.BigEndian.PutUint16(header[2:], uint16(len(idx)))
+	binary.BigEndian.PutUint16(header, uint16(CURRENT_VERSION))
+	binary.BigEndian.PutUint16(header[2:], uint16(numRecords))
 
 	_, err := file.Write(header)
 	return err
 }
 
-func (IndexMap) writeEntry(file *os.File, name string, id uuid.UUID) error {
+func (Codec) writeEntry(file *os.File, name string, id uuid.UUID) error {
 	entry := make([]byte, 2+16+len(name))
 
 	binary.BigEndian.PutUint16(entry, 16+uint16(len(name)))

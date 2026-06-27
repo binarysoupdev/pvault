@@ -6,6 +6,8 @@ import (
 	"github.com/google/uuid"
 )
 
+type IndexMap map[string]uuid.UUID
+
 func (idx IndexMap) FindName(id uuid.UUID) (string, bool) {
 	for name, val := range idx {
 		if val == id {
