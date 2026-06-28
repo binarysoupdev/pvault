@@ -99,6 +99,7 @@ func (cmd ConfigCommand) upgradeVault() error {
 	if !v.IsOutOfDate() {
 		return errors.New("vault is up-to-date")
 	}
+	oldVersion := v.Version()
 
 	backup := fmt.Sprintf("version_%d", v.Version())
 	err = v.Backup(backup)
@@ -107,6 +108,13 @@ func (cmd ConfigCommand) upgradeVault() error {
 	}
 
 	style.BoldCreate.Printf("[+] Created Backup: %s\n", backup)
+
+	err = v.Upgrade()
+	if err != nil {
+		return errors.Chain(err, "error upgrading vault")
+	}
+
+	style.BoldCreate.Printf("[+] Vault Upgraded (@v%d -> @v%d)\n", oldVersion, v.Version())
 	return nil
 }
 
