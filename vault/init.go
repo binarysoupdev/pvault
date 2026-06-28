@@ -22,10 +22,10 @@ func InitializeNew(path string) (Vault, error) {
 	}
 
 	v := Vault{
-		Path:     path,
-		Index:    index.IndexMap{},
-		Database: data.NewDatabaseV2(filepath.Join(path, INDEX_FILE)),
+		Path:  path,
+		Index: index.IndexMap{},
 	}
+	v.Database = v.NewCurrentDatabase()
 
 	err = v.Database.SaveIndex(v.Index)
 	if err != nil {
@@ -33,4 +33,8 @@ func InitializeNew(path string) (Vault, error) {
 	}
 
 	return v, nil
+}
+
+func (v Vault) NewCurrentDatabase() data.DatabaseV2 {
+	return data.NewDatabaseV2(filepath.Join(v.Path, INDEX_FILE))
 }

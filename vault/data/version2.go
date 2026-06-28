@@ -23,8 +23,8 @@ func NewDatabaseV2(path string) DatabaseV2 {
 	}
 }
 
-func (DatabaseV2) Upgrade(idx index.IndexMap, target Database) error {
-	return errors.New("not supported")
+func (DatabaseV2) Upgrade() error {
+	return nil
 }
 
 func (db DatabaseV2) SaveIndex(idx index.IndexMap) error {

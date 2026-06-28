@@ -2,7 +2,6 @@ package legacy
 
 import (
 	"errors"
-	"pvault/vault/data"
 	"pvault/vault/index"
 )
 
@@ -21,7 +20,7 @@ func (DatabaseV1) Version() uint16 {
 }
 
 func (DatabaseV1) SaveIndex(idx index.IndexMap) error {
-	return errors.New("not supported")
+	return errors.New("save index not supported")
 }
 
 func (DatabaseV1) LoadIndex() (index.IndexMap, error) {
@@ -29,7 +28,7 @@ func (DatabaseV1) LoadIndex() (index.IndexMap, error) {
 	return index.IndexMap{}, nil
 }
 
-func (DatabaseV1) Upgrade(idx index.IndexMap, target data.Database) error {
+func (DatabaseV1) Upgrade() error {
 	// TODO: implement
 	return nil
 }

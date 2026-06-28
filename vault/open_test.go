@@ -39,33 +39,39 @@ func TestOpenUnsupportedVersionReturnsError(t *testing.T) {
 	require.ErrorContains(t, res, fmt.Sprintf("unsupported version \"%d\"", VERSION))
 }
 
-func TestOpenLegacyFileLoadsLegacyDecoder(t *testing.T) {
+func TestOpenLegacyFileLoadsCorrectDecoder(t *testing.T) {
 	//-- arrange
 	PATH := file.CreateEmpty(t, vault.LEGACY_INDEX_FILE)
+	VAULT_PATH := filepath.Dir(PATH)
 
 	//-- act
-	v, err := vault.Open(filepath.Dir(PATH))
+	v, err := vault.Open(VAULT_PATH)
 
 	//-- assert
 	require.NoError(t, err)
+
+	assert.Equal(t, VAULT_PATH, v.Path)
+	assert.NotNil(t, v.Index)
 	assert.IsType(t, legacy.DatabaseV1{}, v.Database)
 }
 
-func TestOpenNewVaultLoadsCurrentDecoder(t *testing.T) {
+func TestOpenModernFileLoadsCorrectDecoder(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "vault")
+	DATABASE := data.DatabaseV2{}
 
-	_, err := vault.InitializeNew(PATH)
-	require.NoError(t, err)
+	file, PATH := file.Create(t, vault.INDEX_FILE)
+	file.Write([]byte{0, byte(DATABASE.Version()), 0, 0})
+	file.Close()
+
+	VAULT_PATH := filepath.Dir(PATH)
 
 	//-- act
-	v, err := vault.Open(PATH)
+	v, err := vault.Open(VAULT_PATH)
 
 	//-- assert
 	require.NoError(t, err)
 
-	assert.Equal(t, PATH, v.Path)
-	assert.Equal(t, vault.CURRENT_VERSION, v.Version())
-	assert.IsType(t, data.DatabaseV2{}, v.Database)
+	assert.Equal(t, VAULT_PATH, v.Path)
 	assert.NotNil(t, v.Index)
+	assert.IsType(t, DATABASE, v.Database)
 }
