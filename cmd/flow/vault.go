@@ -12,7 +12,7 @@ func OpenVault(path string) (vault.Vault, error) {
 	}
 
 	if v.IsOutOfDate() {
-		return vault.Vault{}, errors.Format("vault (@v%d) out-of-date (run \"config -upgrade\" to repair)", v.Version)
+		return vault.Vault{}, errors.Format("vault (@v%d) out-of-date (run \"config -upgrade\" to repair)", v.Version())
 	}
 
 	return v, nil

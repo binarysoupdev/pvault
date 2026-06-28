@@ -9,18 +9,26 @@ import (
 	"github.com/google/uuid"
 )
 
-type DatabaseV2 struct{}
+type DatabaseV2 struct {
+	Path string
+}
 
 func (DatabaseV2) Version() uint16 {
 	return 2
 }
 
-func (DatabaseV2) Upgrade(path string, idx index.IndexMap, target Database) error {
+func NewDatabaseV2(path string) DatabaseV2 {
+	return DatabaseV2{
+		Path: path,
+	}
+}
+
+func (DatabaseV2) Upgrade(idx index.IndexMap, target Database) error {
 	return errors.New("not supported")
 }
 
-func (db DatabaseV2) SaveIndex(path string, idx index.IndexMap) error {
-	file, err := os.Create(path)
+func (db DatabaseV2) SaveIndex(idx index.IndexMap) error {
+	file, err := os.Create(db.Path)
 	if err != nil {
 		return errors.Chain(err, "error creating index file")
 	}
@@ -61,8 +69,8 @@ func (DatabaseV2) writeEntry(file *os.File, name string, id uuid.UUID) error {
 	return err
 }
 
-func (db DatabaseV2) LoadIndex(path string) (index.IndexMap, error) {
-	raw, err := os.ReadFile(path)
+func (db DatabaseV2) LoadIndex() (index.IndexMap, error) {
+	raw, err := os.ReadFile(db.Path)
 	if err != nil {
 		return index.IndexMap{}, errors.Chain(err, "error reading index file")
 	}

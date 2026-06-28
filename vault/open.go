@@ -9,66 +9,64 @@ import (
 	"pvault/vault/data/legacy"
 )
 
-const (
-	LEGACY_INDEX_FILE = "index.txt"
-	LEGACY_VERSION    = 1
-)
+const LEGACY_INDEX_FILE = "index.txt"
 
 func Open(path string) (Vault, error) {
-	v := Vault{
-		Path: path,
-	}
-
-	version, err := v.detectVersion()
+	db, err := detectDatabase(path)
 	if err != nil {
 		return Vault{}, err
 	}
 
-	v.Version = version
-	switch version {
-	case 1:
-		v.Database = legacy.DatabaseV1{}
-	case 2:
-		v.Database = data.DatabaseV2{}
-	default:
-		return Vault{}, errors.Format("unsupported version \"%d\"", version)
-	}
-
-	v.Index, err = v.Database.LoadIndex(v.IndexPath())
+	idx, err := db.LoadIndex()
 	if err != nil {
-		return v, errors.Chain(err, "error parsing index file")
+		return Vault{}, errors.Chain(err, "error parsing index file")
 	}
 
-	return v, nil
+	return Vault{
+		Path:     path,
+		Index:    idx,
+		Database: db,
+	}, nil
 }
 
-func (v Vault) detectVersion() (uint16, error) {
-	_, err := os.Stat(v.IndexPath())
+func detectDatabase(path string) (data.Database, error) {
+	indexPath := filepath.Join(path, INDEX_FILE)
+
+	_, err := os.Stat(indexPath)
 	if err == nil {
-		return v.parseVersionHeader()
+		return detectDatabaseFromVersionHeader(indexPath)
 	}
 
-	_, err = os.Stat(filepath.Join(v.Path, LEGACY_INDEX_FILE))
+	legacyPath := filepath.Join(path, LEGACY_INDEX_FILE)
+
+	_, err = os.Stat(legacyPath)
 	if err == nil {
-		return LEGACY_VERSION, nil
+		return legacy.NewDatabaseV1(legacyPath), nil
 	}
 
-	return 0, errors.New("index file not found")
+	return nil, errors.New("index file not found")
 }
 
-func (v Vault) parseVersionHeader() (uint16, error) {
+func detectDatabaseFromVersionHeader(path string) (data.Database, error) {
 	header := make([]byte, 2)
 
-	file, err := os.Open(v.IndexPath())
+	file, err := os.Open(path)
 	if err != nil {
-		return 0, errors.Chain(err, "error opening index file")
+		return nil, errors.Chain(err, "error opening index file")
 	}
 	defer file.Close()
 
 	_, err = file.Read(header)
 	if err != nil {
-		return 0, errors.Chain(err, "error reading version header")
+		return nil, errors.Chain(err, "error reading version header")
 	}
 
-	return binary.BigEndian.Uint16(header), nil
+	version := binary.BigEndian.Uint16(header)
+
+	switch version {
+	case 2:
+		return data.NewDatabaseV2(path), nil
+	default:
+		return nil, errors.Format("unsupported version \"%d\"", version)
+	}
 }

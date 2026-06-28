@@ -16,7 +16,7 @@ import (
 
 func TestLoadIndexFileNotFoundReturnsError(t *testing.T) {
 	//-- act
-	_, res := data.DatabaseV2{}.LoadIndex("invalid")
+	_, res := data.NewDatabaseV2("invalid").LoadIndex()
 
 	//-- assert
 	require.ErrorContains(t, res, "error reading index file")
@@ -32,7 +32,7 @@ func TestLoadIndexIncorrectVersionReturnError(t *testing.T) {
 	file.Close()
 
 	//-- act
-	_, res := data.DatabaseV2{}.LoadIndex(PATH)
+	_, res := data.NewDatabaseV2(PATH).LoadIndex()
 
 	//-- assert
 	require.ErrorContains(t, res, fmt.Sprintf("incorrect version \"%d\"", VERSION))
@@ -49,11 +49,13 @@ func TestSaveIndexThenLoadIndex(t *testing.T) {
 		rand.ASCII(20): uuid.New(),
 	}
 
+	db := data.NewDatabaseV2(PATH)
+
 	//-- act
-	err := data.DatabaseV2{}.SaveIndex(PATH, INDEX)
+	err := db.SaveIndex(INDEX)
 	require.NoError(t, err)
 
-	res, err := data.DatabaseV2{}.LoadIndex(PATH)
+	res, err := db.LoadIndex()
 	require.NoError(t, err)
 
 	//-- assert

@@ -100,7 +100,7 @@ func (cmd ConfigCommand) upgradeVault() error {
 		return errors.New("vault is up-to-date")
 	}
 
-	backup := fmt.Sprintf("version_%d", v.Version)
+	backup := fmt.Sprintf("version_%d", v.Version())
 	err = v.Backup(backup)
 	if err != nil {
 		return errors.Chain(err, "error backing vault")
@@ -129,9 +129,9 @@ func (cmd ConfigCommand) validateVaultPath() {
 	}
 
 	if v.IsOutOfDate() {
-		style.Error.Printf("-> vault (@v%d) out-of-date (run \"config -upgrade\" to repair)\n", v.Version)
+		style.Error.Printf("-> vault (@v%d) out-of-date (run \"config -upgrade\" to repair)\n", v.Version())
 	} else {
-		style.Success.Printf("-> verified (@v%d)\n", v.Version)
+		style.Success.Printf("-> verified (@v%d)\n", v.Version())
 	}
 }
 

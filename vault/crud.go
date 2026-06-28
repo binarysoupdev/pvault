@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"os"
 	"pvault/errors"
-	"pvault/vault/data"
 	"pvault/vault/record"
 
 	"github.com/binarysoupdev/cryptool/crypt"
@@ -55,7 +54,7 @@ func (v Vault) updateIndex(r record.Record) error {
 	}
 	v.Index[r.Name] = r.ID
 
-	err := data.CurrentDatabase{}.SaveIndex(v.IndexPath(), v.Index)
+	err := v.Database.SaveIndex(v.Index)
 	if err != nil {
 		return errors.Chain(err, "error saving index file")
 	}
@@ -122,7 +121,7 @@ func (v Vault) DeleteRecord(name string) (uuid.UUID, error) {
 func (v Vault) deleteIndex(name string) error {
 	delete(v.Index, name)
 
-	err := data.CurrentDatabase{}.SaveIndex(v.IndexPath(), v.Index)
+	err := v.Database.SaveIndex(v.Index)
 	if err != nil {
 		return errors.Chain(err, "error saving index file")
 	}

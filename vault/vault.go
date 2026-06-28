@@ -8,21 +8,16 @@ import (
 	"github.com/google/uuid"
 )
 
-const (
-	CURRENT_VERSION uint16 = 2
-	INDEX_FILE             = "index.bin"
-)
+const CURRENT_VERSION uint16 = 2
 
 type Vault struct {
-	Path    string
-	Version uint16
-
-	Database data.Database
+	Path     string
 	Index    index.IndexMap
+	Database data.Database
 }
 
-func (v Vault) IndexPath() string {
-	return filepath.Join(v.Path, INDEX_FILE)
+func (v Vault) Version() uint16 {
+	return v.Database.Version()
 }
 
 func (v Vault) RecordPath(id uuid.UUID) string {

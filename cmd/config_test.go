@@ -132,6 +132,7 @@ func (s *ConfigTestSuite) TestRunValidateConfigWithInvalidVaultPrintsError() {
 func (s *ConfigTestSuite) TestRunValidateConfigWithOutOfDateVaultPrintsError() {
 	//-- arrange
 	PATH := file.CreateEmpty(s.T(), vault.LEGACY_INDEX_FILE)
+	const LEGACY_VERSION = 1
 
 	s.Config.VaultPath = filepath.Dir(PATH)
 	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
@@ -149,7 +150,7 @@ func (s *ConfigTestSuite) TestRunValidateConfigWithOutOfDateVaultPrintsError() {
 
 	vaultPath := out.ReadLine()
 	s.Assert().Contains(vaultPath, s.Config.VaultPath)
-	s.Assert().Contains(vaultPath, fmt.Sprintf("vault (@v%d) out-of-date", vault.LEGACY_VERSION))
+	s.Assert().Contains(vaultPath, fmt.Sprintf("vault (@v%d) out-of-date", LEGACY_VERSION))
 }
 
 func (s *ConfigTestSuite) TestRunValidateConfigInvalidOutputPathPrintsError() {

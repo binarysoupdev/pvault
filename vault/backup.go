@@ -19,8 +19,12 @@ func (v Vault) Backup(name string) error {
 		return errors.Chain(err, "error creating backup directory")
 	}
 
-	for _, filename := range filenames {
-		err := copyFile(filepath.Join(v.Path, filename.Name()), filepath.Join(path, filename.Name()))
+	for _, file := range filenames {
+		if file.IsDir() {
+			continue
+		}
+
+		err := copyFile(filepath.Join(v.Path, file.Name()), filepath.Join(path, file.Name()))
 		if err != nil {
 			return errors.Chain(err, "error copying file")
 		}

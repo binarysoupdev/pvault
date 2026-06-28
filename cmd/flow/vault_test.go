@@ -14,12 +14,13 @@ import (
 func TestOpenVaultVaultOutOfDateReturnsError(t *testing.T) {
 	//-- arrange
 	PATH := file.CreateEmpty(t, vault.LEGACY_INDEX_FILE)
+	const LEGACY_VERSION = 1
 
 	//-- act
 	_, res := flow.OpenVault(filepath.Dir(PATH))
 
 	//-- assert
-	require.ErrorContains(t, res, fmt.Sprintf("vault (@v%d) out-of-date", vault.LEGACY_VERSION))
+	require.ErrorContains(t, res, fmt.Sprintf("vault (@v%d) out-of-date", LEGACY_VERSION))
 }
 
 func TestOpenVaultInvalidPathReturnsError(t *testing.T) {

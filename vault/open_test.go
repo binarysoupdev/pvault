@@ -65,7 +65,7 @@ func TestOpenNewVaultLoadsCurrentDecoder(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, PATH, v.Path)
-	assert.Equal(t, vault.CURRENT_VERSION, v.Version)
-	assert.IsType(t, data.CurrentDatabase{}, v.Database)
+	assert.Equal(t, vault.CURRENT_VERSION, v.Version())
+	assert.IsType(t, data.DatabaseV2{}, v.Database)
 	assert.NotNil(t, v.Index)
 }
