@@ -3,7 +3,6 @@ package vault_test
 import (
 	"fmt"
 	"pvault/vault"
-	"pvault/vault/index"
 	"pvault/vault/record"
 	"testing"
 
@@ -63,7 +62,7 @@ func (s *CRUDTestSuite) TestSaveRecordNewIdNewNameValid() {
 	s.Require().NoError(res)
 	s.Assert().Contains(s.Vault.Index, s.Record.Name)
 
-	idx, err := index.Codec{}.Decode(s.Vault.IndexPath())
+	idx, err := s.Vault.Database.LoadIndex(s.Vault.IndexPath())
 	s.Require().NoError(err)
 	s.Assert().Contains(idx, s.Record.Name)
 
@@ -85,7 +84,7 @@ func (s *CRUDTestSuite) TestSaveRecordExistingIDNewNameValid() {
 	s.Assert().Contains(s.Vault.Index, s.Record.Name)
 	s.Assert().Len(s.Vault.Index, 1)
 
-	idx, err := index.Codec{}.Decode(s.Vault.IndexPath())
+	idx, err := s.Vault.Database.LoadIndex(s.Vault.IndexPath())
 	s.Require().NoError(err)
 	s.Assert().Contains(idx, s.Record.Name)
 	s.Assert().Len(s.Vault.Index, 1)
@@ -117,7 +116,7 @@ func (s *CRUDTestSuite) TestSaveRecordExistingIDExistingNameValid() {
 	s.Require().NoError(res)
 	s.Assert().Len(s.Vault.Index, 1)
 
-	idx, err := index.Codec{}.Decode(s.Vault.IndexPath())
+	idx, err := s.Vault.Database.LoadIndex(s.Vault.IndexPath())
 	s.Require().NoError(err)
 	s.Assert().Len(idx, 1)
 
@@ -213,7 +212,7 @@ func (s *CRUDTestSuite) TestDeleteRecordValid() {
 	s.Require().NoError(err)
 	s.Assert().Equal(s.Record.ID, id)
 
-	idx, err := index.Codec{}.Decode(s.Vault.IndexPath())
+	idx, err := s.Vault.Database.LoadIndex(s.Vault.IndexPath())
 	s.Require().NoError(err)
 	s.Assert().Len(idx, 0)
 

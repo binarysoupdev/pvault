@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"pvault/vault"
-	"pvault/vault/index"
-	"pvault/vault/index/legacy"
+	"pvault/vault/data"
+	"pvault/vault/data/legacy"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -48,7 +48,7 @@ func TestOpenLegacyFileLoadsLegacyDecoder(t *testing.T) {
 
 	//-- assert
 	require.NoError(t, err)
-	assert.IsType(t, legacy.DecoderV1{}, v.Decoder)
+	assert.IsType(t, legacy.DatabaseV1{}, v.Database)
 }
 
 func TestOpenNewVaultLoadsCurrentDecoder(t *testing.T) {
@@ -66,6 +66,6 @@ func TestOpenNewVaultLoadsCurrentDecoder(t *testing.T) {
 
 	assert.Equal(t, PATH, v.Path)
 	assert.Equal(t, vault.CURRENT_VERSION, v.Version)
-	assert.IsType(t, index.Codec{}, v.Decoder)
+	assert.IsType(t, data.CurrentDatabase{}, v.Database)
 	assert.NotNil(t, v.Index)
 }

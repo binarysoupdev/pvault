@@ -2,7 +2,7 @@ package vault
 
 import (
 	"pvault/errors"
-	"pvault/vault/index"
+	"pvault/vault/data"
 	"pvault/vault/record"
 )
 
@@ -13,7 +13,7 @@ func (v Vault) updateIndex(r record.Record) error {
 	}
 	v.Index[r.Name] = r.ID
 
-	err := index.Codec{}.Encode(v.IndexPath(), v.Index)
+	err := data.CurrentDatabase{}.SaveIndex(v.IndexPath(), v.Index)
 	if err != nil {
 		return errors.Chain(err, "error saving index file")
 	}
@@ -24,7 +24,7 @@ func (v Vault) updateIndex(r record.Record) error {
 func (v Vault) deleteIndex(name string) error {
 	delete(v.Index, name)
 
-	err := index.Codec{}.Encode(v.IndexPath(), v.Index)
+	err := data.CurrentDatabase{}.SaveIndex(v.IndexPath(), v.Index)
 	if err != nil {
 		return errors.Chain(err, "error saving index file")
 	}

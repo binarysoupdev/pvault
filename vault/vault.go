@@ -1,41 +1,30 @@
 package vault
 
 import (
-	"os"
-	"pvault/errors"
+	"path/filepath"
+	"pvault/vault/data"
 	"pvault/vault/index"
+
+	"github.com/google/uuid"
 )
 
-const CURRENT_VERSION uint16 = 2
+const (
+	CURRENT_VERSION uint16 = 2
+	INDEX_FILE             = "index.bin"
+)
 
 type Vault struct {
 	Path    string
 	Version uint16
 
-	Decoder Decoder
-	Index   index.IndexMap
+	Database data.Database
+	Index    index.IndexMap
 }
 
-func InitializeNew(path string) (Vault, error) {
-	v := Vault{
-		Path:  path,
-		Index: index.IndexMap{},
-	}
+func (v Vault) IndexPath() string {
+	return filepath.Join(v.Path, INDEX_FILE)
+}
 
-	_, err := os.Stat(path)
-	if err == nil || !os.IsNotExist(err) {
-		return v, errors.New("vault path already exists")
-	}
-
-	err = os.MkdirAll(path, 0755)
-	if err != nil {
-		return v, errors.Chain(err, "error creating vault directory")
-	}
-
-	err = index.Codec{}.Encode(v.IndexPath(), v.Index)
-	if err != nil {
-		return v, errors.Chain(err, "error saving index file")
-	}
-
-	return v, nil
+func (v Vault) RecordPath(id uuid.UUID) string {
+	return filepath.Join(v.Path, id.String())
 }

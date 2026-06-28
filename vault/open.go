@@ -5,18 +5,14 @@ import (
 	"os"
 	"path/filepath"
 	"pvault/errors"
-	"pvault/vault/index"
-	"pvault/vault/index/legacy"
+	"pvault/vault/data"
+	"pvault/vault/data/legacy"
 )
 
 const (
 	LEGACY_INDEX_FILE = "index.txt"
 	LEGACY_VERSION    = 1
 )
-
-type Decoder interface {
-	Decode(path string) (index.IndexMap, error)
-}
 
 func Open(path string) (Vault, error) {
 	v := Vault{
@@ -28,19 +24,17 @@ func Open(path string) (Vault, error) {
 		return Vault{}, err
 	}
 
-	if version > CURRENT_VERSION || version < 1 {
+	v.Version = version
+	switch version {
+	case 1:
+		v.Database = legacy.DatabaseV1{}
+	case 2:
+		v.Database = data.DatabaseV2{}
+	default:
 		return Vault{}, errors.Format("unsupported version \"%d\"", version)
 	}
 
-	v.Version = version
-	switch version {
-	case LEGACY_VERSION:
-		v.Decoder = legacy.DecoderV1{}
-	default:
-		v.Decoder = index.Codec{}
-	}
-
-	v.Index, err = v.Decoder.Decode(v.IndexPath())
+	v.Index, err = v.Database.LoadIndex(v.IndexPath())
 	if err != nil {
 		return v, errors.Chain(err, "error parsing index file")
 	}
