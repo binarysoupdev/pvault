@@ -29,6 +29,7 @@ func NewConfigCommand(loader config.Loader[config.Config]) *ConfigCommand {
 func (cmd ConfigCommand) Run(args []string) error {
 	new := cmd.Flags.Bool("new", false, "generate a new config file")
 	init := cmd.Flags.Bool("init", false, "initialize the vault")
+	upgrade := cmd.Flags.Bool("upgrade", false, "upgrade the vault if it's out-of-date")
 	cmd.Flags.Parse(args)
 
 	if *new {
@@ -42,6 +43,8 @@ func (cmd ConfigCommand) Run(args []string) error {
 
 	if *init {
 		return cmd.initializeVault()
+	} else if *upgrade {
+		return cmd.upgradeVault()
 	} else {
 		return cmd.validate()
 	}
@@ -87,6 +90,26 @@ func (cmd ConfigCommand) initializeVault() error {
 	return nil
 }
 
+func (cmd ConfigCommand) upgradeVault() error {
+	v, err := vault.Open(cmd.Config.VaultPath)
+	if err != nil {
+		return errors.Chain(err, "error opening vault")
+	}
+
+	if !v.IsOutOfDate() {
+		return errors.New("vault is up-to-date")
+	}
+
+	backup := fmt.Sprintf("version_%d", v.Version)
+	err = v.Backup(backup)
+	if err != nil {
+		return errors.Chain(err, "error backing vault")
+	}
+
+	style.BoldCreate.Printf("[+] Created Backup: %s\n", backup)
+	return nil
+}
+
 func (cmd ConfigCommand) validate() error {
 	style.BoldInfo.Printf("[=] Loaded from \"%s\"\n", cmd.ConfigPath)
 
@@ -105,7 +128,7 @@ func (cmd ConfigCommand) validateVaultPath() {
 		return
 	}
 
-	if v.Version < vault.CURRENT_VERSION {
+	if v.IsOutOfDate() {
 		style.Error.Printf("-> vault (@v%d) out-of-date (run \"config -upgrade\" to repair)\n", v.Version)
 	} else {
 		style.Success.Printf("-> verified (@v%d)\n", v.Version)

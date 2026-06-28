@@ -11,7 +11,7 @@ func OpenVault(path string) (vault.Vault, error) {
 		return vault.Vault{}, errors.Chain(err, "error opening vault")
 	}
 
-	if v.Version < vault.CURRENT_VERSION {
+	if v.IsOutOfDate() {
 		return vault.Vault{}, errors.Format("vault (@v%d) out-of-date (run \"config -upgrade\" to repair)", v.Version)
 	}
 
