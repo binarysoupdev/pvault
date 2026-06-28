@@ -6,9 +6,13 @@ import (
 	"pvault/vault/index"
 )
 
+const CURRENT_VERSION uint16 = 2
+
 type Vault struct {
-	Version int
 	Path    string
+	Version uint16
+
+	Decoder Decoder
 	Index   index.IndexMap
 }
 
@@ -31,29 +35,6 @@ func InitializeNew(path string) (Vault, error) {
 	err = index.Codec{}.Encode(v.IndexPath(), v.Index)
 	if err != nil {
 		return v, errors.Chain(err, "error saving index file")
-	}
-
-	return v, nil
-}
-
-func Open(path string) (Vault, error) {
-	v := Vault{
-		Version: index.CURRENT_VERSION,
-		Path:    path,
-	}
-
-	decoder, err := v.selectDecoder(v.Path)
-	if err != nil {
-		return Vault{}, err
-	}
-
-	if decoder.Version() < v.Version {
-		return Vault{}, newOutOfDateError(decoder.Version())
-	}
-
-	v.Index, err = decoder.Decode(v.IndexPath())
-	if err != nil {
-		return v, errors.Chain(err, "error parsing index file")
 	}
 
 	return v, nil

@@ -8,7 +8,6 @@ import (
 	"pvault/config"
 	"pvault/data"
 	"pvault/vault"
-	"pvault/vault/index"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/test"
@@ -150,7 +149,7 @@ func (s *ConfigTestSuite) TestRunValidateConfigWithOutOfDateVaultPrintsError() {
 
 	vaultPath := out.ReadLine()
 	s.Assert().Contains(vaultPath, s.Config.VaultPath)
-	s.Assert().Contains(vaultPath, "vault out-of-date")
+	s.Assert().Contains(vaultPath, fmt.Sprintf("vault (@v%d) out-of-date", vault.LEGACY_VERSION))
 }
 
 func (s *ConfigTestSuite) TestRunValidateConfigInvalidOutputPathPrintsError() {
@@ -192,7 +191,7 @@ func (s *ConfigTestSuite) TestRunValidateConfigPrintsConfig() {
 
 	vaultPath := out.ReadLine()
 	s.Assert().Contains(vaultPath, s.Config.VaultPath)
-	s.Assert().Contains(vaultPath, fmt.Sprintf("verified (@v%d)", index.CURRENT_VERSION))
+	s.Assert().Contains(vaultPath, fmt.Sprintf("verified (@v%d)", vault.CURRENT_VERSION))
 
 	outputPath := out.ReadLine()
 	s.Assert().Contains(outputPath, s.Config.OutputPath)

@@ -101,14 +101,14 @@ func (cmd ConfigCommand) validateVaultPath() {
 
 	v, err := vault.Open(cmd.Config.VaultPath)
 	if err != nil {
-		_, ok := err.(vault.OutOfDateError)
-		if ok {
-			style.Error.Println("-> vault out-of-date (run \"config -upgrade\" to repair)")
-		} else {
-			style.Error.Println("-> error opening vault (run \"config -init\" to repair)")
-		}
+		style.Error.Println("-> error opening vault (run \"config -init\" to repair)")
+		return
+	}
+
+	if v.Version < vault.CURRENT_VERSION {
+		style.Error.Printf("-> vault (@v%d) out-of-date (run \"config -upgrade\" to repair)\n", v.Version)
 	} else {
-		style.Success.Printf(" -> verified (@v%d)\n", v.Version)
+		style.Success.Printf("-> verified (@v%d)\n", v.Version)
 	}
 }
 

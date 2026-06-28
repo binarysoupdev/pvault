@@ -1,6 +1,7 @@
 package flow_test
 
 import (
+	"fmt"
 	"path/filepath"
 	"pvault/cmd/flow"
 	"pvault/vault"
@@ -18,7 +19,7 @@ func TestOpenVaultVaultOutOfDateReturnsError(t *testing.T) {
 	_, res := flow.OpenVault(filepath.Dir(PATH))
 
 	//-- assert
-	require.ErrorContains(t, res, "vault out-of-date")
+	require.ErrorContains(t, res, fmt.Sprintf("vault (@v%d) out-of-date", vault.LEGACY_VERSION))
 }
 
 func TestOpenVaultInvalidPathReturnsError(t *testing.T) {

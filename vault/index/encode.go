@@ -30,9 +30,9 @@ func (c Codec) Encode(path string, idx IndexMap) error {
 	return nil
 }
 
-func (Codec) writeHeader(file *os.File, numRecords int) error {
+func (c Codec) writeHeader(file *os.File, numRecords int) error {
 	header := make([]byte, 4)
-	binary.BigEndian.PutUint16(header, uint16(CURRENT_VERSION))
+	binary.BigEndian.PutUint16(header, c.Version())
 	binary.BigEndian.PutUint16(header[2:], uint16(numRecords))
 
 	_, err := file.Write(header)

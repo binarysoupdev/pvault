@@ -2,6 +2,7 @@ package index_test
 
 import (
 	"fmt"
+	"pvault/vault"
 	"pvault/vault/index"
 	"testing"
 
@@ -21,7 +22,7 @@ func TestDecodeIndexFileNotFoundReturnsError(t *testing.T) {
 func TestDecodeIncorrectVersionReturnError(t *testing.T) {
 	//-- arrange
 	rand := rand.New(0)
-	VERSION := index.CURRENT_VERSION + 1
+	VERSION := vault.CURRENT_VERSION + 1
 
 	file, PATH := file.Create(t, rand.ASCII(10))
 	file.Write([]byte{0, byte(VERSION), 0, 0})

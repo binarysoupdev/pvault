@@ -16,7 +16,7 @@ func (c Codec) Decode(path string) (IndexMap, error) {
 	header := raw[:4]
 
 	version := binary.BigEndian.Uint16(header)
-	if version != 1 {
+	if version != c.Version() {
 		return IndexMap{}, errors.Format("incorrect version \"%d\"", version)
 	}
 
