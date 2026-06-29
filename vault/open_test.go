@@ -60,7 +60,7 @@ func TestOpenModernFileLoadsCorrectDecoder(t *testing.T) {
 	DATABASE := data.DatabaseV2{}
 
 	file, PATH := file.Create(t, vault.INDEX_FILE)
-	file.Write([]byte{0, byte(DATABASE.Version()), 0, 0})
+	file.Write([]byte{0, byte(DATABASE.GetVersion()), 0, 0})
 	file.Close()
 
 	VAULT_PATH := filepath.Dir(PATH)

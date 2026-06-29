@@ -22,7 +22,7 @@ func (DatabaseV1) GetVersion() uint16 {
 	return 1
 }
 
-func (DatabaseV1) Upgrade() error {
+func (DatabaseV1) Upgrade(target data.Database) error {
 	// TODO: implement
 	return nil
 }

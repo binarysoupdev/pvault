@@ -14,6 +14,6 @@ func (DatabaseV2) GetVersion() uint16 {
 	return 2
 }
 
-func (DatabaseV2) Upgrade() error {
-	return nil
+func (DatabaseV2) Upgrade(target Database) error {
+	return NotSupportedError{}
 }
