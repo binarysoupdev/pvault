@@ -18,7 +18,7 @@ func NewDatabaseV1(path string) DatabaseV1 {
 	}
 }
 
-func (DatabaseV1) Version() uint16 {
+func (DatabaseV1) GetVersion() uint16 {
 	return 1
 }
 

@@ -8,8 +8,9 @@ import (
 )
 
 type DatabaseMock struct {
-	Index  index.IndexMap
-	Record record.Record
+	Version uint16
+	Index   index.IndexMap
+	Record  record.Record
 
 	UpgradeError      error
 	SaveIndexError    error
@@ -19,8 +20,8 @@ type DatabaseMock struct {
 	DeleteRecordError error
 }
 
-func (DatabaseMock) Version() uint16 {
-	return 0
+func (db DatabaseMock) GetVersion() uint16 {
+	return db.Version
 }
 
 func (db DatabaseMock) Upgrade() error {

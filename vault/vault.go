@@ -14,5 +14,5 @@ type Vault struct {
 }
 
 func (v Vault) Version() uint16 {
-	return v.Database.Version()
+	return v.Database.GetVersion()
 }

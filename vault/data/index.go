@@ -33,7 +33,7 @@ func (db DatabaseV2) SaveIndex(idx index.IndexMap) error {
 
 func (db DatabaseV2) writeHeader(file *os.File, numRecords int) error {
 	header := make([]byte, 4)
-	binary.BigEndian.PutUint16(header, db.Version())
+	binary.BigEndian.PutUint16(header, db.GetVersion())
 	binary.BigEndian.PutUint16(header[2:], uint16(numRecords))
 
 	_, err := file.Write(header)
@@ -59,7 +59,7 @@ func (db DatabaseV2) LoadIndex() (index.IndexMap, error) {
 	header := raw[:4]
 
 	version := binary.BigEndian.Uint16(header)
-	if version != db.Version() {
+	if version != db.GetVersion() {
 		return index.IndexMap{}, errors.Format("incorrect version \"%d\"", version)
 	}
 

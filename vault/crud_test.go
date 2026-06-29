@@ -9,7 +9,6 @@ import (
 	"pvault/vault/record"
 	"testing"
 
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/rand"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
@@ -32,7 +31,6 @@ func (s *CRUDTestSuite) SetupTest() {
 	s.DatabaseMock = data.DatabaseMock{}
 
 	s.Vault = vault.Vault{
-		Path:     file.NewPath(s.T(), ""),
 		Index:    index.IndexMap{},
 		Database: &s.DatabaseMock,
 	}

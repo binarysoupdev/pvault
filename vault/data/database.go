@@ -8,7 +8,7 @@ import (
 )
 
 type Database interface {
-	Version() uint16
+	GetVersion() uint16
 	Upgrade() error
 
 	SaveIndex(idx index.IndexMap) error
