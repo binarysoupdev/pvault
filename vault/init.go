@@ -44,7 +44,7 @@ func (v *Vault) ReloadIndex() error {
 
 	v.Index, err = v.Database.LoadIndex()
 	if err != nil {
-		return errors.Chain(err, "error loading index")
+		return errors.Chain(err, "error loading index from database")
 	}
 
 	return nil

@@ -1,11 +1,16 @@
 package vault_test
 
 import (
+	"errors"
 	"path/filepath"
 	"pvault/vault"
+	"pvault/vault/data"
+	"pvault/vault/index"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
+	"github.com/binarysoupdev/tinsel/rand"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -33,4 +38,40 @@ func TestInitializeNewCreatesDirectoryAndIndexFile(t *testing.T) {
 
 	assert.DirExists(t, PATH)
 	assert.FileExists(t, filepath.Join(PATH, vault.INDEX_FILE))
+}
+
+func TestReloadIndexWhereDatabaseLoadIndexFailsReturnsError(t *testing.T) {
+	//-- arrange
+	v := vault.Vault{
+		Database: &data.DatabaseMock{
+			LoadIndexError: errors.New(""),
+		},
+	}
+
+	//-- act
+	res := v.ReloadIndex()
+
+	//-- assert
+	require.ErrorContains(t, res, "error loading index from database")
+}
+
+func TestReloadIndexValidUpdatesVaultIndex(t *testing.T) {
+	//-- arrange
+	rand := rand.New(0)
+	INDEX := index.IndexMap{
+		rand.ASCII(10): uuid.New(),
+	}
+
+	v := vault.Vault{
+		Database: &data.DatabaseMock{
+			Index: INDEX,
+		},
+	}
+
+	//-- act
+	res := v.ReloadIndex()
+
+	//-- assert
+	require.NoError(t, res)
+	assert.Equal(t, INDEX, v.Index)
 }
