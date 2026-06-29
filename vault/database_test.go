@@ -12,18 +12,18 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type CRUDTestSuite struct {
+type DatabaseTestSuite struct {
 	suite.Suite
 	Vault    vault.Vault
 	Record   record.Record
 	Password string
 }
 
-func TestCreateCommandSuite(t *testing.T) {
-	suite.Run(t, &CRUDTestSuite{})
+func TestDatabaseTestSuite(t *testing.T) {
+	suite.Run(t, &DatabaseTestSuite{})
 }
 
-func (s *CRUDTestSuite) SetupTest() {
+func (s *DatabaseTestSuite) SetupTest() {
 	PATH := file.NewPath(s.T(), "vault")
 
 	_, err := vault.InitializeNew(PATH)
@@ -43,7 +43,7 @@ func (s *CRUDTestSuite) SetupTest() {
 
 //=====================================
 
-func (s *CRUDTestSuite) TestSaveRecordInvalidVaultPath() {
+func (s *DatabaseTestSuite) TestSaveRecordInvalidVaultPath() {
 	//-- arrange
 	s.Vault.Path = "invalid"
 
@@ -54,7 +54,7 @@ func (s *CRUDTestSuite) TestSaveRecordInvalidVaultPath() {
 	s.Require().ErrorContains(res, "error writing record file")
 }
 
-func (s *CRUDTestSuite) TestSaveRecordNewIdNewNameValid() {
+func (s *DatabaseTestSuite) TestSaveRecordNewIdNewNameValid() {
 	//-- act
 	res := s.Vault.SaveRecord(s.Record, s.Password)
 
@@ -71,7 +71,7 @@ func (s *CRUDTestSuite) TestSaveRecordNewIdNewNameValid() {
 	s.Assert().Equal(s.Record, other)
 }
 
-func (s *CRUDTestSuite) TestSaveRecordExistingIDNewNameValid() {
+func (s *DatabaseTestSuite) TestSaveRecordExistingIDNewNameValid() {
 	//-- arrange
 	s.Vault.Index[s.Record.Name] = s.Record.ID
 	s.Record.Name += "x"
@@ -94,7 +94,7 @@ func (s *CRUDTestSuite) TestSaveRecordExistingIDNewNameValid() {
 	s.Assert().Equal(s.Record, other)
 }
 
-func (s *CRUDTestSuite) TestSaveRecordNewIDExistingNameInvalid() {
+func (s *DatabaseTestSuite) TestSaveRecordNewIDExistingNameInvalid() {
 	//-- arrange
 	s.Vault.Index[s.Record.Name] = uuid.Nil
 
@@ -105,7 +105,7 @@ func (s *CRUDTestSuite) TestSaveRecordNewIDExistingNameInvalid() {
 	s.Require().ErrorContains(res, "error validating record")
 }
 
-func (s *CRUDTestSuite) TestSaveRecordExistingIDExistingNameValid() {
+func (s *DatabaseTestSuite) TestSaveRecordExistingIDExistingNameValid() {
 	//-- arrange
 	s.Vault.Index[s.Record.Name] = s.Record.ID
 
@@ -125,7 +125,7 @@ func (s *CRUDTestSuite) TestSaveRecordExistingIDExistingNameValid() {
 	s.Assert().Equal(s.Record, other)
 }
 
-func (s *CRUDTestSuite) TestLoadRecordInvalidVaultPath() {
+func (s *DatabaseTestSuite) TestLoadRecordInvalidVaultPath() {
 	//-- arrange
 	err := s.Vault.SaveRecord(s.Record, s.Password)
 	s.Require().NoError(err)
@@ -139,7 +139,7 @@ func (s *CRUDTestSuite) TestLoadRecordInvalidVaultPath() {
 	s.Require().ErrorContains(res, "error reading record file")
 }
 
-func (s *CRUDTestSuite) TestLoadRecordInvalidName() {
+func (s *DatabaseTestSuite) TestLoadRecordInvalidName() {
 	//-- arrange
 	err := s.Vault.SaveRecord(s.Record, s.Password)
 	s.Require().NoError(err)
@@ -153,7 +153,7 @@ func (s *CRUDTestSuite) TestLoadRecordInvalidName() {
 	s.Require().ErrorContains(res, fmt.Sprintf("name \"%s\" not found", NAME))
 }
 
-func (s *CRUDTestSuite) TestLoadRecordIncorrectPassword() {
+func (s *DatabaseTestSuite) TestLoadRecordIncorrectPassword() {
 	//-- arrange
 	err := s.Vault.SaveRecord(s.Record, s.Password)
 	s.Require().NoError(err)
@@ -165,7 +165,7 @@ func (s *CRUDTestSuite) TestLoadRecordIncorrectPassword() {
 	s.Require().ErrorContains(res, "error decrypting ciphertext")
 }
 
-func (s *CRUDTestSuite) TestLoadRecordValid() {
+func (s *DatabaseTestSuite) TestLoadRecordValid() {
 	//-- arrange
 	err := s.Vault.SaveRecord(s.Record, s.Password)
 	s.Require().NoError(err)
@@ -178,7 +178,7 @@ func (s *CRUDTestSuite) TestLoadRecordValid() {
 	s.Assert().Equal(s.Record, r)
 }
 
-func (s *CRUDTestSuite) TestDeleteRecordInvalidName() {
+func (s *DatabaseTestSuite) TestDeleteRecordInvalidName() {
 	//-- act
 	_, res := s.Vault.DeleteRecord(s.Record.Name)
 
@@ -186,7 +186,7 @@ func (s *CRUDTestSuite) TestDeleteRecordInvalidName() {
 	s.Require().ErrorContains(res, fmt.Sprintf("name \"%s\" not found", s.Record.Name))
 }
 
-func (s *CRUDTestSuite) TestDeleteRecordInvalidVaultPath() {
+func (s *DatabaseTestSuite) TestDeleteRecordInvalidVaultPath() {
 	//-- arrange
 	err := s.Vault.SaveRecord(s.Record, s.Password)
 	s.Require().NoError(err)
@@ -200,7 +200,7 @@ func (s *CRUDTestSuite) TestDeleteRecordInvalidVaultPath() {
 	s.Require().ErrorContains(res, "error deleting record file")
 }
 
-func (s *CRUDTestSuite) TestDeleteRecordValid() {
+func (s *DatabaseTestSuite) TestDeleteRecordValid() {
 	//-- arrange
 	err := s.Vault.SaveRecord(s.Record, s.Password)
 	s.Require().NoError(err)
@@ -216,5 +216,5 @@ func (s *CRUDTestSuite) TestDeleteRecordValid() {
 	s.Require().NoError(err)
 	s.Assert().Len(idx, 0)
 
-	s.Assert().NoFileExists(s.Vault.RecordPath(s.Record.ID))
+	s.Assert().NoFileExists(s.Database.RecordPath(s.Record.ID))
 }

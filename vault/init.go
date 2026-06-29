@@ -10,6 +10,10 @@ import (
 
 const INDEX_FILE = "index.bin"
 
+func (v Vault) NewCurrentDatabase() data.DatabaseV2 {
+	return data.NewDatabaseV2(filepath.Join(v.Path, INDEX_FILE))
+}
+
 func InitializeNew(path string) (Vault, error) {
 	_, err := os.Stat(path)
 	if err == nil || !os.IsNotExist(err) {
@@ -35,6 +39,13 @@ func InitializeNew(path string) (Vault, error) {
 	return v, nil
 }
 
-func (v Vault) NewCurrentDatabase() data.DatabaseV2 {
-	return data.NewDatabaseV2(filepath.Join(v.Path, INDEX_FILE))
+func (v *Vault) ReloadIndex() error {
+	var err error
+
+	v.Index, err = v.Database.LoadIndex()
+	if err != nil {
+		return errors.Chain(err, "error loading index")
+	}
+
+	return nil
 }

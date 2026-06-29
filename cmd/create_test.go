@@ -14,6 +14,7 @@ import (
 	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
 	"github.com/binarysoupdev/tinsel/rand"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -21,6 +22,8 @@ type CreateTestSuite struct {
 	test.CommandSuite[*cmd.CreateCommand]
 	ConfigLoader config.Loader[config.Config]
 	Config       config.Config
+
+	Vault vault.Vault
 }
 
 func TestCreateCommandSuite(t *testing.T) {
@@ -41,7 +44,7 @@ func (s *CreateTestSuite) SetupTest() {
 	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
-	_, err = vault.InitializeNew(s.Config.VaultPath)
+	s.Vault, err = vault.InitializeNew(s.Config.VaultPath)
 	s.Require().NoError(err)
 }
 
@@ -160,11 +163,20 @@ func (s *CreateTestSuite) TestRunValid() {
 	line := io.ReadLine()
 	s.Require().Contains(line, "[+] New Record: ")
 
-	ID := line[len(line)-36:]
-	VAULT_FILE := filepath.Join(s.Config.VaultPath, ID)
-	OUTPUT_FILE := filepath.Join(s.Config.OutputPath, ID+".json")
+	ID, err := uuid.Parse(line[len(line)-36:])
+	s.Require().NoError(err)
 
+	OUTPUT_FILE := filepath.Join(s.Config.OutputPath, ID.String()+".json")
 	s.Assert().Contains(io.ReadLine(), "[+] "+OUTPUT_FILE)
-	s.Assert().FileExists(VAULT_FILE)
-	s.Assert().FileExists(OUTPUT_FILE)
+
+	err = s.Vault.ReloadIndex()
+	s.Require().NoError(err)
+
+	r1, err := data.LoadJSON[record.Record](OUTPUT_FILE)
+	s.Require().NoError(err)
+
+	r2, err := s.Vault.LoadRecord(NAME, PASSWORD)
+	s.Require().NoError(err)
+
+	s.Assert().Equal(r1, r2)
 }

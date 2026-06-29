@@ -1,6 +1,7 @@
 package cmd_test
 
 import (
+	"fmt"
 	"os"
 	"pvault/cmd"
 	"pvault/config"
@@ -90,7 +91,7 @@ func (s *DeleteTestSuite) TestRunInvalidNoResults() {
 
 func (s *DeleteTestSuite) TestRunIncorrectConfirmName() {
 	//-- arrange
-	err := os.Remove(s.Vault.RecordPath(s.Record.ID))
+	err := s.Vault.Database.DeleteRecord(s.Record.ID)
 	s.Require().NoError(err)
 
 	io := pipe.OpenStdio(1, 2, true)
@@ -111,7 +112,7 @@ func (s *DeleteTestSuite) TestRunIncorrectConfirmName() {
 
 func (s *DeleteTestSuite) TestRunVaultFileMissing() {
 	//-- arrange
-	err := os.Remove(s.Vault.RecordPath(s.Record.ID))
+	err := s.Vault.Database.DeleteRecord(s.Record.ID)
 	s.Require().NoError(err)
 
 	io := pipe.OpenStdio(1, 2, true)
@@ -143,9 +144,14 @@ func (s *DeleteTestSuite) TestRunValid() {
 
 	//-- assert
 	s.RequireResultPass()
-	s.Assert().NoFileExists(s.Vault.RecordPath(s.Record.ID))
 
 	s.Assert().Contains(io.ReadLine(), s.Record.Name)
 	s.Assert().Contains(io.ReadLine(), "Confirm NAME: "+s.Record.Name)
 	s.Assert().Contains(io.ReadLine(), "[-] Deleted Record: "+s.Record.ID.String())
+
+	err := s.Vault.ReloadIndex()
+	s.Require().NoError(err)
+
+	_, err = s.Vault.LoadRecord(s.Record.Name, "")
+	s.Assert().ErrorContains(err, fmt.Sprintf("name \"%s\" not found", s.Record.Name))
 }

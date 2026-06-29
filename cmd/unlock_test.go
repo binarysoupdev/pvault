@@ -106,7 +106,7 @@ func (s *UnlockTestSuite) TestRunInvalidNoResults() {
 
 func (s *UnlockTestSuite) TestRunVaultFileMissing() {
 	//-- arrange
-	err := os.Remove(s.Vault.RecordPath(s.Record.ID))
+	err := s.Vault.Database.DeleteRecord(s.Record.ID)
 	s.Require().NoError(err)
 
 	io := pipe.OpenStdio(1, 2, false)

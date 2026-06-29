@@ -112,7 +112,7 @@ func (s *CopyTestSuite) TestRunFailInvalidNoResults() {
 
 func (s *CopyTestSuite) TestRunFailVaultFileMissing() {
 	//-- arrange
-	err := os.Remove(s.Vault.RecordPath(s.Record.ID))
+	err := s.Vault.Database.DeleteRecord(s.Record.ID)
 	s.Require().NoError(err)
 
 	io := pipe.OpenStdio(1, 2, false)

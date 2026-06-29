@@ -14,15 +14,44 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLoadIndexFileNotFoundReturnsError(t *testing.T) {
+func TestSaveIndexWithInvalidPathReturnsError(t *testing.T) {
+	//-- arrange
+	db := data.NewDatabaseV2("invalid/index.bin")
+
 	//-- act
-	_, res := data.NewDatabaseV2("invalid").LoadIndex()
+	res := db.SaveIndex(index.IndexMap{})
+
+	//-- assert
+	require.ErrorContains(t, res, "error creating index file")
+}
+
+func TestSaveIndexValidSavesIndex(t *testing.T) {
+	//-- arrange
+	rand := rand.New(0)
+	INDEX_FILE := file.NewPath(t, rand.ASCII(10))
+
+	db := data.NewDatabaseV2(INDEX_FILE)
+
+	//-- act
+	res := db.SaveIndex(index.IndexMap{})
+
+	//-- assert
+	require.NoError(t, res)
+	assert.FileExists(t, INDEX_FILE)
+}
+
+func TestLoadIndexWithFileNotFoundReturnsError(t *testing.T) {
+	//-- arrange
+	db := data.NewDatabaseV2("invalid")
+
+	//-- act
+	_, res := db.LoadIndex()
 
 	//-- assert
 	require.ErrorContains(t, res, "error reading index file")
 }
 
-func TestLoadIndexIncorrectVersionReturnError(t *testing.T) {
+func TestLoadIndexWithIncorrectVersionReturnError(t *testing.T) {
 	//-- arrange
 	rand := rand.New(0)
 	VERSION := vault.CURRENT_VERSION + 1
@@ -31,17 +60,19 @@ func TestLoadIndexIncorrectVersionReturnError(t *testing.T) {
 	file.Write([]byte{0, byte(VERSION), 0, 0})
 	file.Close()
 
+	db := data.NewDatabaseV2(PATH)
+
 	//-- act
-	_, res := data.NewDatabaseV2(PATH).LoadIndex()
+	_, res := db.LoadIndex()
 
 	//-- assert
 	require.ErrorContains(t, res, fmt.Sprintf("incorrect version \"%d\"", VERSION))
 }
 
-func TestSaveIndexThenLoadIndex(t *testing.T) {
+func TestLoadIndexValidReturnIndex(t *testing.T) {
 	//-- arrange
 	rand := rand.New(0)
-	PATH := file.NewPath(t, rand.ASCII(10))
+	db := data.NewDatabaseV2(file.NewPath(t, rand.ASCII(10)))
 
 	INDEX := index.IndexMap{
 		rand.ASCII(10): uuid.New(),
@@ -49,12 +80,10 @@ func TestSaveIndexThenLoadIndex(t *testing.T) {
 		rand.ASCII(20): uuid.New(),
 	}
 
-	db := data.NewDatabaseV2(PATH)
-
-	//-- act
 	err := db.SaveIndex(INDEX)
 	require.NoError(t, err)
 
+	//-- act
 	res, err := db.LoadIndex()
 	require.NoError(t, err)
 
