@@ -1,6 +1,9 @@
 package data_test
 
 import (
+	"encoding/binary"
+	"fmt"
+	"os"
 	"pvault/vault/data"
 	"pvault/vault/record"
 	"testing"
@@ -43,7 +46,7 @@ func (s *RecordTestSuite) TestSaveRecordWithInvalidDatabasePathReturnError() {
 	res := s.Database.SaveRecord(s.Record, s.Password)
 
 	//-- assert
-	s.Require().ErrorContains(res, "error writing record file")
+	s.Require().ErrorContains(res, "error creating record file")
 }
 
 func (s *RecordTestSuite) TestSaveRecordSavesRecord() {
@@ -79,6 +82,27 @@ func (s *RecordTestSuite) TestLoadRecordWithIncorrectPasswordReturnsError() {
 
 	//-- assert
 	s.Require().ErrorContains(res, "error decrypting ciphertext")
+}
+
+func (s *RecordTestSuite) TestLoadRecordWithUnsupportedVersionReturnsError() {
+	//-- arrange
+	err := s.Database.SaveRecord(s.Record, s.Password)
+	s.Require().NoError(err)
+
+	raw, err := os.ReadFile(s.Database.RecordPath(s.Record.ID))
+	s.Require().NoError(err)
+
+	VERSION := data.CURRENT_RECORD_VERSION + 1
+	binary.BigEndian.PutUint16(raw, VERSION)
+
+	err = os.WriteFile(s.Database.RecordPath(s.Record.ID), raw, 0666)
+	s.Require().NoError(err)
+
+	//-- act
+	_, res := s.Database.LoadRecord(s.Record.ID, s.Password)
+
+	//-- assert
+	s.Require().ErrorContains(res, fmt.Sprintf("unsupported record version \"%d\"", VERSION))
 }
 
 func (s *RecordTestSuite) TestLoadRecordReturnsRecord() {
