@@ -10,7 +10,10 @@ import (
 	"github.com/google/uuid"
 )
 
-const RECORD_VERSION uint16 = 1
+const (
+	RECORD_VERSION   uint16 = 1
+	LEGACY_HASH_SIZE uint16 = 60
+)
 
 func (db Database) RecordPath(id uuid.UUID) string {
 	return filepath.Join(db.Path, id.String())
@@ -61,4 +64,13 @@ func (db Database) ParseRecordV1(id uuid.UUID, password string, raw []byte) (rec
 	}
 
 	return r.Upgrade(id, name), nil
+}
+
+func (db Database) LegacyRecordPath(id uuid.UUID) string {
+	return db.RecordPath(id) + ".crypt"
+}
+
+func (db Database) SaveLegacyRecord(id uuid.UUID, password string, r legacy.RecordV1) error {
+	hash := make([]byte, LEGACY_HASH_SIZE)
+	return data.SaveEncryptedRecord(db.LegacyRecordPath(id), password, hash, r)
 }
