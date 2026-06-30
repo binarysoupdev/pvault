@@ -4,14 +4,11 @@ import (
 	"encoding/binary"
 	"os"
 	"pvault/vault/data"
-	"pvault/vault/data/version2"
 	"pvault/vault/index"
 )
 
-func (db Database) UpgradeToVersion2(idx index.IndexMap) error {
+func (db Database) Upgrade(idx index.IndexMap, target data.Database) error {
 	const LEGACY_HASH_SIZE = 60
-
-	target := version2.NewDatabase(db.Path)
 
 	for name, id := range idx {
 		oldFile := db.RecordPath(id)

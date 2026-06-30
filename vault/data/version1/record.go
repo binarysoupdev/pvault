@@ -17,6 +17,18 @@ func (db Database) RecordPath(id uuid.UUID) string {
 }
 
 func (db Database) SaveRecord(r record.Record, password string) error {
+	return data.NotSupportedError{}
+}
+
+func (Database) LoadRecord(id uuid.UUID, password string) (record.Record, error) {
+	return record.Record{}, data.NotSupportedError{}
+}
+
+func (Database) DeleteRecord(id uuid.UUID) error {
+	return data.NotSupportedError{}
+}
+
+func (db Database) SaveLegacyRecord(r record.Record, password string) error {
 	old := legacy.RecordV1{
 		Password: r.Password,
 		Username: r.Username,
@@ -29,10 +41,17 @@ func (db Database) SaveRecord(r record.Record, password string) error {
 	return data.SaveEncryptedRecord(db.RecordPath(r.ID), password, RECORD_VERSION, header, old)
 }
 
-func (Database) LoadRecord(id uuid.UUID, password string) (record.Record, error) {
-	return record.Record{}, data.NotSupportedError{}
-}
+func (db Database) ParseLegacyRecord(id uuid.UUID, password string, raw []byte) (record.Record, error) {
+	length := binary.BigEndian.Uint16(raw)
+	raw = raw[2:]
 
-func (Database) DeleteRecord(id uuid.UUID) error {
-	return data.NotSupportedError{}
+	name := string(raw[:length])
+	raw = raw[length:]
+
+	r, err := data.DecryptRecord[legacy.RecordV1](password, raw)
+	if err != nil {
+		return record.Record{}, err
+	}
+
+	return r.Upgrade(id, name), nil
 }

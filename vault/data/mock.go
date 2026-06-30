@@ -24,8 +24,12 @@ func (db DatabaseMock) GetVersion() uint16 {
 	return db.Version
 }
 
-func (db *DatabaseMock) UpgradeToVersion2(idx index.IndexMap) error {
+func (db *DatabaseMock) Upgrade(idx index.IndexMap, target Database) error {
 	return db.UpgradeError
+}
+
+func (DatabaseMock) IndexPath() string {
+	return ""
 }
 
 func (db *DatabaseMock) SaveIndex(idx index.IndexMap) error {
@@ -35,6 +39,10 @@ func (db *DatabaseMock) SaveIndex(idx index.IndexMap) error {
 
 func (db DatabaseMock) LoadIndex() (index.IndexMap, error) {
 	return db.Index, db.LoadIndexError
+}
+
+func (DatabaseMock) RecordPath(id uuid.UUID) string {
+	return ""
 }
 
 func (db *DatabaseMock) SaveRecord(r record.Record, password string) error {

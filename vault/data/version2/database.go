@@ -19,6 +19,6 @@ func (Database) GetVersion() uint16 {
 	return 2
 }
 
-func (Database) UpgradeToVersion2(idx index.IndexMap) error {
+func (Database) Upgrade(idx index.IndexMap, target data.Database) error {
 	return data.NotSupportedError{}
 }

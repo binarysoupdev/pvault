@@ -9,12 +9,6 @@ import (
 	"github.com/binarysoupdev/cryptool/crypt"
 )
 
-type EncryptedRecord[T any] struct {
-	Version uint16
-	Header  []byte
-	Obj     T
-}
-
 func SaveVersionedRecord(path string, version uint16, data []byte) error {
 	file, err := os.Create(path)
 	if err != nil {
@@ -47,4 +41,21 @@ func SaveEncryptedRecord[T any](path string, password string, version uint16, he
 	copy(data[len(header)+len(salt):], ciphertext)
 
 	return SaveVersionedRecord(path, version, data)
+}
+
+func DecryptRecord[T any](password string, ciphertext []byte) (T, error) {
+	var obj T
+	c := crypt.LoadFromPassword(password, ciphertext[:crypt.SALT_SIZE])
+
+	plaintext, err := c.Decrypt(ciphertext[crypt.SALT_SIZE:])
+	if err != nil {
+		return obj, errors.Chain(err, "error decrypting ciphertext")
+	}
+
+	err = json.Unmarshal(plaintext, &obj)
+	if err != nil {
+		return obj, errors.Chain(err, "error unmarshaling json")
+	}
+
+	return obj, nil
 }

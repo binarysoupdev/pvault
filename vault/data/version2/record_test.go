@@ -106,7 +106,7 @@ func (s *RecordTestSuite) TestLoadRecordVersion1ReturnsRecord() {
 	//-- arrange
 	s.Record.Other = map[string]any{}
 
-	err := version1.NewDatabase(s.Database.Path).SaveRecord(s.Record, s.Password)
+	err := version1.NewDatabase(s.Database.Path).SaveLegacyRecord(s.Record, s.Password)
 	s.Require().NoError(err)
 
 	//-- act

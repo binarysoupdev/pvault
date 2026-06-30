@@ -16,7 +16,7 @@ func (v *Vault) Upgrade() error {
 		return err
 	}
 
-	err = v.Database.UpgradeToVersion2(v.Index)
+	err = v.Database.Upgrade(v.Index, db)
 	if err != nil {
 		return errors.Chain(err, "error upgrading database")
 	}
