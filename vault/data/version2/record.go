@@ -19,7 +19,10 @@ func (db Database) RecordPath(id uuid.UUID) string {
 }
 
 func (db Database) SaveRecord(r record.Record, password string) error {
-	return data.SaveEncryptedRecord(db.RecordPath(r.ID), password, RECORD_VERSION, nil, r)
+	header := make([]byte, 2)
+	binary.BigEndian.PutUint16(header, RECORD_VERSION)
+
+	return data.SaveEncryptedRecord(db.RecordPath(r.ID), password, header, r)
 }
 
 func (db Database) LoadRecord(id uuid.UUID, password string) (record.Record, error) {
@@ -33,7 +36,7 @@ func (db Database) LoadRecord(id uuid.UUID, password string) (record.Record, err
 
 	switch version {
 	case 1:
-		return version1.NewDatabase(db.Path).ParseLegacyRecord(id, password, raw)
+		return version1.NewDatabase(db.Path).ParseRecordV1(id, password, raw)
 	case 2:
 		return data.DecryptRecord[record.Record](password, raw)
 	default:

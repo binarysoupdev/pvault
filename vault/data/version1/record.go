@@ -28,20 +28,27 @@ func (Database) DeleteRecord(id uuid.UUID) error {
 	return data.NotSupportedError{}
 }
 
-func (db Database) SaveLegacyRecord(r record.Record, password string) error {
-	old := legacy.RecordV1{
+func (db Database) SaveRecordV1(r record.Record, password string) error {
+	v1 := legacy.RecordV1{
 		Password: r.Password,
 		Username: r.Username,
 	}
+	header := db.buildRecordV1Header(r.Name)
 
-	header := make([]byte, 2+len(r.Name))
-	binary.BigEndian.PutUint16(header, uint16(len(r.Name)))
-	copy(header[2:], []byte(r.Name))
-
-	return data.SaveEncryptedRecord(db.RecordPath(r.ID), password, RECORD_VERSION, header, old)
+	return data.SaveEncryptedRecord(db.RecordPath(r.ID), password, header, v1)
 }
 
-func (db Database) ParseLegacyRecord(id uuid.UUID, password string, raw []byte) (record.Record, error) {
+func (Database) buildRecordV1Header(name string) []byte {
+	header := make([]byte, 2+2+len(name))
+
+	binary.BigEndian.PutUint16(header, RECORD_VERSION)
+	binary.BigEndian.PutUint16(header[2:], uint16(len(name)))
+	copy(header[2+2:], []byte(name))
+
+	return header
+}
+
+func (db Database) ParseRecordV1(id uuid.UUID, password string, raw []byte) (record.Record, error) {
 	length := binary.BigEndian.Uint16(raw)
 	raw = raw[2:]
 
