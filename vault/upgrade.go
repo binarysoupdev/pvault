@@ -11,12 +11,12 @@ func (v *Vault) Upgrade() error {
 		return errors.New("vault is up-to-date")
 	}
 
-	db, err := v.initNewDatabase()
+	db, err := v.initNewDatabaseVersion2()
 	if err != nil {
 		return err
 	}
 
-	err = v.Database.Upgrade(v.Index, db)
+	err = v.Database.UpgradeToVersion2(v.Index)
 	if err != nil {
 		return errors.Chain(err, "error upgrading database")
 	}

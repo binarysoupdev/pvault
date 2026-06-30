@@ -6,7 +6,8 @@ import (
 	"path/filepath"
 	"pvault/errors"
 	"pvault/vault/data"
-	"pvault/vault/data/legacy"
+	"pvault/vault/data/version1"
+	"pvault/vault/data/version2"
 )
 
 const LEGACY_INDEX_FILE = "index.txt"
@@ -41,7 +42,7 @@ func detectDatabase(path string) (data.Database, error) {
 
 	_, err = os.Stat(legacyPath)
 	if err == nil {
-		return legacy.NewDatabaseV1(legacyPath), nil
+		return version1.NewDatabase(legacyPath), nil
 	}
 
 	return nil, errors.New("index file not found")
@@ -65,7 +66,7 @@ func detectDatabaseFromVersionHeader(path string) (data.Database, error) {
 
 	switch version {
 	case 2:
-		return data.NewDatabaseV2(path), nil
+		return version2.NewDatabase(path), nil
 	default:
 		return nil, errors.Format("unsupported version \"%d\"", version)
 	}

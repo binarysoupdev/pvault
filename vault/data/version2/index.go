@@ -1,4 +1,4 @@
-package data
+package version2
 
 import (
 	"encoding/binary"
@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (db DatabaseV2) SaveIndex(idx index.IndexMap) error {
+func (db Database) SaveIndex(idx index.IndexMap) error {
 	file, err := os.Create(db.Path)
 	if err != nil {
 		return errors.Chain(err, "error creating index file")
@@ -31,7 +31,7 @@ func (db DatabaseV2) SaveIndex(idx index.IndexMap) error {
 	return nil
 }
 
-func (db DatabaseV2) writeHeader(file *os.File, numRecords int) error {
+func (db Database) writeHeader(file *os.File, numRecords int) error {
 	header := make([]byte, 4)
 	binary.BigEndian.PutUint16(header, db.GetVersion())
 	binary.BigEndian.PutUint16(header[2:], uint16(numRecords))
@@ -40,7 +40,7 @@ func (db DatabaseV2) writeHeader(file *os.File, numRecords int) error {
 	return err
 }
 
-func (DatabaseV2) writeEntry(file *os.File, name string, id uuid.UUID) error {
+func (Database) writeEntry(file *os.File, name string, id uuid.UUID) error {
 	entry := make([]byte, 2+16+len(name))
 
 	binary.BigEndian.PutUint16(entry, 16+uint16(len(name)))
@@ -51,7 +51,7 @@ func (DatabaseV2) writeEntry(file *os.File, name string, id uuid.UUID) error {
 	return err
 }
 
-func (db DatabaseV2) LoadIndex() (index.IndexMap, error) {
+func (db Database) LoadIndex() (index.IndexMap, error) {
 	raw, err := os.ReadFile(db.Path)
 	if err != nil {
 		return index.IndexMap{}, errors.Chain(err, "error reading index file")
@@ -79,7 +79,7 @@ func (db DatabaseV2) LoadIndex() (index.IndexMap, error) {
 	return idx, nil
 }
 
-func (DatabaseV2) decodeEntry(idx index.IndexMap, raw []byte) {
+func (Database) decodeEntry(idx index.IndexMap, raw []byte) {
 	id, _ := uuid.FromBytes(raw[:16])
 	name := string(raw[16:])
 

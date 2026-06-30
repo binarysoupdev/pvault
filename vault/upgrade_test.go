@@ -4,6 +4,7 @@ import (
 	"pvault/errors"
 	"pvault/vault"
 	"pvault/vault/data"
+	"pvault/vault/data/version2"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -68,6 +69,6 @@ func (s *UpgradeTestSuite) TestUpgradeValidRunsUpgrade() {
 	//-- arrange
 	s.Require().NoError(res)
 
-	s.Require().IsType(data.DatabaseV2{}, s.Vault.Database)
-	s.Assert().FileExists(s.Vault.Database.(data.DatabaseV2).Path)
+	s.Require().IsType(version2.Database{}, s.Vault.Database)
+	s.Assert().FileExists(s.Vault.Database.(version2.Database).Path)
 }

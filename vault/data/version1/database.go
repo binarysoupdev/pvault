@@ -1,4 +1,4 @@
-package legacy
+package version1
 
 import (
 	"encoding/binary"
@@ -15,48 +15,48 @@ import (
 	"github.com/google/uuid"
 )
 
-type DatabaseV1 struct {
+type Database struct {
 	IndexPath string
 }
 
-func NewDatabaseV1(path string) DatabaseV1 {
-	return DatabaseV1{
+func NewDatabase(path string) Database {
+	return Database{
 		IndexPath: path,
 	}
 }
 
-func (DatabaseV1) SaveIndex(idx index.IndexMap) error {
+func (Database) GetVersion() uint16 {
+	return 1
+}
+
+func (Database) SaveIndex(idx index.IndexMap) error {
 	return data.NotSupportedError{}
 }
 
-func (DatabaseV1) LoadIndex() (index.IndexMap, error) {
+func (Database) LoadIndex() (index.IndexMap, error) {
 	// TODO: implement
 	return index.IndexMap{}, nil
 }
 
-func (DatabaseV1) SaveRecord(r record.Record, password string) error {
+func (Database) SaveRecord(r record.Record, password string) error {
 	return data.NotSupportedError{}
 }
 
-func (DatabaseV1) LoadRecord(id uuid.UUID, password string) (record.Record, error) {
+func (Database) LoadRecord(id uuid.UUID, password string) (record.Record, error) {
 	return record.Record{}, data.NotSupportedError{}
 }
 
-func (DatabaseV1) DeleteRecord(id uuid.UUID) error {
+func (Database) DeleteRecord(id uuid.UUID) error {
 	return data.NotSupportedError{}
 }
 
 //=====================================
 
-func (DatabaseV1) GetVersion() uint16 {
-	return 1
-}
-
-func (db DatabaseV1) RecordPath(id uuid.UUID) string {
+func (db Database) RecordPath(id uuid.UUID) string {
 	return filepath.Join(filepath.Dir(db.IndexPath), id.String()+".crypt")
 }
 
-func (db DatabaseV1) SaveTestRecord(path string, r record.Record, password string) error {
+func (db Database) SaveTestRecord(path string, r record.Record, password string) error {
 	old := legacy.RecordV1{
 		Password: r.Password,
 		Username: r.Username,
@@ -84,7 +84,7 @@ func (db DatabaseV1) SaveTestRecord(path string, r record.Record, password strin
 	return nil
 }
 
-func (db DatabaseV1) writeRecordMeta(file *os.File, name string) {
+func (db Database) writeRecordMeta(file *os.File, name string) {
 	const LEGACY_RECORD_VERSION = 1
 
 	version := make([]byte, 2)
@@ -95,31 +95,4 @@ func (db DatabaseV1) writeRecordMeta(file *os.File, name string) {
 	binary.BigEndian.PutUint16(length, uint16(len(name)))
 	file.Write(length)
 	file.Write([]byte(name))
-}
-
-func (db DatabaseV1) Upgrade(idx index.IndexMap, target data.DatabaseV2) error {
-	const LEGACY_HASH_SIZE = 60
-
-	for name, id := range idx {
-		oldFile := db.RecordPath(id)
-
-		raw, err := os.ReadFile(oldFile)
-		if err != nil {
-			continue
-		}
-
-		file, err := os.Create(target.RecordPath(id))
-		if err != nil {
-			return errors.Chain(err, "error creating converted record file")
-		}
-		defer file.Close()
-
-		db.writeRecordMeta(file, name)
-		file.Write(raw[LEGACY_HASH_SIZE:])
-
-		_ = os.Remove(oldFile)
-	}
-
-	_ = os.Remove(db.IndexPath)
-	return nil
 }

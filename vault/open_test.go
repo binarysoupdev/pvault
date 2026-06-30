@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"pvault/vault"
-	"pvault/vault/data"
-	"pvault/vault/data/legacy"
+	"pvault/vault/data/version1"
+	"pvault/vault/data/version2"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -52,12 +52,12 @@ func TestOpenLegacyFileLoadsCorrectDecoder(t *testing.T) {
 
 	assert.Equal(t, VAULT_PATH, v.Path)
 	assert.NotNil(t, v.Index)
-	assert.IsType(t, legacy.DatabaseV1{}, v.Database)
+	assert.IsType(t, version1.Database{}, v.Database)
 }
 
 func TestOpenModernFileLoadsCorrectDecoder(t *testing.T) {
 	//-- arrange
-	DATABASE := data.DatabaseV2{}
+	DATABASE := version2.Database{}
 
 	file, PATH := file.Create(t, vault.INDEX_FILE)
 	file.Write([]byte{0, byte(DATABASE.GetVersion()), 0, 0})

@@ -24,7 +24,7 @@ func (db DatabaseMock) GetVersion() uint16 {
 	return db.Version
 }
 
-func (db *DatabaseMock) Upgrade(idx index.IndexMap, target DatabaseV2) error {
+func (db *DatabaseMock) UpgradeToVersion2(idx index.IndexMap) error {
 	return db.UpgradeError
 }
 

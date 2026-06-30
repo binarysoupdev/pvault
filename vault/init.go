@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"pvault/errors"
-	"pvault/vault/data"
+	"pvault/vault/data/version2"
 	"pvault/vault/index"
 )
 
@@ -26,7 +26,7 @@ func InitializeNew(path string) (Vault, error) {
 		Index: index.IndexMap{},
 	}
 
-	v.Database, err = v.initNewDatabase()
+	v.Database, err = v.initNewDatabaseVersion2()
 	if err != nil {
 		return Vault{}, err
 	}
@@ -34,12 +34,12 @@ func InitializeNew(path string) (Vault, error) {
 	return v, nil
 }
 
-func (v Vault) initNewDatabase() (data.DatabaseV2, error) {
-	db := data.NewDatabaseV2(filepath.Join(v.Path, INDEX_FILE))
+func (v Vault) initNewDatabaseVersion2() (version2.Database, error) {
+	db := version2.NewDatabase(filepath.Join(v.Path, INDEX_FILE))
 
 	err := db.SaveIndex(v.Index)
 	if err != nil {
-		return data.DatabaseV2{}, errors.Chain(err, "error saving index file")
+		return version2.Database{}, errors.Chain(err, "error saving index file")
 	}
 
 	return db, nil

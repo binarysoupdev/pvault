@@ -1,4 +1,4 @@
-package data
+package version2
 
 import (
 	"encoding/binary"
@@ -15,11 +15,11 @@ import (
 
 const CURRENT_RECORD_VERSION uint16 = 2
 
-func (db DatabaseV2) RecordPath(id uuid.UUID) string {
+func (db Database) RecordPath(id uuid.UUID) string {
 	return filepath.Join(filepath.Dir(db.Path), id.String())
 }
 
-func (db DatabaseV2) SaveRecord(r record.Record, password string) error {
+func (db Database) SaveRecord(r record.Record, password string) error {
 	c, salt := crypt.NewFromPassword(password)
 
 	plaintext, err := json.Marshal(r)
@@ -45,7 +45,7 @@ func (db DatabaseV2) SaveRecord(r record.Record, password string) error {
 	return nil
 }
 
-func (db DatabaseV2) LoadRecord(id uuid.UUID, password string) (record.Record, error) {
+func (db Database) LoadRecord(id uuid.UUID, password string) (record.Record, error) {
 	raw, err := os.ReadFile(db.RecordPath(id))
 	if err != nil {
 		return record.Record{}, errors.Chain(err, "error reading record file")
@@ -64,7 +64,7 @@ func (db DatabaseV2) LoadRecord(id uuid.UUID, password string) (record.Record, e
 	}
 }
 
-func (DatabaseV2) parseRecordV1(password string, raw []byte, id uuid.UUID) (record.Record, error) {
+func (Database) parseRecordV1(password string, raw []byte, id uuid.UUID) (record.Record, error) {
 	length := binary.BigEndian.Uint16(raw)
 	raw = raw[2:]
 
@@ -79,7 +79,7 @@ func (DatabaseV2) parseRecordV1(password string, raw []byte, id uuid.UUID) (reco
 	return r.Upgrade(id, name), nil
 }
 
-func (DatabaseV2) parseRecordV2(password string, raw []byte) (record.Record, error) {
+func (Database) parseRecordV2(password string, raw []byte) (record.Record, error) {
 	return decryptJSON[record.Record](password, raw)
 }
 
@@ -100,7 +100,7 @@ func decryptJSON[T any](password string, ciphertext []byte) (T, error) {
 	return obj, nil
 }
 
-func (db DatabaseV2) DeleteRecord(id uuid.UUID) error {
+func (db Database) DeleteRecord(id uuid.UUID) error {
 	err := os.Remove(db.RecordPath(id))
 	if err != nil {
 		return errors.Chain(err, "error removing record file")
