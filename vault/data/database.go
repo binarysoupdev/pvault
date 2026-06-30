@@ -9,7 +9,7 @@ import (
 
 type Database interface {
 	GetVersion() uint16
-	Upgrade(target Database) error
+	Upgrade(idx index.IndexMap, target DatabaseV2) error
 
 	SaveIndex(idx index.IndexMap) error
 	LoadIndex() (index.IndexMap, error)

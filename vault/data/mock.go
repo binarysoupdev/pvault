@@ -8,11 +8,9 @@ import (
 )
 
 type DatabaseMock struct {
-	Version       uint16
-	UpgradeTarget Database
-
-	Index  index.IndexMap
-	Record record.Record
+	Version uint16
+	Index   index.IndexMap
+	Record  record.Record
 
 	UpgradeError      error
 	SaveIndexError    error
@@ -26,8 +24,7 @@ func (db DatabaseMock) GetVersion() uint16 {
 	return db.Version
 }
 
-func (db *DatabaseMock) Upgrade(target Database) error {
-	db.UpgradeTarget = target
+func (db *DatabaseMock) Upgrade(idx index.IndexMap, target DatabaseV2) error {
 	return db.UpgradeError
 }
 

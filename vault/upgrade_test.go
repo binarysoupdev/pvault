@@ -6,6 +6,7 @@ import (
 	"pvault/vault/data"
 	"testing"
 
+	"github.com/binarysoupdev/tinsel/file"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -25,6 +26,7 @@ func (s *UpgradeTestSuite) SetupTest() {
 	}
 
 	s.Vault = vault.Vault{
+		Path:     file.NewPath(s.T(), ""),
 		Database: &s.DatabaseMock,
 	}
 }
@@ -65,5 +67,7 @@ func (s *UpgradeTestSuite) TestUpgradeValidRunsUpgrade() {
 
 	//-- arrange
 	s.Require().NoError(res)
-	s.IsType(s.Vault.NewCurrentDatabase(), s.DatabaseMock.UpgradeTarget)
+
+	s.Require().IsType(data.DatabaseV2{}, s.Vault.Database)
+	s.Assert().FileExists(s.Vault.Database.(data.DatabaseV2).Path)
 }
