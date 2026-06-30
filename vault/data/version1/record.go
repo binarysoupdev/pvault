@@ -2,58 +2,37 @@ package version1
 
 import (
 	"encoding/binary"
-	"encoding/json"
-	"os"
 	"path/filepath"
-	"pvault/errors"
+	"pvault/vault/data"
 	"pvault/vault/record"
 	"pvault/vault/record/legacy"
 
-	"github.com/binarysoupdev/cryptool/crypt"
 	"github.com/google/uuid"
 )
 
+const RECORD_VERSION uint16 = 1
+
 func (db Database) RecordPath(id uuid.UUID) string {
-	return filepath.Join(db.Path, id.String()+".crypt")
+	return filepath.Join(db.Path, id.String())
 }
 
-func (db Database) SaveTestRecord(path string, r record.Record, password string) error {
+func (db Database) SaveRecord(r record.Record, password string) error {
 	old := legacy.RecordV1{
 		Password: r.Password,
 		Username: r.Username,
 	}
 
-	c, salt := crypt.NewFromPassword(password)
+	header := make([]byte, 2+len(r.Name))
+	binary.BigEndian.PutUint16(header, uint16(len(r.Name)))
+	copy(header[2:], []byte(r.Name))
 
-	plaintext, err := json.Marshal(old)
-	if err != nil {
-		return errors.Chain(err, "error marshaling json")
-	}
-
-	ciphertext := c.Encrypt(plaintext)
-
-	file, err := os.Create(path)
-	if err != nil {
-		return errors.Chain(err, "error creating record file")
-	}
-	defer file.Close()
-
-	db.writeRecordMeta(file, r.Name)
-	file.Write(salt)
-	file.Write(ciphertext)
-
-	return nil
+	return data.SaveEncryptedRecord(db.RecordPath(r.ID), password, RECORD_VERSION, header, old)
 }
 
-func (db Database) writeRecordMeta(file *os.File, name string) {
-	const LEGACY_RECORD_VERSION = 1
+func (Database) LoadRecord(id uuid.UUID, password string) (record.Record, error) {
+	return record.Record{}, data.NotSupportedError{}
+}
 
-	version := make([]byte, 2)
-	binary.BigEndian.PutUint16(version, LEGACY_RECORD_VERSION)
-	file.Write(version)
-
-	length := make([]byte, 2)
-	binary.BigEndian.PutUint16(length, uint16(len(name)))
-	file.Write(length)
-	file.Write([]byte(name))
+func (Database) DeleteRecord(id uuid.UUID) error {
+	return data.NotSupportedError{}
 }

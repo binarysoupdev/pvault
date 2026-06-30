@@ -26,7 +26,7 @@ func TestRecordTestSuite(t *testing.T) {
 }
 
 func (s *RecordTestSuite) SetupTest() {
-	s.Database = version2.NewDatabase(file.NewPath(s.T(), "index.bin"))
+	s.Database = version2.NewDatabase(file.NewPath(s.T(), ""))
 
 	rand := rand.New(0)
 	s.Record = record.NewFromName(rand.ASCII(10))
@@ -87,7 +87,7 @@ func (s *RecordTestSuite) TestLoadRecordWithIncorrectPasswordReturnsError() {
 
 func (s *RecordTestSuite) TestLoadRecordWithUnsupportedVersionReturnsError() {
 	//-- arrange
-	VERSION := version2.CURRENT_RECORD_VERSION + 1
+	VERSION := version2.RECORD_VERSION + 1
 
 	version := make([]byte, 2)
 	binary.BigEndian.PutUint16(version, VERSION)
@@ -106,7 +106,7 @@ func (s *RecordTestSuite) TestLoadRecordVersion1ReturnsRecord() {
 	//-- arrange
 	s.Record.Other = map[string]any{}
 
-	err := version1.Database{}.SaveTestRecord(s.Database.RecordPath(s.Record.ID), s.Record, s.Password)
+	err := version1.NewDatabase(s.Database.Path).SaveRecord(s.Record, s.Password)
 	s.Require().NoError(err)
 
 	//-- act

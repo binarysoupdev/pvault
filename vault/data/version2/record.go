@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"pvault/errors"
+	"pvault/vault/data"
 	"pvault/vault/record"
 	"pvault/vault/record/legacy"
 
@@ -13,36 +14,14 @@ import (
 	"github.com/google/uuid"
 )
 
-const CURRENT_RECORD_VERSION uint16 = 2
+const RECORD_VERSION uint16 = 2
 
 func (db Database) RecordPath(id uuid.UUID) string {
-	return filepath.Join(filepath.Dir(db.Path), id.String())
+	return filepath.Join(db.Path, id.String())
 }
 
 func (db Database) SaveRecord(r record.Record, password string) error {
-	c, salt := crypt.NewFromPassword(password)
-
-	plaintext, err := json.Marshal(r)
-	if err != nil {
-		return errors.Chain(err, "error marshaling json")
-	}
-
-	ciphertext := c.Encrypt(plaintext)
-
-	file, err := os.Create(db.RecordPath(r.ID))
-	if err != nil {
-		return errors.Chain(err, "error creating record file")
-	}
-	defer file.Close()
-
-	version := make([]byte, 2)
-	binary.BigEndian.PutUint16(version, CURRENT_RECORD_VERSION)
-
-	file.Write(version)
-	file.Write(salt)
-	file.Write(ciphertext)
-
-	return nil
+	return data.SaveEncryptedRecord(db.RecordPath(r.ID), password, RECORD_VERSION, nil, r)
 }
 
 func (db Database) LoadRecord(id uuid.UUID, password string) (record.Record, error) {
