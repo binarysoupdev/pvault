@@ -3,14 +3,21 @@ package version2
 import (
 	"encoding/binary"
 	"os"
+	"path/filepath"
 	"pvault/errors"
 	"pvault/vault/index"
 
 	"github.com/google/uuid"
 )
 
+const INDEX_FILE = "index.bin"
+
+func (db Database) IndexPath() string {
+	return filepath.Join(db.Path, INDEX_FILE)
+}
+
 func (db Database) SaveIndex(idx index.IndexMap) error {
-	file, err := os.Create(db.Path)
+	file, err := os.Create(db.IndexPath())
 	if err != nil {
 		return errors.Chain(err, "error creating index file")
 	}
@@ -52,7 +59,7 @@ func (Database) writeEntry(file *os.File, name string, id uuid.UUID) error {
 }
 
 func (db Database) LoadIndex() (index.IndexMap, error) {
-	raw, err := os.ReadFile(db.Path)
+	raw, err := os.ReadFile(db.IndexPath())
 	if err != nil {
 		return index.IndexMap{}, errors.Chain(err, "error reading index file")
 	}

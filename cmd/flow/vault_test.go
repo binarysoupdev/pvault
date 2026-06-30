@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"pvault/cmd/flow"
 	"pvault/vault"
+	"pvault/vault/data/version1"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -13,7 +14,7 @@ import (
 
 func TestOpenVaultVaultOutOfDateReturnsError(t *testing.T) {
 	//-- arrange
-	PATH := file.CreateEmpty(t, vault.LEGACY_INDEX_FILE)
+	PATH := file.CreateEmpty(t, version1.INDEX_FILE)
 	const LEGACY_VERSION = 1
 
 	//-- act

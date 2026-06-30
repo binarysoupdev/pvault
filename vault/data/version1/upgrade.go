@@ -9,7 +9,7 @@ import (
 
 func (db Database) UpgradeToVersion2(idx index.IndexMap) error {
 	const LEGACY_HASH_SIZE = 60
-	target := version2.NewDatabase(db.IndexPath)
+	target := version2.NewDatabase(db.Path)
 
 	for name, id := range idx {
 		oldFile := db.RecordPath(id)
@@ -31,6 +31,6 @@ func (db Database) UpgradeToVersion2(idx index.IndexMap) error {
 		_ = os.Remove(oldFile)
 	}
 
-	_ = os.Remove(db.IndexPath)
+	_ = os.Remove(db.IndexPath())
 	return nil
 }

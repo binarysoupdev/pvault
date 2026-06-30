@@ -10,8 +10,6 @@ import (
 	"pvault/vault/data/version2"
 )
 
-const LEGACY_INDEX_FILE = "index.txt"
-
 func Open(path string) (Vault, error) {
 	db, err := detectDatabase(path)
 	if err != nil {
@@ -31,27 +29,23 @@ func Open(path string) (Vault, error) {
 }
 
 func detectDatabase(path string) (data.Database, error) {
-	indexPath := filepath.Join(path, INDEX_FILE)
-
-	_, err := os.Stat(indexPath)
+	_, err := os.Stat(filepath.Join(path, version2.INDEX_FILE))
 	if err == nil {
-		return detectDatabaseFromVersionHeader(indexPath)
+		return detectDatabaseFromVersionHeader(path, version2.INDEX_FILE)
 	}
 
-	legacyPath := filepath.Join(path, LEGACY_INDEX_FILE)
-
-	_, err = os.Stat(legacyPath)
+	_, err = os.Stat(filepath.Join(path, version1.INDEX_FILE))
 	if err == nil {
-		return version1.NewDatabase(legacyPath), nil
+		return version1.NewDatabase(path), nil
 	}
 
 	return nil, errors.New("index file not found")
 }
 
-func detectDatabaseFromVersionHeader(path string) (data.Database, error) {
+func detectDatabaseFromVersionHeader(path, indexFile string) (data.Database, error) {
 	header := make([]byte, 2)
 
-	file, err := os.Open(path)
+	file, err := os.Open(filepath.Join(path, indexFile))
 	if err != nil {
 		return nil, errors.Chain(err, "error opening index file")
 	}

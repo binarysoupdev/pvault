@@ -8,6 +8,7 @@ import (
 	"pvault/config"
 	"pvault/data"
 	"pvault/vault"
+	"pvault/vault/data/version1"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/test"
@@ -131,7 +132,7 @@ func (s *ConfigTestSuite) TestRunValidateConfigWithInvalidVaultPrintsError() {
 
 func (s *ConfigTestSuite) TestRunValidateConfigWithOutOfDateVaultPrintsError() {
 	//-- arrange
-	PATH := file.CreateEmpty(s.T(), vault.LEGACY_INDEX_FILE)
+	PATH := file.CreateEmpty(s.T(), version1.INDEX_FILE)
 	const LEGACY_VERSION = 1
 
 	s.Config.VaultPath = filepath.Dir(PATH)

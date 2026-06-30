@@ -2,13 +2,10 @@ package vault
 
 import (
 	"os"
-	"path/filepath"
 	"pvault/errors"
 	"pvault/vault/data/version2"
 	"pvault/vault/index"
 )
-
-const INDEX_FILE = "index.bin"
 
 func InitializeNew(path string) (Vault, error) {
 	_, err := os.Stat(path)
@@ -35,7 +32,7 @@ func InitializeNew(path string) (Vault, error) {
 }
 
 func (v Vault) initNewDatabaseVersion2() (version2.Database, error) {
-	db := version2.NewDatabase(filepath.Join(v.Path, INDEX_FILE))
+	db := version2.NewDatabase(v.Path)
 
 	err := db.SaveIndex(v.Index)
 	if err != nil {

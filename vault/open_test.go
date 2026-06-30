@@ -28,7 +28,7 @@ func TestOpenUnsupportedVersionReturnsError(t *testing.T) {
 	//-- arrange
 	VERSION := vault.CURRENT_VERSION + 1
 
-	file, PATH := file.Create(t, vault.INDEX_FILE)
+	file, PATH := file.Create(t, version2.INDEX_FILE)
 	file.Write([]byte{0, byte(VERSION), 0, 0})
 	file.Close()
 
@@ -41,7 +41,7 @@ func TestOpenUnsupportedVersionReturnsError(t *testing.T) {
 
 func TestOpenLegacyFileLoadsCorrectDecoder(t *testing.T) {
 	//-- arrange
-	PATH := file.CreateEmpty(t, vault.LEGACY_INDEX_FILE)
+	PATH := file.CreateEmpty(t, version1.INDEX_FILE)
 	VAULT_PATH := filepath.Dir(PATH)
 
 	//-- act
@@ -59,7 +59,7 @@ func TestOpenModernFileLoadsCorrectDecoder(t *testing.T) {
 	//-- arrange
 	DATABASE := version2.Database{}
 
-	file, PATH := file.Create(t, vault.INDEX_FILE)
+	file, PATH := file.Create(t, version2.INDEX_FILE)
 	file.Write([]byte{0, byte(DATABASE.GetVersion()), 0, 0})
 	file.Close()
 

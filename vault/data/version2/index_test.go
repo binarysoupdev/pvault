@@ -2,6 +2,7 @@ package version2_test
 
 import (
 	"fmt"
+	"path/filepath"
 	"pvault/vault"
 	"pvault/vault/data/version2"
 	"pvault/vault/index"
@@ -27,17 +28,16 @@ func TestSaveIndexWithInvalidPathReturnsError(t *testing.T) {
 
 func TestSaveIndexValidSavesIndex(t *testing.T) {
 	//-- arrange
-	rand := rand.New(0)
-	INDEX_FILE := file.NewPath(t, rand.ASCII(10))
+	PATH := file.NewPath(t, "")
 
-	db := version2.NewDatabase(INDEX_FILE)
+	db := version2.NewDatabase(PATH)
 
 	//-- act
 	res := db.SaveIndex(index.IndexMap{})
 
 	//-- assert
 	require.NoError(t, res)
-	assert.FileExists(t, INDEX_FILE)
+	assert.FileExists(t, db.IndexPath())
 }
 
 func TestLoadIndexWithFileNotFoundReturnsError(t *testing.T) {
@@ -53,14 +53,13 @@ func TestLoadIndexWithFileNotFoundReturnsError(t *testing.T) {
 
 func TestLoadIndexWithIncorrectVersionReturnError(t *testing.T) {
 	//-- arrange
-	rand := rand.New(0)
 	VERSION := vault.CURRENT_VERSION + 1
 
-	file, PATH := file.Create(t, rand.ASCII(10))
+	file, PATH := file.Create(t, version2.INDEX_FILE)
 	file.Write([]byte{0, byte(VERSION), 0, 0})
 	file.Close()
 
-	db := version2.NewDatabase(PATH)
+	db := version2.NewDatabase(filepath.Dir(PATH))
 
 	//-- act
 	_, res := db.LoadIndex()
@@ -71,9 +70,9 @@ func TestLoadIndexWithIncorrectVersionReturnError(t *testing.T) {
 
 func TestLoadIndexValidReturnIndex(t *testing.T) {
 	//-- arrange
-	rand := rand.New(0)
-	db := version2.NewDatabase(file.NewPath(t, rand.ASCII(10)))
+	db := version2.NewDatabase(file.NewPath(t, ""))
 
+	rand := rand.New(0)
 	INDEX := index.IndexMap{
 		rand.ASCII(10): uuid.New(),
 		rand.ASCII(15): uuid.New(),

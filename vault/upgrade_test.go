@@ -70,5 +70,5 @@ func (s *UpgradeTestSuite) TestUpgradeValidRunsUpgrade() {
 	s.Require().NoError(res)
 
 	s.Require().IsType(version2.Database{}, s.Vault.Database)
-	s.Assert().FileExists(s.Vault.Database.(version2.Database).Path)
+	s.Assert().FileExists(s.Vault.Database.(version2.Database).IndexPath())
 }
