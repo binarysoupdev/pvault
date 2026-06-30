@@ -1,10 +1,16 @@
 package legacy
 
 import (
+	"encoding/binary"
+	"encoding/json"
+	"os"
+	"pvault/errors"
 	"pvault/vault/data"
 	"pvault/vault/index"
 	"pvault/vault/record"
+	"pvault/vault/record/legacy"
 
+	"github.com/binarysoupdev/cryptool/crypt"
 	"github.com/google/uuid"
 )
 
@@ -46,4 +52,42 @@ func (DatabaseV1) LoadRecord(id uuid.UUID, password string) (record.Record, erro
 
 func (DatabaseV1) DeleteRecord(id uuid.UUID) error {
 	return data.NotSupportedError{}
+}
+
+func (DatabaseV1) SaveTestRecord(path string, r record.Record, password string) error {
+	const LEGACY_RECORD_VERSION = 1
+
+	old := legacy.RecordV1{
+		Password: r.Password,
+		Username: r.Username,
+	}
+
+	c, salt := crypt.NewFromPassword(password)
+
+	plaintext, err := json.Marshal(old)
+	if err != nil {
+		return errors.Chain(err, "error marshaling json")
+	}
+
+	ciphertext := c.Encrypt(plaintext)
+
+	file, err := os.Create(path)
+	if err != nil {
+		return errors.Chain(err, "error creating record file")
+	}
+	defer file.Close()
+
+	version := make([]byte, 2)
+	binary.BigEndian.PutUint16(version, LEGACY_RECORD_VERSION)
+	file.Write(version)
+
+	length := make([]byte, 2)
+	binary.BigEndian.PutUint16(length, uint16(len(r.Name)))
+	file.Write(length)
+	file.Write([]byte(r.Name))
+
+	file.Write(salt)
+	file.Write(ciphertext)
+
+	return nil
 }

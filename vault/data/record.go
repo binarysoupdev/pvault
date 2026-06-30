@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"pvault/errors"
 	"pvault/vault/record"
+	"pvault/vault/record/legacy"
 
 	"github.com/binarysoupdev/cryptool/crypt"
 	"github.com/google/uuid"
@@ -53,30 +54,50 @@ func (db DatabaseV2) LoadRecord(id uuid.UUID, password string) (record.Record, e
 	version := binary.BigEndian.Uint16(raw)
 	raw = raw[2:]
 
-	c := crypt.LoadFromPassword(password, raw[:crypt.SALT_SIZE])
-
-	plaintext, err := c.Decrypt(raw[crypt.SALT_SIZE:])
-	if err != nil {
-		return record.Record{}, errors.Chain(err, "error decrypting ciphertext")
-	}
-
 	switch version {
+	case 1:
+		return db.parseRecordV1(password, raw, id)
 	case 2:
-		return db.parseRecordV2(plaintext)
+		return db.parseRecordV2(password, raw)
 	default:
 		return record.Record{}, errors.Format("unsupported record version \"%d\"", version)
 	}
 }
 
-func (DatabaseV2) parseRecordV2(raw []byte) (record.Record, error) {
-	var r record.Record
+func (DatabaseV2) parseRecordV1(password string, raw []byte, id uuid.UUID) (record.Record, error) {
+	length := binary.BigEndian.Uint16(raw)
+	raw = raw[2:]
 
-	err := json.Unmarshal(raw, &r)
+	name := string(raw[:length])
+	raw = raw[length:]
+
+	r, err := decryptJSON[legacy.RecordV1](password, raw)
 	if err != nil {
-		return record.Record{}, errors.Chain(err, "error unmarshaling json")
+		return record.Record{}, err
 	}
 
-	return r, nil
+	return r.Upgrade(id, name), nil
+}
+
+func (DatabaseV2) parseRecordV2(password string, raw []byte) (record.Record, error) {
+	return decryptJSON[record.Record](password, raw)
+}
+
+func decryptJSON[T any](password string, ciphertext []byte) (T, error) {
+	var obj T
+	c := crypt.LoadFromPassword(password, ciphertext[:crypt.SALT_SIZE])
+
+	plaintext, err := c.Decrypt(ciphertext[crypt.SALT_SIZE:])
+	if err != nil {
+		return obj, errors.Chain(err, "error decrypting ciphertext")
+	}
+
+	err = json.Unmarshal(plaintext, &obj)
+	if err != nil {
+		return obj, errors.Chain(err, "error unmarshaling json")
+	}
+
+	return obj, nil
 }
 
 func (db DatabaseV2) DeleteRecord(id uuid.UUID) error {

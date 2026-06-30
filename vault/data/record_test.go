@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"pvault/vault/data"
+	"pvault/vault/data/legacy"
 	"pvault/vault/record"
 	"testing"
 
@@ -31,7 +32,7 @@ func (s *RecordTestSuite) SetupTest() {
 	s.Record = record.NewFromName(rand.ASCII(10))
 	s.Record.Username = rand.ASCII(10)
 	s.Record.Password = rand.ASCII(30)
-	s.Record.Other = []interface{}{rand.ASCII(5), rand.ASCII(5), rand.ASCII(5)}
+	s.Record.Other = map[string]any{"A": rand.ASCII(5), "B": true}
 
 	s.Password = rand.ASCII(30)
 }
@@ -86,16 +87,12 @@ func (s *RecordTestSuite) TestLoadRecordWithIncorrectPasswordReturnsError() {
 
 func (s *RecordTestSuite) TestLoadRecordWithUnsupportedVersionReturnsError() {
 	//-- arrange
-	err := s.Database.SaveRecord(s.Record, s.Password)
-	s.Require().NoError(err)
-
-	raw, err := os.ReadFile(s.Database.RecordPath(s.Record.ID))
-	s.Require().NoError(err)
-
 	VERSION := data.CURRENT_RECORD_VERSION + 1
-	binary.BigEndian.PutUint16(raw, VERSION)
 
-	err = os.WriteFile(s.Database.RecordPath(s.Record.ID), raw, 0666)
+	version := make([]byte, 2)
+	binary.BigEndian.PutUint16(version, VERSION)
+
+	err := os.WriteFile(s.Database.RecordPath(s.Record.ID), version, 0666)
 	s.Require().NoError(err)
 
 	//-- act
@@ -105,7 +102,22 @@ func (s *RecordTestSuite) TestLoadRecordWithUnsupportedVersionReturnsError() {
 	s.Require().ErrorContains(res, fmt.Sprintf("unsupported record version \"%d\"", VERSION))
 }
 
-func (s *RecordTestSuite) TestLoadRecordReturnsRecord() {
+func (s *RecordTestSuite) TestLoadRecordVersion1ReturnsRecord() {
+	//-- arrange
+	s.Record.Other = map[string]any{}
+
+	err := legacy.DatabaseV1{}.SaveTestRecord(s.Database.RecordPath(s.Record.ID), s.Record, s.Password)
+	s.Require().NoError(err)
+
+	//-- act
+	r, err := s.Database.LoadRecord(s.Record.ID, s.Password)
+
+	//-- assert
+	s.Require().NoError(err)
+	s.Assert().Equal(s.Record, r)
+}
+
+func (s *RecordTestSuite) TestLoadRecordVersion2ReturnsRecord() {
 	//-- arrange
 	err := s.Database.SaveRecord(s.Record, s.Password)
 	s.Require().NoError(err)
