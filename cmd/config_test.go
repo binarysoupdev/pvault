@@ -83,32 +83,6 @@ func (s *ConfigTestSuite) TestRunNotNewConfigNotFoundReturnsError() {
 	s.RequireResultFail("error loading config")
 }
 
-func (s *ConfigTestSuite) TestRunInitVaultInvalidPathReturnsError() {
-	//-- arrange
-	s.Config.VaultPath = file.NewPath(s.T(), "")
-	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
-	s.Require().NoError(err)
-
-	//-- act
-	s.RunCommand("-init")
-
-	//-- assert
-	s.RequireResultFail("error initializing new vault")
-}
-
-func (s *ConfigTestSuite) TestRunInitVaultInitializesVault() {
-	//-- arrange
-	out := pipe.OpenStdout(1)
-	defer out.Close()
-
-	//-- act
-	s.RunCommand("-init")
-
-	//-- assert
-	s.RequireResultPass()
-	s.Assert().Contains(out.ReadLine(), "[+] New Vault Initialized: "+s.Config.VaultPath)
-}
-
 func (s *ConfigTestSuite) TestRunValidateConfigWithInvalidVaultPrintsError() {
 	//-- arrange
 	s.Config.VaultPath = file.NewPath(s.T(), "")
@@ -154,7 +128,7 @@ func (s *ConfigTestSuite) TestRunValidateConfigWithOutOfDateVaultPrintsError() {
 	s.Assert().Contains(vaultPath, fmt.Sprintf("vault (@v%d) out-of-date", LEGACY_VERSION))
 }
 
-func (s *ConfigTestSuite) TestRunValidateConfigInvalidOutputPathPrintsError() {
+func (s *ConfigTestSuite) TestRunValidateWithInvalidOutputPathPrintsError() {
 	//-- arrange
 	s.Config.OutputPath = "invalid"
 	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)

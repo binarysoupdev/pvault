@@ -8,7 +8,6 @@ import (
 	"pvault/config"
 	"pvault/data"
 	"pvault/errors"
-	"pvault/vault"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
@@ -28,8 +27,6 @@ func NewConfigCommand(loader config.Loader[config.Config]) *ConfigCommand {
 
 func (cmd ConfigCommand) Run(args []string) error {
 	new := cmd.Flags.Bool("new", false, "generate a new config file")
-	init := cmd.Flags.Bool("init", false, "initialize the vault")
-	upgrade := cmd.Flags.Bool("upgrade", false, "upgrade the vault if it's out-of-date")
 	cmd.Flags.Parse(args)
 
 	if *new {
@@ -41,13 +38,7 @@ func (cmd ConfigCommand) Run(args []string) error {
 		return err
 	}
 
-	if *init {
-		return cmd.initializeVault()
-	} else if *upgrade {
-		return cmd.upgradeVault()
-	} else {
-		return cmd.validate()
-	}
+	return cmd.validate()
 }
 
 func (cmd ConfigCommand) generateNew() error {
@@ -76,46 +67,7 @@ func (ConfigCommand) newVaultPath() string {
 	if err != nil {
 		return ""
 	}
-
 	return filepath.Join(base, ".pvault/vault")
-}
-
-func (cmd ConfigCommand) initializeVault() error {
-	_, err := vault.InitializeNew(cmd.Config.VaultPath)
-	if err != nil {
-		return errors.Chain(err, "error initializing new vault")
-	}
-
-	style.BoldCreate.Printf("[+] New Vault Initialized: %s\n", cmd.Config.VaultPath)
-	return nil
-}
-
-func (cmd ConfigCommand) upgradeVault() error {
-	v, err := vault.Open(cmd.Config.VaultPath)
-	if err != nil {
-		return errors.Chain(err, "error opening vault")
-	}
-
-	if !v.IsOutOfDate() {
-		return errors.New("vault is up-to-date")
-	}
-	oldVersion := v.Version()
-
-	backup := fmt.Sprintf("version_%d", v.Version())
-	err = v.Backup(backup)
-	if err != nil {
-		return errors.Chain(err, "error backing vault")
-	}
-
-	style.BoldCreate.Printf("[+] Created Backup: %s\n", backup)
-
-	err = v.Upgrade()
-	if err != nil {
-		return errors.Chain(err, "error upgrading vault")
-	}
-
-	style.BoldCreate.Printf("[+] Vault Upgraded (@v%d -> @v%d)\n", oldVersion, v.Version())
-	return nil
 }
 
 func (cmd ConfigCommand) validate() error {
@@ -130,14 +82,9 @@ func (cmd ConfigCommand) validate() error {
 func (cmd ConfigCommand) validateVaultPath() {
 	fmt.Printf("%s \"%s\" ", style.Bold.Sprint("Vault Path:"), cmd.Config.VaultPath)
 
-	v, err := vault.Open(cmd.Config.VaultPath)
+	v, err := flow.OpenVault(cmd.Config.VaultPath)
 	if err != nil {
-		style.Error.Println("-> error opening vault (run \"config -init\" to repair)")
-		return
-	}
-
-	if v.IsOutOfDate() {
-		style.Error.Printf("-> vault (@v%d) out-of-date (run \"config -upgrade\" to repair)\n", v.Version())
+		style.Error.Printf("-> %s\n", err)
 	} else {
 		style.Success.Printf("-> verified (@v%d)\n", v.Version())
 	}
