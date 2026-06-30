@@ -81,6 +81,13 @@ func (cmd VaultCommand) upgrade() error {
 }
 
 func (cmd VaultCommand) validate() error {
-	style.BoldInfo.Printf("[=] Loaded from \"%s\"\n", cmd.ConfigPath)
+	v, err := flow.OpenVault(cmd.Config.VaultPath)
+	if err != nil {
+		return err
+	}
+
+	style.BoldInfo.Printf("[=] Vault verified at \"%s\" (@v%d)\n", v.Path, v.Version())
+	style.Info.Printf("[%d] records found\n", len(v.Index))
+
 	return nil
 }
