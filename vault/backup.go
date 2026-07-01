@@ -7,16 +7,16 @@ import (
 	"pvault/errors"
 )
 
-func (v Vault) Backup(name string) error {
+func (v Vault) Backup(name string) (string, error) {
 	filenames, err := os.ReadDir(v.Path)
 	if err != nil {
-		return errors.Chain(err, "error reading vault directory")
+		return "", errors.Chain(err, "error reading vault directory")
 	}
 
 	path := filepath.Join(v.Path, name)
 	err = os.Mkdir(path, 0755)
 	if err != nil {
-		return errors.Chain(err, "error creating backup directory")
+		return "", errors.Chain(err, "error creating backup directory")
 	}
 
 	for _, file := range filenames {
@@ -26,11 +26,11 @@ func (v Vault) Backup(name string) error {
 
 		err := copyFile(filepath.Join(v.Path, file.Name()), filepath.Join(path, file.Name()))
 		if err != nil {
-			return errors.Chain(err, "error copying file")
+			return "", errors.Chain(err, "error copying file")
 		}
 	}
 
-	return nil
+	return path, nil
 }
 
 func copyFile(src, dest string) error {

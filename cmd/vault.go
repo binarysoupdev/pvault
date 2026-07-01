@@ -63,13 +63,12 @@ func (cmd VaultCommand) upgrade() error {
 	}
 	oldVersion := v.Version()
 
-	backup := fmt.Sprintf("version_%d", v.Version())
-	err = v.Backup(backup)
+	backup, err := v.Backup(fmt.Sprintf("version_%d", v.Version()))
 	if err != nil {
 		return errors.Chain(err, "error backing vault")
 	}
 
-	style.BoldCreate.Printf("[+] Created Backup: %s\n", backup)
+	style.BoldCreate.Printf("[+] Created Backup \"%s\"\n", backup)
 
 	err = v.Upgrade()
 	if err != nil {
