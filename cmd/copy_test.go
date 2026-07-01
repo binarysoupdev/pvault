@@ -7,6 +7,7 @@ import (
 	"pvault/config"
 	"pvault/data"
 	"pvault/tools/clipboard"
+	"pvault/tools/qrcode"
 	"pvault/vault"
 	"pvault/vault/record"
 	"testing"
@@ -21,6 +22,7 @@ import (
 type CopyTestSuite struct {
 	test.CommandSuite[*cmd.CopyCommand]
 	Clipboard *clipboard.MockClipboard
+	QRCode    *qrcode.MockRenderer
 
 	ConfigLoader config.Loader[config.Config]
 	Config       config.Config
@@ -34,14 +36,16 @@ func TestCopyCommandSuite(t *testing.T) {
 	s := CopyTestSuite{
 		ConfigLoader: config.NewLoader[config.Config](file.NewPath(t, "config.json")),
 		Clipboard:    clipboard.Mock(),
+		QRCode:       qrcode.Mock(),
 	}
 
-	s.CommandSuite = test.NewCommandSuite(cmd.NewCopyCommand(s.ConfigLoader, s.Clipboard))
+	s.CommandSuite = test.NewCommandSuite(cmd.NewCopyCommand(s.ConfigLoader, s.Clipboard, s.QRCode))
 	suite.Run(t, &s)
 }
 
 func (s *CopyTestSuite) SetupTest() {
 	*s.Clipboard = clipboard.MockClipboard{}
+	*s.QRCode = qrcode.MockRenderer{}
 
 	s.Config = config.Config{
 		Version:   config.VERSION,
@@ -212,4 +216,69 @@ func (s *CopyTestSuite) TestRunPassUsernameCopied() {
 	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")
 	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
 	s.Assert().Contains(io.ReadLine(), "[=] USERNAME copied to clipboard")
+}
+
+func (s *CopyTestSuite) TestRunQRFailsWithErrorRenderingToQRCode() {
+	//-- arrange
+	s.QRCode.RenderError = errors.New("")
+
+	io := pipe.OpenStdio(1, 3, false)
+	defer io.Close()
+
+	//-- act
+	io.Queue("PASSWORD: ", s.Password)
+	io.EndQueue()
+
+	s.RunCommand("-s", s.Record.Name, "-qr")
+
+	//-- assert
+	s.RequireResultFail("error rendering qr-code")
+
+	s.Assert().Contains(io.ReadLine(), s.Record.Name)
+	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")
+	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
+}
+
+func (s *CopyTestSuite) TestRunQRPassesAndRendersPasswordAsQRCode() {
+	//-- arrange
+	io := pipe.OpenStdio(1, 4, false)
+	defer io.Close()
+
+	//-- act
+	io.Queue("PASSWORD: ", s.Password)
+	io.EndQueue()
+
+	s.RunCommand("-s", s.Record.Name, "-qr")
+
+	//-- assert
+	s.RequireResultPass()
+
+	s.Assert().Equal(s.Record.Password, s.QRCode.Text)
+
+	s.Assert().Contains(io.ReadLine(), s.Record.Name)
+	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")
+	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
+	s.Assert().Contains(io.ReadLine(), "[=] PASSWORD rendered as QR-Code")
+}
+
+func (s *CopyTestSuite) TestRunQRPassesAndRendersUsernameAsQRCode() {
+	//-- arrange
+	io := pipe.OpenStdio(1, 4, false)
+	defer io.Close()
+
+	//-- act
+	io.Queue("PASSWORD: ", s.Password)
+	io.EndQueue()
+
+	s.RunCommand("-s", s.Record.Name, "-username", "-qr")
+
+	//-- assert
+	s.RequireResultPass()
+
+	s.Assert().Equal(s.Record.Username, s.QRCode.Text)
+
+	s.Assert().Contains(io.ReadLine(), s.Record.Name)
+	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")
+	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
+	s.Assert().Contains(io.ReadLine(), "[=] USERNAME rendered as QR-Code")
 }

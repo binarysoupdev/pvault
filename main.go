@@ -8,6 +8,7 @@ import (
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/tools/clipboard"
+	"pvault/tools/qrcode"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
@@ -27,7 +28,7 @@ func main() {
 		cmd.NewUnlockCommand(configLoader),
 		cmd.NewDeleteCommand(configLoader),
 		cmd.NewSearchCommand(configLoader),
-		cmd.NewCopyCommand(configLoader, clipboard.AtottoClipboard{}),
+		cmd.NewCopyCommand(configLoader, clipboard.AtottoClipboard{}, qrcode.Skip2Renderer{}),
 	)
 
 	if *ls || len(os.Args) < 2 {

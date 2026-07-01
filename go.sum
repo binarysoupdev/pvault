@@ -2,8 +2,6 @@ github.com/atotto/clipboard v0.1.4 h1:EH0zSVneZPSuFR11BlR9YppQTVDbh5+16AmcJi4g1z
 github.com/atotto/clipboard v0.1.4/go.mod h1:ZY9tmq7sm5xIbd9bOK4onWV4S6X0u6GY7Vn0Yu86PYI=
 github.com/binarysoupdev/cryptool v1.0.0 h1:jMrM7jlTmw+p2hPHn+LNp4EmINPI60DdDbj3CUWEQwc=
 github.com/binarysoupdev/cryptool v1.0.0/go.mod h1:TjlWiLszDprJ6Tpc8ff4zHjoF+VPicykFxNElNyumPU=
-github.com/binarysoupdev/go-commando v1.3.0 h1:QoQs9Ekq9vUo+aDylgNXW1Ijo7amlrVG4kEz7jDct1U=
-github.com/binarysoupdev/go-commando v1.3.0/go.mod h1:RXjpje+Lk0CtXew1boXQ1LMTQQAqXqM+6KSg64ftSKk=
 github.com/binarysoupdev/go-commando v1.3.1 h1:J+Z16WLNYIvVQA/P0DiWNP8LGqxh6H2obQnrIW3ODls=
 github.com/binarysoupdev/go-commando v1.3.1/go.mod h1:RXjpje+Lk0CtXew1boXQ1LMTQQAqXqM+6KSg64ftSKk=
 github.com/binarysoupdev/got-style v1.1.0 h1:f5D2tsWE5ttftoYPSuF33J74tnTQ4uiAbkuvdZzrack=
@@ -16,6 +14,8 @@ github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e h1:MRM5ITcdelLK2j1vwZ3Je0FKVCfqOLp5zO6trqMLYs0=
+github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e/go.mod h1:XV66xRDqSt+GTGFMVlhk3ULuV0y9ZmzeVGR4mloJI3M=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 golang.org/x/sys v0.46.0 h1:noSf2Fq6F8DBgS+LysIkx7rIExoNHJsxOAtPp4rthXw=

@@ -5,6 +5,7 @@ import (
 	"pvault/config"
 	"pvault/errors"
 	"pvault/tools/clipboard"
+	"pvault/tools/qrcode"
 	"pvault/vault"
 
 	"github.com/binarysoupdev/go-commando/command"
@@ -16,13 +17,15 @@ type CopyCommand struct {
 	config.Loader[config.Config]
 
 	clipboard clipboard.Clipboard
+	qrcode    qrcode.Renderer
 }
 
-func NewCopyCommand(loader config.Loader[config.Config], clipboard clipboard.Clipboard) *CopyCommand {
+func NewCopyCommand(loader config.Loader[config.Config], clipboard clipboard.Clipboard, qrcode qrcode.Renderer) *CopyCommand {
 	return &CopyCommand{
 		FlagCommandBase: command.NewFlagCommandBase("copy", "copy password/username of a record"),
 		Loader:          loader,
 		clipboard:       clipboard,
+		qrcode:          qrcode,
 	}
 }
 
@@ -40,6 +43,7 @@ func (cmd *CopyCommand) Initialize() error {
 func (cmd CopyCommand) Run(args []string) error {
 	search := flow.NewSearchFlow(cmd.Flags)
 	username := cmd.Flags.Bool("username", false, "copy username instead of password")
+	qr := cmd.Flags.Bool("qr", false, "render as a qrcode")
 	cmd.Flags.Parse(args)
 
 	v, err := vault.Open(cmd.Config.VaultPath)
@@ -61,11 +65,33 @@ func (cmd CopyCommand) Run(args []string) error {
 
 	style.BoldInfo.Printf("[=] Loaded Record: %s\n", r.ID.String())
 
-	if *username {
-		return cmd.copyToClipboard("USERNAME", r.Username)
+	const USERNAME_FIELD = "USERNAME"
+	const PASSWORD_FIELD = "PASSWORD"
+
+	if *qr {
+		if *username {
+			return cmd.renderToQRCode(USERNAME_FIELD, r.Username)
+		} else {
+			return cmd.renderToQRCode(PASSWORD_FIELD, r.Password)
+		}
 	} else {
-		return cmd.copyToClipboard("PASSWORD", r.Password)
+		if *username {
+			return cmd.copyToClipboard(USERNAME_FIELD, r.Username)
+		} else {
+			return cmd.copyToClipboard(PASSWORD_FIELD, r.Password)
+		}
 	}
+}
+
+func (cmd CopyCommand) renderToQRCode(field string, val string) error {
+	style.Info.Printf("[=] %s rendered as QR-Code\n", field)
+
+	err := cmd.qrcode.RenderToStdout(val)
+	if err != nil {
+		return errors.Chain(err, "error rendering qr-code")
+	}
+
+	return nil
 }
 
 func (cmd CopyCommand) copyToClipboard(field string, val string) error {
