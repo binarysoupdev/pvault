@@ -3,6 +3,7 @@ package vault
 import (
 	"os"
 	"pvault/errors"
+	"pvault/vault/data"
 	"pvault/vault/data/version2"
 	"pvault/vault/index"
 )
@@ -19,11 +20,12 @@ func InitializeNew(path string) (Vault, error) {
 	}
 
 	v := Vault{
-		Path:  path,
-		Index: index.IndexMap{},
+		Path:     path,
+		Index:    index.IndexMap{},
+		Database: version2.NewDatabase(path),
 	}
 
-	v.Database, err = v.initNewDatabaseVersion2()
+	err = InitDatabase(v.Database, v.Index)
 	if err != nil {
 		return Vault{}, err
 	}
@@ -31,15 +33,13 @@ func InitializeNew(path string) (Vault, error) {
 	return v, nil
 }
 
-func (v Vault) initNewDatabaseVersion2() (version2.Database, error) {
-	db := version2.NewDatabase(v.Path)
-
-	err := db.SaveIndex(v.Index)
+func InitDatabase(db data.Database, idx index.IndexMap) error {
+	err := db.SaveIndex(idx)
 	if err != nil {
-		return version2.Database{}, errors.Chain(err, "error saving index file")
+		return errors.Chain(err, "error saving index file")
 	}
 
-	return db, nil
+	return nil
 }
 
 func (v *Vault) ReloadIndex() error {

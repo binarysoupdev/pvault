@@ -47,9 +47,12 @@ func (cmd ConfigCommand) generateNew() error {
 		return errors.Format("config file \"%s\" already exists", cmd.ConfigPath)
 	}
 
+	home := cmd.homePath()
+
 	config := config.Config{
 		Version:    config.VERSION,
-		VaultPath:  cmd.newVaultPath(),
+		VaultPath:  filepath.Join(home, "vault"),
+		BackupPath: filepath.Join(home, "backups"),
 		OutputPath: ".",
 	}
 
@@ -62,18 +65,19 @@ func (cmd ConfigCommand) generateNew() error {
 	return nil
 }
 
-func (ConfigCommand) newVaultPath() string {
+func (ConfigCommand) homePath() string {
 	base, err := os.UserHomeDir()
 	if err != nil {
 		return ""
 	}
-	return filepath.Join(base, ".pvault/vault")
+	return filepath.Join(base, ".pvault")
 }
 
 func (cmd ConfigCommand) validate() error {
 	style.BoldInfo.Printf("[=] Loaded from \"%s\"\n", cmd.ConfigPath)
 
 	cmd.validateVaultPath()
+	cmd.validateBackupPath()
 	cmd.validateOutputPath()
 
 	return nil
@@ -87,6 +91,17 @@ func (cmd ConfigCommand) validateVaultPath() {
 		style.Error.Printf("-> %s\n", err)
 	} else {
 		style.Success.Printf("-> verified (@v%d)\n", v.Version())
+	}
+}
+
+func (cmd ConfigCommand) validateBackupPath() {
+	fmt.Printf("%s \"%s\" ", style.Bold.Sprint("Backup Path:"), cmd.Config.BackupPath)
+
+	err := cmd.Config.ValidateBackupPath()
+	if err != nil {
+		style.Error.Printf("-> %s\n", err.Error())
+	} else {
+		style.Success.Println("-> verified")
 	}
 }
 

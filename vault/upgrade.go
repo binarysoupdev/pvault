@@ -1,6 +1,9 @@
 package vault
 
-import "pvault/errors"
+import (
+	"pvault/errors"
+	"pvault/vault/data/version2"
+)
 
 func (v Vault) IsOutOfDate() bool {
 	return v.Version() < CURRENT_VERSION
@@ -11,7 +14,9 @@ func (v *Vault) Upgrade() error {
 		return errors.New("vault is up-to-date")
 	}
 
-	db, err := v.initNewDatabaseVersion2()
+	db := version2.NewDatabase(v.Path)
+
+	err := InitDatabase(db, v.Index)
 	if err != nil {
 		return err
 	}

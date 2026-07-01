@@ -7,33 +7,34 @@ import (
 	"pvault/errors"
 )
 
-func (v Vault) Backup(name string) (string, error) {
-	filenames, err := os.ReadDir(v.Path)
+func (v Vault) Backup(path string) error {
+	stat, err := os.Stat(path)
 	if err != nil {
-		return "", errors.Chain(err, "error reading vault directory")
+		return errors.Chain(err, "error reading backup directory")
 	}
 
-	path := filepath.Join(v.Path, name)
-	err = os.Mkdir(path, 0755)
-	if err != nil {
-		return "", errors.Chain(err, "error creating backup directory")
+	if !stat.IsDir() {
+		return errors.Format("\"%s\" is not a directory", path)
 	}
 
-	for _, file := range filenames {
-		if file.IsDir() {
-			continue
-		}
+	err = v.backupFile(path, v.Database.IndexPath())
+	if err != nil {
+		return errors.Chain(err, "error backing index file")
+	}
 
-		err := copyFile(filepath.Join(v.Path, file.Name()), filepath.Join(path, file.Name()))
+	for _, id := range v.Index {
+		err := v.backupFile(path, v.Database.RecordPath(id))
 		if err != nil {
-			return "", errors.Chain(err, "error copying file")
+			return errors.Chain(err, "error backing record")
 		}
 	}
 
-	return path, nil
+	return nil
 }
 
-func copyFile(src, dest string) error {
+func (Vault) backupFile(dir string, src string) error {
+	dest := filepath.Join(dir, filepath.Base(src))
+
 	s, err := os.Open(src)
 	if err != nil {
 		return errors.Chain(err, "error opening source file")

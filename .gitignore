@@ -1,6 +1,7 @@
 .vscode/*
 
 tmp/legacy/*
+tmp/backups/*
 tmp/vault/*
 
 tmp/output/*

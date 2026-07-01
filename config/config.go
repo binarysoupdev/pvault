@@ -10,6 +10,7 @@ const VERSION = 1
 type Config struct {
 	Version    int    `json:"version"`
 	VaultPath  string `json:"vault_path"`
+	BackupPath string `json:"backup_path"`
 	OutputPath string `json:"output_path"`
 }
 
@@ -21,6 +22,19 @@ func (c Config) ValidateVersion() error {
 	if c.Version > VERSION {
 		return errors.Format("unsupported version \"%d\"", c.Version)
 	}
+	return nil
+}
+
+func (c Config) ValidateBackupPath() error {
+	stat, err := os.Stat(c.BackupPath)
+	if err != nil {
+		return nil
+	}
+
+	if !stat.IsDir() {
+		return errors.New("path not a directory")
+	}
+
 	return nil
 }
 

@@ -16,7 +16,7 @@ const (
 )
 
 func (db Database) RecordPath(id uuid.UUID) string {
-	return filepath.Join(db.Path, id.String())
+	return filepath.Join(db.Path, id.String()+".crypt")
 }
 
 func (db Database) SaveRecord(r record.Record, password string) error {
@@ -31,14 +31,14 @@ func (Database) DeleteRecord(id uuid.UUID) error {
 	return data.NotSupportedError{}
 }
 
-func (db Database) SaveRecordV1(r record.Record, password string) error {
+func (db Database) SaveRecordV1(path string, r record.Record, password string) error {
 	v1 := legacy.RecordV1{
 		Password: r.Password,
 		Username: r.Username,
 	}
 	header := db.buildRecordV1Header(r.Name)
 
-	return data.SaveEncryptedRecord(db.RecordPath(r.ID), password, header, v1)
+	return data.SaveEncryptedRecord(path, password, header, v1)
 }
 
 func (Database) buildRecordV1Header(name string) []byte {
@@ -66,11 +66,7 @@ func (db Database) ParseRecordV1(id uuid.UUID, password string, raw []byte) (rec
 	return r.Upgrade(id, name), nil
 }
 
-func (db Database) LegacyRecordPath(id uuid.UUID) string {
-	return db.RecordPath(id) + ".crypt"
-}
-
 func (db Database) SaveLegacyRecord(id uuid.UUID, password string, r legacy.RecordV1) error {
 	hash := make([]byte, LEGACY_HASH_SIZE)
-	return data.SaveEncryptedRecord(db.LegacyRecordPath(id), password, hash, r)
+	return data.SaveEncryptedRecord(db.RecordPath(id), password, hash, r)
 }

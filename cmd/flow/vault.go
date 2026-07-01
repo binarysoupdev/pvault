@@ -1,8 +1,15 @@
 package flow
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"pvault/config"
 	"pvault/errors"
 	"pvault/vault"
+	"time"
+
+	"github.com/binarysoupdev/got-style/style"
 )
 
 func OpenVault(path string) (vault.Vault, error) {
@@ -16,4 +23,26 @@ func OpenVault(path string) (vault.Vault, error) {
 	}
 
 	return v, nil
+}
+
+func BackupVault(v vault.Vault, config config.Config) error {
+	err := config.ValidateBackupPath()
+	if err != nil {
+		return errors.Chain(err, "error validating backup path")
+	}
+
+	path := filepath.Join(config.BackupPath, fmt.Sprintf("%s (v%d)", time.Now().Format(time.DateTime), v.Version()))
+
+	err = os.MkdirAll(path, 0755)
+	if err != nil {
+		return errors.Chain(err, "error creating backup directory")
+	}
+
+	err = v.Backup(path)
+	if err != nil {
+		return errors.Chain(err, "error backing vault")
+	}
+
+	style.BoldCreate.Printf("[+] Created Backup \"%s\"\n", path)
+	return nil
 }

@@ -61,6 +61,45 @@ func TestValidateVersionWithCurrentVersionReturnsNoError(t *testing.T) {
 	require.NoError(t, res)
 }
 
+func TestValidateBackupPathWherePathIsAFileReturnsError(t *testing.T) {
+	//-- arrange
+	cfg := config.Config{
+		BackupPath: file.CreateEmpty(t, "backup.txt"),
+	}
+
+	//-- act
+	res := cfg.ValidateBackupPath()
+
+	//-- assert
+	require.ErrorContains(t, res, "path not a directory")
+}
+
+func TestValidateBackupPathWhereDirectoryDoesNotExistValid(t *testing.T) {
+	//-- arrange
+	cfg := config.Config{
+		BackupPath: file.NewPath(t, "not_exist"),
+	}
+
+	//-- act
+	res := cfg.ValidateBackupPath()
+
+	//-- assert
+	require.NoError(t, res)
+}
+
+func TestValidateBackupPathWhereDirectoryExistsValid(t *testing.T) {
+	//-- arrange
+	cfg := config.Config{
+		BackupPath: file.NewPath(t, ""),
+	}
+
+	//-- act
+	res := cfg.ValidateBackupPath()
+
+	//-- assert
+	require.NoError(t, res)
+}
+
 func TestValidateOutputPathNotFound(t *testing.T) {
 	//-- arrange
 	cfg := config.Config{

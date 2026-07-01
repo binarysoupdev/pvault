@@ -1,5 +1,6 @@
 {
     "version": 1,
     "vault_path": "tmp/vault",
+    "backup_path": "tmp/backups",
     "output_path": "tmp/output"
 }

@@ -54,7 +54,7 @@ func TestUpgradeValidUpgradesVault(t *testing.T) {
 	assert.NoFileExists(t, db.IndexPath())
 
 	for name, id := range INDEX {
-		assert.NoFileExists(t, db.LegacyRecordPath(id))
+		assert.NoFileExists(t, db.RecordPath(id))
 
 		r, err := TARGET.LoadRecord(id, PASSWORD)
 		require.NoError(t, err)

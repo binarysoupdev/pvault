@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"pvault/cmd/flow"
 	"pvault/config"
 	"pvault/errors"
@@ -30,11 +29,14 @@ func (cmd *VaultCommand) Initialize() error {
 
 func (cmd VaultCommand) Run(args []string) error {
 	init := cmd.Flags.Bool("init", false, "initialize the vault")
+	backup := cmd.Flags.Bool("backup", false, "backup the vault to the backup directory")
 	upgrade := cmd.Flags.Bool("upgrade", false, "upgrade the vault if it's out-of-date")
 	cmd.Flags.Parse(args)
 
 	if *init {
 		return cmd.initialize()
+	} else if *backup {
+		return cmd.backup()
 	} else if *upgrade {
 		return cmd.upgrade()
 	} else {
@@ -52,6 +54,15 @@ func (cmd VaultCommand) initialize() error {
 	return nil
 }
 
+func (cmd VaultCommand) backup() error {
+	v, err := vault.Open(cmd.Config.VaultPath)
+	if err != nil {
+		return errors.Chain(err, "error opening vault")
+	}
+
+	return flow.BackupVault(v, cmd.Config)
+}
+
 func (cmd VaultCommand) upgrade() error {
 	v, err := vault.Open(cmd.Config.VaultPath)
 	if err != nil {
@@ -63,12 +74,10 @@ func (cmd VaultCommand) upgrade() error {
 	}
 	oldVersion := v.Version()
 
-	backup, err := v.Backup(fmt.Sprintf("version_%d", v.Version()))
+	err = flow.BackupVault(v, cmd.Config)
 	if err != nil {
-		return errors.Chain(err, "error backing vault")
+		return err
 	}
-
-	style.BoldCreate.Printf("[+] Created Backup \"%s\"\n", backup)
 
 	err = v.Upgrade()
 	if err != nil {

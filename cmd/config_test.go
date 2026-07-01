@@ -36,6 +36,7 @@ func (s *ConfigTestSuite) SetupTest() {
 	s.Config = config.Config{
 		Version:    config.VERSION,
 		VaultPath:  file.NewPath(s.T(), "vault"),
+		BackupPath: file.NewPath(s.T(), ""),
 		OutputPath: file.NewPath(s.T(), ""),
 	}
 
@@ -128,9 +129,9 @@ func (s *ConfigTestSuite) TestRunValidateConfigWithOutOfDateVaultPrintsError() {
 	s.Assert().Contains(vaultPath, fmt.Sprintf("vault (@v%d) out-of-date", LEGACY_VERSION))
 }
 
-func (s *ConfigTestSuite) TestRunValidateWithInvalidOutputPathPrintsError() {
+func (s *ConfigTestSuite) TestRunValidatePassWithInvalidBackupPathPrintsError() {
 	//-- arrange
-	s.Config.OutputPath = "invalid"
+	s.Config.BackupPath = file.CreateEmpty(s.T(), "backup.txt")
 	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
@@ -146,16 +147,38 @@ func (s *ConfigTestSuite) TestRunValidateWithInvalidOutputPathPrintsError() {
 	out.SkipLines(1)
 
 	outputPath := out.ReadLine()
+	s.Assert().Contains(outputPath, s.Config.BackupPath)
+	s.Assert().Contains(outputPath, "path not a directory")
+}
+
+func (s *ConfigTestSuite) TestRunValidateWithInvalidOutputPathPrintsError() {
+	//-- arrange
+	s.Config.OutputPath = "invalid"
+	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	s.Require().NoError(err)
+
+	out := pipe.OpenStdout(4)
+	defer out.Close()
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultPass()
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Loaded from \"%s\"", s.ConfigLoader.ConfigPath))
+	out.SkipLines(2)
+
+	outputPath := out.ReadLine()
 	s.Assert().Contains(outputPath, s.Config.OutputPath)
 	s.Assert().Contains(outputPath, "path not found")
 }
 
-func (s *ConfigTestSuite) TestRunValidateConfigPrintsConfig() {
+func (s *ConfigTestSuite) TestRunValidatePassConfigPrintsConfig() {
 	//-- arrange
 	_, err := vault.InitializeNew(s.Config.VaultPath)
 	s.Require().NoError(err)
 
-	out := pipe.OpenStdout(3)
+	out := pipe.OpenStdout(4)
 	defer out.Close()
 
 	//-- act
@@ -168,6 +191,10 @@ func (s *ConfigTestSuite) TestRunValidateConfigPrintsConfig() {
 	vaultPath := out.ReadLine()
 	s.Assert().Contains(vaultPath, s.Config.VaultPath)
 	s.Assert().Contains(vaultPath, fmt.Sprintf("verified (@v%d)", vault.CURRENT_VERSION))
+
+	backupPath := out.ReadLine()
+	s.Assert().Contains(backupPath, s.Config.BackupPath)
+	s.Assert().Contains(backupPath, "verified")
 
 	outputPath := out.ReadLine()
 	s.Assert().Contains(outputPath, s.Config.OutputPath)

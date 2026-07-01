@@ -1,9 +1,9 @@
 package vault_test
 
 import (
-	"os"
-	"path/filepath"
+	"fmt"
 	"pvault/vault"
+	"pvault/vault/record"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -21,51 +21,40 @@ func TestBackupTestSuite(t *testing.T) {
 }
 
 func (s *BackupTestSuite) SetupTest() {
-	s.Vault = vault.Vault{
-		Path: file.NewPath(s.T(), ""),
-	}
+	var err error
+	s.Vault, err = vault.InitializeNew(file.NewPath(s.T(), "vault"))
+	s.Require().NoError(err)
 }
 
-func (s *BackupTestSuite) TestBackupWhereVaultPathNotFoundReturnsError() {
+func (s *BackupTestSuite) TestBackupWherePathNotFoundReturnsError() {
+	//-- act
+	res := s.Vault.Backup("invalid")
+
 	//-- arrange
-	s.Vault.Path = "invalid"
+	s.Require().ErrorContains(res, "error reading backup directory")
+}
+
+func (s *BackupTestSuite) TestBackupWherePathIsNotADirReturnsError() {
+	//-- arrange
+	PATH := file.CreateEmpty(s.T(), "backups.txt")
 
 	//-- act
-	res := s.Vault.Backup("")
+	res := s.Vault.Backup(PATH)
 
 	//-- arrange
-	s.Require().ErrorContains(res, "error reading vault directory")
+	s.Require().ErrorContains(res, fmt.Sprintf("\"%s\" is not a directory", PATH))
 }
 
-func (s *BackupTestSuite) TestBackupWhereBackupDirAlreadyExistsReturnsError() {
+func (s *BackupTestSuite) TestBackupValidBacksUpIndexFileAndRecord() {
 	//-- arrange
+	BACKUP := file.NewPath(s.T(), "")
+
 	rand := rand.New(0)
-	BACKUP := rand.ASCII(15)
-
-	err := os.Mkdir(filepath.Join(s.Vault.Path, BACKUP), 0755)
-	s.Require().NoError(err)
-
-	//-- act
-	res := s.Vault.Backup(BACKUP)
-
-	//-- arrange
-	s.Require().ErrorContains(res, "error creating backup directory")
-}
-
-func (s *BackupTestSuite) TestBackupValidCopiesOnlyFilesToBackupDir() {
-	//-- arrange
-	rand := rand.New(0)
-	BACKUP := rand.ASCII(15)
-
-	FILES := make([]string, 5)
-	for i := range FILES {
-		FILES[i] = rand.ASCII(10)
-		os.WriteFile(filepath.Join(s.Vault.Path, FILES[i]), rand.Bytes(50), 0755)
+	const NUM_RECORDS = 5
+	for range NUM_RECORDS {
+		err := s.Vault.SaveRecord(record.NewFromName(rand.ASCII(10)), rand.ASCII(30))
+		s.Require().NoError(err)
 	}
-
-	DIR := rand.ASCII(10)
-	err := os.Mkdir(filepath.Join(s.Vault.Path, DIR), 0755)
-	s.Require().NoError(err)
 
 	//-- act
 	res := s.Vault.Backup(BACKUP)
@@ -73,17 +62,8 @@ func (s *BackupTestSuite) TestBackupValidCopiesOnlyFilesToBackupDir() {
 	//-- arrange
 	s.Require().NoError(res)
 
-	backupDir := filepath.Join(s.Vault.Path, BACKUP)
-	s.Require().DirExists(backupDir)
+	v, err := vault.Open(BACKUP)
+	s.Require().NoError(err)
 
-	for _, file := range FILES {
-		bytes1, err := os.ReadFile(filepath.Join(s.Vault.Path, file))
-		s.Require().NoError(err)
-
-		bytes2, err := os.ReadFile(filepath.Join(backupDir, file))
-		s.Require().NoError(err)
-
-		s.Assert().Equal(bytes1, bytes2)
-	}
-	s.Assert().NoDirExists(filepath.Join(backupDir, DIR))
+	s.Assert().Equal(s.Vault.Index, v.Index)
 }

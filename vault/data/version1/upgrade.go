@@ -9,7 +9,7 @@ import (
 
 func (db Database) Upgrade(idx index.IndexMap, target data.Database) error {
 	for name, id := range idx {
-		legacyFile := db.LegacyRecordPath(id)
+		legacyFile := db.RecordPath(id)
 
 		raw, err := os.ReadFile(legacyFile)
 		if err != nil {
