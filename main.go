@@ -14,9 +14,17 @@ import (
 	"github.com/binarysoupdev/got-style/style"
 )
 
+const VERSION = "2.0.0-beta1"
+
 func main() {
+	v := flag.Bool("v", false, "display version")
 	ls := flag.Bool("ls", false, "list all commands")
 	flag.Parse()
+
+	if *v {
+		printVersion()
+		return
+	}
 
 	configLoader := config.NewLoader[config.Config](configPath())
 
@@ -32,6 +40,7 @@ func main() {
 	)
 
 	if *ls || len(os.Args) < 2 {
+		printVersion()
 		runner.ListCommands()
 		return
 	}
@@ -40,6 +49,10 @@ func main() {
 		style.BoldError.Print("ERROR: ")
 		fmt.Println(err)
 	}
+}
+
+func printVersion() {
+	style.New(style.BOLD, style.UNDERLINE).Printf("pvault @v%s\n", VERSION)
 }
 
 func configPath() string {
