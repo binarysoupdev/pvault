@@ -7,6 +7,8 @@ import (
 	"pvault/vault/index"
 )
 
+const VERSION = 1
+
 type Database struct {
 	Path string
 }
@@ -18,7 +20,7 @@ func New(path string) Database {
 }
 
 func (Database) GetVersion() uint16 {
-	return 1
+	return VERSION
 }
 
 func (db Database) Initialize(idx index.IndexMap) error {

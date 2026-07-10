@@ -43,7 +43,7 @@ func (s *SearchFlowSuite) ParseFlags(args ...string) {
 
 //=====================================
 
-func (s *SearchFlowSuite) TestDisplayNoResults() {
+func (s *SearchFlowSuite) TestDisplayReturnsErrorWhenNoResults() {
 	//-- act
 	s.ParseFlags("-s", "no match")
 	res := s.Flow.Display(s.Vault)
@@ -52,7 +52,7 @@ func (s *SearchFlowSuite) TestDisplayNoResults() {
 	s.Assert().ErrorContains(res, "no matches found")
 }
 
-func (s *SearchFlowSuite) TestDisplayPrintResults() {
+func (s *SearchFlowSuite) TestDisplayReturnsNoErrorAndPrintResults() {
 	//-- arrange
 	out := pipe.OpenStdout(2)
 	defer out.Close()
@@ -73,7 +73,7 @@ func (s *SearchFlowSuite) TestDisplayPrintResults() {
 	s.Assert().Contains(line, "Foo")
 }
 
-func (s *SearchFlowSuite) TestSelectNoResults() {
+func (s *SearchFlowSuite) TestSelectReturnsErrorWhenNoResults() {
 	//-- act
 	s.ParseFlags("-s", "no match")
 	_, res := s.Flow.Select(s.Vault)
@@ -82,7 +82,7 @@ func (s *SearchFlowSuite) TestSelectNoResults() {
 	s.Assert().ErrorContains(res, "no matches found")
 }
 
-func (s *SearchFlowSuite) TestSelectOneResult() {
+func (s *SearchFlowSuite) TestSelectReturnsNoErrorAndMatchWhenOnlyOneResult() {
 	//-- arrange
 	out := pipe.OpenStdout(1)
 	defer out.Close()
@@ -98,7 +98,7 @@ func (s *SearchFlowSuite) TestSelectOneResult() {
 	s.Assert().Contains(out.ReadLine(), "Bar")
 }
 
-func (s *SearchFlowSuite) TestSelectManyResultsNoIndex() {
+func (s *SearchFlowSuite) TestSelectReturnsErrorWhenManyResultsAndNoIndex() {
 	//-- arrange
 	out := pipe.OpenStdout(3)
 	defer out.Close()
@@ -114,7 +114,7 @@ func (s *SearchFlowSuite) TestSelectManyResultsNoIndex() {
 	s.Assert().Contains(out.ReadLine(), "Foo")
 }
 
-func (s *SearchFlowSuite) TestSelectManyResultsInvalidIndex() {
+func (s *SearchFlowSuite) TestSelectReturnsErrorWhenManyResultsAndInvalidIndex() {
 	//-- arrange
 	out := pipe.OpenStdout(2)
 	defer out.Close()
@@ -130,7 +130,7 @@ func (s *SearchFlowSuite) TestSelectManyResultsInvalidIndex() {
 	s.Assert().Contains(out.ReadLine(), "Foo")
 }
 
-func (s *SearchFlowSuite) TestSelectManyResultsValidIndexReturnsMatch() {
+func (s *SearchFlowSuite) TestSelectReturnsNoErrorAndMatchWhenManyResultsAndValidIndex() {
 	//-- arrange
 	out := pipe.OpenStdout(2)
 	defer out.Close()

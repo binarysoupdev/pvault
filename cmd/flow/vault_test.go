@@ -2,11 +2,11 @@ package flow_test
 
 import (
 	"fmt"
-	"path/filepath"
 	"pvault/cmd/flow"
 	"pvault/config"
 	"pvault/vault"
 	"pvault/vault/data/version1"
+	"pvault/vault/index"
 	"regexp"
 	"testing"
 
@@ -16,19 +16,21 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestOpenVaultVaultOutOfDateReturnsError(t *testing.T) {
+func TestOpenVaultReturnsErrorWhenVaultOutOfDate(t *testing.T) {
 	//-- arrange
-	PATH := file.CreateEmpty(t, version1.INDEX_FILE)
-	const LEGACY_VERSION = 1
+	PATH := file.NewPath(t, "")
+
+	err := version1.New(PATH).Initialize(index.IndexMap{})
+	require.NoError(t, err)
 
 	//-- act
-	_, res := flow.OpenVault(filepath.Dir(PATH))
+	_, res := flow.OpenVault(PATH)
 
 	//-- assert
-	require.ErrorContains(t, res, fmt.Sprintf("vault (@v%d) out-of-date", LEGACY_VERSION))
+	require.ErrorContains(t, res, fmt.Sprintf("vault (@v%d) out-of-date", version1.VERSION))
 }
 
-func TestOpenVaultInvalidPathReturnsError(t *testing.T) {
+func TestOpenVaultReturnsErrorWithInvalidPath(t *testing.T) {
 	//-- act
 	_, res := flow.OpenVault("invalid")
 
@@ -36,7 +38,7 @@ func TestOpenVaultInvalidPathReturnsError(t *testing.T) {
 	require.ErrorContains(t, res, "error opening vault")
 }
 
-func TestOpenVaultReturnsVault(t *testing.T) {
+func TestOpenVaultReturnsVaultAndNoErrorWhenValid(t *testing.T) {
 	//-- arrange
 	PATH := file.NewPath(t, "vault")
 
@@ -50,7 +52,7 @@ func TestOpenVaultReturnsVault(t *testing.T) {
 	require.NoError(t, res)
 }
 
-func TestBackupVaultWithInvalidBackupPathReturnsError(t *testing.T) {
+func TestBackupVaultReturnsErrorWhenBackupPathInvalid(t *testing.T) {
 	//-- arrange
 	CONFIG := config.Config{
 		BackupPath: file.CreateEmpty(t, "invalid.txt"),
@@ -63,7 +65,7 @@ func TestBackupVaultWithInvalidBackupPathReturnsError(t *testing.T) {
 	require.ErrorContains(t, res, "error validating backup path")
 }
 
-func TestBackupVaultValidBacksUpVault(t *testing.T) {
+func TestBackupVaultReturnsNoErrorAndBacksUpVaultWhenValid(t *testing.T) {
 	//-- arrange
 	DIR_REGEX := regexp.MustCompile(`"([^"]*)"`)
 

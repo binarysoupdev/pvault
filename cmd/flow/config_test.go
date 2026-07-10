@@ -8,12 +8,11 @@ import (
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
-	"github.com/binarysoupdev/tinsel/rand"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestLoadConfigConfigNotFoundReturnsError(t *testing.T) {
+func TestLoadConfigReturnsErrorWhenConfigNotFound(t *testing.T) {
 	//-- arrange
 	loader := config.NewLoader[config.Config]("invalid")
 
@@ -24,10 +23,9 @@ func TestLoadConfigConfigNotFoundReturnsError(t *testing.T) {
 	require.ErrorContains(t, res, "error loading config")
 }
 
-func TestLoadConfigInvalidVersionReturnsError(t *testing.T) {
+func TestLoadConfigReturnsErrorWhenUsingInvalidVersion(t *testing.T) {
 	//-- arrange
-	rand := rand.New(0)
-	loader := config.NewLoader[config.Config](file.NewPath(t, rand.ASCII(10)))
+	loader := config.NewLoader[config.Config](file.NewPath(t, "config.json"))
 
 	CONFIG := config.Config{
 		Version: config.VERSION + 1,
@@ -42,10 +40,9 @@ func TestLoadConfigInvalidVersionReturnsError(t *testing.T) {
 	require.ErrorContains(t, res, "error validating config version")
 }
 
-func TestLoadConfigOlderVersionReturnsError(t *testing.T) {
+func TestLoadConfigReturnsErrorWhenUsingOlderVersion(t *testing.T) {
 	//-- arrange
-	rand := rand.New(0)
-	loader := config.NewLoader[config.Config](file.NewPath(t, rand.ASCII(10)))
+	loader := config.NewLoader[config.Config](file.NewPath(t, "config.json"))
 
 	CONFIG := config.Config{
 		Version: config.VERSION - 1,
@@ -60,15 +57,14 @@ func TestLoadConfigOlderVersionReturnsError(t *testing.T) {
 	require.ErrorContains(t, res, fmt.Sprintf("config version [%d] out-of-date", CONFIG.Version))
 }
 
-func TestLoadConfigValidLoadsConfig(t *testing.T) {
+func TestLoadConfigReturnsNoErrorAndLoadsConfigWhenValid(t *testing.T) {
 	//-- arrange
-	rand := rand.New(0)
-	loader := config.NewLoader[config.Config](file.NewPath(t, rand.ASCII(10)))
+	loader := config.NewLoader[config.Config](file.NewPath(t, "config.json"))
 
 	CONFIG := config.Config{
 		Version:    config.VERSION,
-		VaultPath:  rand.ASCII(15),
-		OutputPath: rand.ASCII(15),
+		VaultPath:  "vault/path",
+		OutputPath: "output/path",
 	}
 	err := data.SaveJSON(CONFIG, loader.ConfigPath)
 	require.NoError(t, err)

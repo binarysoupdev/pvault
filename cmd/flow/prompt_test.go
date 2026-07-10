@@ -6,15 +6,13 @@ import (
 	"pvault/cmd/flow"
 
 	"github.com/binarysoupdev/tinsel/pipe"
-	"github.com/binarysoupdev/tinsel/rand"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPromptReturnsInput(t *testing.T) {
 	//-- arrange
-	rand := rand.New(0)
-	PROMPT := rand.ASCII(10)
-	INPUT := rand.ASCII(15)
+	const PROMPT = "prompt: "
+	const INPUT = "input"
 
 	io := pipe.OpenStdio(1, 1, true)
 	defer io.Close()
@@ -32,9 +30,8 @@ func TestPromptReturnsInput(t *testing.T) {
 
 func TestPromptPasswordReturnsPassword(t *testing.T) {
 	//-- arrange
-	rand := rand.New(0)
-	PROMPT := rand.ASCII(10)
-	PASSWORD := rand.ASCII(30)
+	const PROMPT = "prompt: "
+	const PASSWORD = "Password123!"
 
 	io := pipe.OpenStdio(1, 1, true)
 	defer io.Close()
