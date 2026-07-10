@@ -47,22 +47,10 @@ func (cmd LockCommand) Run(args []string) error {
 		return errors.Chain(err, "error loading source record")
 	}
 
-	err = v.ValidateRecord(r)
+	err = flow.SaveVaultRecord(v, r)
 	if err != nil {
-		return errors.Chain(err, "error validating record")
+		return err
 	}
-
-	password := flow.PromptPassword("New PASSWORD: ")
-	if flow.PromptPassword("Verify PASSWORD: ") != password {
-		return errors.New("passwords do not match")
-	}
-
-	err = v.SaveRecord(r, password)
-	if err != nil {
-		return errors.Chain(err, "error saving vault record")
-	}
-
-	style.BoldCreate.Printf("[+] Updated Record: %s\n", r.ID.String())
 
 	err = os.Remove(*path)
 	if err != nil {

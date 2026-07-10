@@ -3,10 +3,8 @@ package cmd
 import (
 	"pvault/cmd/flow"
 	"pvault/config"
-	"pvault/errors"
 
 	"github.com/binarysoupdev/go-commando/command"
-	"github.com/binarysoupdev/got-style/style"
 )
 
 type DeleteCommand struct {
@@ -40,15 +38,10 @@ func (cmd DeleteCommand) Run(args []string) error {
 		return err
 	}
 
-	if flow.Prompt("Confirm NAME: ") != name {
-		return errors.New("names do not match")
-	}
-
-	id, err := v.DeleteRecord(name)
+	err = flow.DeleteVaultRecord(v, name)
 	if err != nil {
-		return errors.Chain(err, "error deleting vault record")
+		return err
 	}
 
-	style.BoldDelete.Printf("[-] Deleted Record: %s\n", id.String())
 	return nil
 }

@@ -161,7 +161,7 @@ func (s *CreateTestSuite) TestRunValid() {
 	s.Assert().Contains(io.ReadLine(), "Verify PASSWORD")
 
 	line := io.ReadLine()
-	s.Require().Contains(line, "[+] New Record: ")
+	s.Require().Contains(line, "[+] Saved Record: ")
 
 	ID, err := uuid.Parse(line[len(line)-36:])
 	s.Require().NoError(err)

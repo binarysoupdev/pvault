@@ -168,7 +168,7 @@ func (s *LockTestSuite) TestRunValidSaveNew() {
 	s.Assert().Contains(io.ReadLine(), "New PASSWORD")
 	s.Assert().Contains(io.ReadLine(), "Verify PASSWORD")
 
-	s.Require().Contains(io.ReadLine(), "[+] Updated Record: "+s.Record.ID.String())
+	s.Require().Contains(io.ReadLine(), "[+] Saved Record: "+s.Record.ID.String())
 	s.Assert().Contains(io.ReadLine(), "[-] "+s.RecordPath)
 	s.Assert().NoFileExists(s.RecordPath)
 
@@ -209,7 +209,7 @@ func (s *LockTestSuite) TestRunValidUpdateExisting() {
 	s.Assert().Contains(io.ReadLine(), "New PASSWORD")
 	s.Assert().Contains(io.ReadLine(), "Verify PASSWORD")
 
-	s.Assert().Contains(io.ReadLine(), "[+] Updated Record: "+s.Record.ID.String())
+	s.Assert().Contains(io.ReadLine(), "[+] Saved Record: "+s.Record.ID.String())
 	s.Assert().Contains(io.ReadLine(), "[-] "+s.RecordPath)
 	s.Assert().NoFileExists(s.RecordPath)
 

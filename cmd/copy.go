@@ -6,7 +6,6 @@ import (
 	"pvault/errors"
 	"pvault/tools/clipboard"
 	"pvault/tools/qrcode"
-	"pvault/vault"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
@@ -46,7 +45,7 @@ func (cmd CopyCommand) Run(args []string) error {
 	qr := cmd.Flags.Bool("qr", false, "render as a qrcode")
 	cmd.Flags.Parse(args)
 
-	v, err := vault.Open(cmd.Config.VaultPath)
+	v, err := flow.OpenVault(cmd.Config.VaultPath)
 	if err != nil {
 		return errors.Chain(err, "error opening vault")
 	}
@@ -56,14 +55,10 @@ func (cmd CopyCommand) Run(args []string) error {
 		return err
 	}
 
-	password := flow.PromptPassword("Enter PASSWORD: ")
-
-	r, err := v.LoadRecord(name, password)
+	r, err := flow.LoadVaultRecord(v, name)
 	if err != nil {
-		return errors.Chain(err, "error loading vault record")
+		return err
 	}
-
-	style.BoldInfo.Printf("[=] Loaded Record: %s\n", r.ID.String())
 
 	const USERNAME_FIELD = "USERNAME"
 	const PASSWORD_FIELD = "PASSWORD"

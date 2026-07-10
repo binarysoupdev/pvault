@@ -1,14 +1,11 @@
 package cmd
 
 import (
-	"path/filepath"
 	"pvault/cmd/flow"
 	"pvault/config"
 	"pvault/errors"
-	"pvault/json"
 
 	"github.com/binarysoupdev/go-commando/command"
-	"github.com/binarysoupdev/got-style/style"
 )
 
 type UnlockCommand struct {
@@ -53,21 +50,15 @@ func (cmd UnlockCommand) Run(args []string) error {
 		return err
 	}
 
-	password := flow.PromptPassword("Enter PASSWORD: ")
-
-	r, err := v.LoadRecord(name, password)
+	r, err := flow.LoadVaultRecord(v, name)
 	if err != nil {
-		return errors.Chain(err, "error loading vault record")
+		return err
 	}
 
-	style.BoldInfo.Printf("[=] Loaded Record: %s\n", r.ID.String())
-
-	path := filepath.Join(cmd.Config.OutputPath, r.ID.String()+".json")
-	err = json.MarshalFilePretty(r, path, "  ")
+	err = flow.SaveOutputRecord(cmd.Config, r)
 	if err != nil {
-		return errors.Chain(err, "error creating output record")
+		return err
 	}
 
-	style.Create.Printf("[+] %s\n", path)
 	return nil
 }

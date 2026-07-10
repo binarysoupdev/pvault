@@ -1,15 +1,12 @@
 package cmd
 
 import (
-	"path/filepath"
 	"pvault/cmd/flow"
 	"pvault/config"
 	"pvault/errors"
-	"pvault/json"
 	"pvault/vault/record"
 
 	"github.com/binarysoupdev/go-commando/command"
-	"github.com/binarysoupdev/got-style/style"
 )
 
 type CreateCommand struct {
@@ -55,29 +52,15 @@ func (cmd CreateCommand) Run(args []string) error {
 
 	r := record.NewFromName(*name)
 
-	err = v.ValidateRecord(r)
+	err = flow.SaveVaultRecord(v, r)
 	if err != nil {
-		return errors.Chain(err, "error validating record")
+		return err
 	}
 
-	password := flow.PromptPassword("New PASSWORD: ")
-	if flow.PromptPassword("Verify PASSWORD: ") != password {
-		return errors.New("passwords do not match")
-	}
-
-	err = v.SaveRecord(r, password)
+	err = flow.SaveOutputRecord(cmd.Config, r)
 	if err != nil {
-		return errors.Chain(err, "error saving vault record")
+		return err
 	}
 
-	style.BoldCreate.Printf("[+] New Record: %s\n", r.ID.String())
-
-	path := filepath.Join(cmd.Config.OutputPath, r.ID.String()+".json")
-	err = json.MarshalFilePretty(r, path, "  ")
-	if err != nil {
-		return errors.Chain(err, "error creating output record")
-	}
-
-	style.Create.Printf("[+] %s\n", path)
 	return nil
 }
