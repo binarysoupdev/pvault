@@ -162,7 +162,7 @@ func (s *VaultTestSuite) TestRunUpgradeFailsWithInvalidBackupPath() {
 	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
-	err = vault.InitDatabase(version1.NewDatabase(s.Config.VaultPath), index.IndexMap{})
+	err = version1.New(s.Config.VaultPath).Initialize(index.IndexMap{})
 	s.Require().NoError(err)
 
 	//-- act
@@ -180,8 +180,8 @@ func (s *VaultTestSuite) TestRunUpgradePassesAndCreatesBackupAndUpgradesDatabase
 	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
-	v1 := version1.NewDatabase(s.Config.VaultPath)
-	err = vault.InitDatabase(v1, index.IndexMap{})
+	v1 := version1.New(s.Config.VaultPath)
+	err = v1.Initialize(index.IndexMap{})
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(2)

@@ -14,9 +14,9 @@ func (v *Vault) Upgrade() error {
 		return errors.New("vault is up-to-date")
 	}
 
-	db := version2.NewDatabase(v.Path)
+	db := version2.New(v.Path)
 
-	err := InitDatabase(db, v.Index)
+	err := db.Initialize(v.Index)
 	if err != nil {
 		return err
 	}

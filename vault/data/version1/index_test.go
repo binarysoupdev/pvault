@@ -14,7 +14,7 @@ import (
 
 func TestLoadIndexValidLoadsIndexMap(t *testing.T) {
 	//-- arrange
-	db := version1.NewDatabase(file.NewPath(t, ""))
+	db := version1.New(file.NewPath(t, ""))
 
 	rand := rand.New(0)
 	INDEX := index.IndexMap{

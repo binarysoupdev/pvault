@@ -26,7 +26,7 @@ func TestRecordTestSuite(t *testing.T) {
 }
 
 func (s *RecordTestSuite) SetupTest() {
-	s.Database = version2.NewDatabase(file.NewPath(s.T(), ""))
+	s.Database = version2.New(file.NewPath(s.T(), ""))
 
 	rand := rand.New(0)
 	s.Record = record.NewFromName(rand.ASCII(10))
@@ -106,7 +106,7 @@ func (s *RecordTestSuite) TestLoadRecordVersion1ReturnsRecord() {
 	//-- arrange
 	s.Record.Other = map[string]any{}
 
-	err := version1.NewDatabase(s.Database.Path).SaveRecordV1(s.Database.RecordPath(s.Record.ID), s.Record, s.Password)
+	err := version1.New(s.Database.Path).SaveRecordV1(s.Database.RecordPath(s.Record.ID), s.Record, s.Password)
 	s.Require().NoError(err)
 
 	//-- act

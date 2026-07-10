@@ -36,7 +36,7 @@ func (db Database) LoadRecord(id uuid.UUID, password string) (record.Record, err
 
 	switch version {
 	case 1:
-		return version1.NewDatabase(db.Path).ParseRecordV1(id, password, raw)
+		return version1.New(db.Path).ParseRecordV1(id, password, raw)
 	case 2:
 		return data.DecryptRecord[record.Record](password, raw)
 	default:

@@ -15,10 +15,30 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestInitializeSucceedsAndSavesIndex(t *testing.T) {
+	//-- arrange
+	db := version1.New(file.NewPath(t, ""))
+
+	INDEX := index.IndexMap{
+		"name1": uuid.New(),
+		"name2": uuid.New(),
+	}
+
+	//-- act
+	res := db.Initialize(INDEX)
+
+	//-- assert
+	require.NoError(t, res)
+
+	idx, err := db.LoadIndex()
+	require.NoError(t, err)
+	assert.Equal(t, INDEX, idx)
+}
+
 func TestUpgradeValidUpgradesVault(t *testing.T) {
 	//-- arrange
-	db := version1.NewDatabase(file.NewPath(t, ""))
-	TARGET := version2.NewDatabase(db.Path)
+	db := version1.New(file.NewPath(t, ""))
+	TARGET := version2.New(db.Path)
 
 	file, err := os.Create(db.IndexPath())
 	require.NoError(t, err)

@@ -12,6 +12,7 @@ type DatabaseMock struct {
 	Index   index.IndexMap
 	Record  record.Record
 
+	InitializeError   error
 	UpgradeError      error
 	SaveIndexError    error
 	LoadIndexError    error
@@ -22,6 +23,10 @@ type DatabaseMock struct {
 
 func (db DatabaseMock) GetVersion() uint16 {
 	return db.Version
+}
+
+func (db DatabaseMock) Initialize(idx index.IndexMap) error {
+	return db.InitializeError
 }
 
 func (db *DatabaseMock) Upgrade(idx index.IndexMap, target Database) error {

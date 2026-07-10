@@ -36,7 +36,7 @@ func detectDatabase(path string) (data.Database, error) {
 
 	_, err = os.Stat(filepath.Join(path, version1.INDEX_FILE))
 	if err == nil {
-		return version1.NewDatabase(path), nil
+		return version1.New(path), nil
 	}
 
 	return nil, errors.New("index file not found")
@@ -60,7 +60,7 @@ func detectDatabaseFromVersionHeader(path, indexFile string) (data.Database, err
 
 	switch version {
 	case 2:
-		return version2.NewDatabase(path), nil
+		return version2.New(path), nil
 	default:
 		return nil, errors.Format("unsupported version \"%d\"", version)
 	}

@@ -9,6 +9,8 @@ import (
 
 type Database interface {
 	GetVersion() uint16
+
+	Initialize(idx index.IndexMap) error
 	Upgrade(idx index.IndexMap, target Database) error
 
 	IndexPath() string
