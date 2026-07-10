@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"pvault/cmd"
 	"pvault/config"
-	"pvault/data"
+	"pvault/json"
 	"pvault/vault"
 	"pvault/vault/record"
 	"testing"
@@ -42,7 +42,7 @@ func (s *UnlockTestSuite) SetupTest() {
 		VaultPath:  file.NewPath(s.T(), "vault"),
 		OutputPath: file.NewPath(s.T(), ""),
 	}
-	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
@@ -73,7 +73,7 @@ func (s *UnlockTestSuite) TestRunFailErrorLoadingConfig() {
 func (s *UnlockTestSuite) TestRunFailConfigOutputPathInvalid() {
 	//-- arrange
 	s.Config.OutputPath = "invalid"
-	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
 	//-- act
@@ -86,7 +86,7 @@ func (s *UnlockTestSuite) TestRunFailConfigOutputPathInvalid() {
 func (s *UnlockTestSuite) TestRunInvalidVaultPath() {
 	//-- arrange
 	s.Config.VaultPath = "invalid"
-	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
 	//-- act
@@ -164,7 +164,7 @@ func (s *UnlockTestSuite) TestRunValid() {
 	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
 	s.Assert().Contains(io.ReadLine(), "[+] "+OUTPUT_FILE)
 
-	record, err := data.LoadJSON[record.Record](OUTPUT_FILE)
+	record, err := json.UnmarshalFile[record.Record](OUTPUT_FILE)
 	s.Require().NoError(err)
 	s.Assert().Equal(s.Record, record)
 }

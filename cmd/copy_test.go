@@ -5,7 +5,7 @@ import (
 	"os"
 	"pvault/cmd"
 	"pvault/config"
-	"pvault/data"
+	"pvault/json"
 	"pvault/tools/clipboard"
 	"pvault/tools/qrcode"
 	"pvault/vault"
@@ -51,7 +51,7 @@ func (s *CopyTestSuite) SetupTest() {
 		Version:   config.VERSION,
 		VaultPath: file.NewPath(s.T(), "vault"),
 	}
-	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
@@ -96,7 +96,7 @@ func (s *CopyTestSuite) TestRunFailErrorLoadingConfig() {
 func (s *CopyTestSuite) TestRunFailInvalidVaultPath() {
 	//-- arrange
 	s.Config.VaultPath = "invalid"
-	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
 	//-- act

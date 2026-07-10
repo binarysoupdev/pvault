@@ -4,7 +4,7 @@ import (
 	"os"
 	"pvault/cmd"
 	"pvault/config"
-	"pvault/data"
+	"pvault/json"
 	"pvault/vault"
 	"pvault/vault/record"
 	"testing"
@@ -37,7 +37,7 @@ func (s *SearchTestSuite) SetupTest() {
 		VaultPath:  file.NewPath(s.T(), "vault"),
 		OutputPath: file.NewPath(s.T(), ""),
 	}
-	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
 	_, err = vault.InitializeNew(s.Config.VaultPath)
@@ -64,7 +64,7 @@ func (s *SearchTestSuite) TestRunInvalidVaultPath() {
 	NAME := rand.ASCII(15)
 
 	s.Config.VaultPath = "invalid"
-	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
 	//-- act

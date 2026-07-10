@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"pvault/cmd/flow"
 	"pvault/config"
-	"pvault/data"
 	"pvault/errors"
+	"pvault/json"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
@@ -56,7 +56,7 @@ func (cmd ConfigCommand) generateNew() error {
 		OutputPath: ".",
 	}
 
-	err = data.SaveJSON(config, cmd.ConfigPath)
+	err = json.MarshalFilePretty(config, cmd.ConfigPath, "  ")
 	if err != nil {
 		return errors.Chain(err, "error saving config file")
 	}

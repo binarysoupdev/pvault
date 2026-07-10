@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"pvault/cmd/flow"
 	"pvault/config"
-	"pvault/data"
 	"pvault/errors"
+	"pvault/json"
 	"pvault/vault/record"
 
 	"github.com/binarysoupdev/go-commando/command"
@@ -73,7 +73,7 @@ func (cmd CreateCommand) Run(args []string) error {
 	style.BoldCreate.Printf("[+] New Record: %s\n", r.ID.String())
 
 	path := filepath.Join(cmd.Config.OutputPath, r.ID.String()+".json")
-	err = data.SaveJSON(r, path)
+	err = json.MarshalFilePretty(r, path, "  ")
 	if err != nil {
 		return errors.Chain(err, "error creating output record")
 	}

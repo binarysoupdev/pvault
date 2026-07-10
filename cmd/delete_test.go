@@ -5,7 +5,7 @@ import (
 	"os"
 	"pvault/cmd"
 	"pvault/config"
-	"pvault/data"
+	"pvault/json"
 	"pvault/vault"
 	"pvault/vault/record"
 	"testing"
@@ -41,7 +41,7 @@ func (s *DeleteTestSuite) SetupTest() {
 		VaultPath:  file.NewPath(s.T(), "vault"),
 		OutputPath: file.NewPath(s.T(), ""),
 	}
-	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
@@ -71,7 +71,7 @@ func (s *DeleteTestSuite) TestRunFailErrorLoadingConfig() {
 func (s *DeleteTestSuite) TestRunInvalidVaultPath() {
 	//-- arrange
 	s.Config.VaultPath = "invalid"
-	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
 	//-- act

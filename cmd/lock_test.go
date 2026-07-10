@@ -4,7 +4,7 @@ import (
 	"os"
 	"pvault/cmd"
 	"pvault/config"
-	"pvault/data"
+	"pvault/json"
 	"pvault/vault"
 	"pvault/vault/record"
 	"testing"
@@ -40,7 +40,7 @@ func (s *LockTestSuite) SetupTest() {
 		VaultPath:  file.NewPath(s.T(), "vault"),
 		OutputPath: file.NewPath(s.T(), ""),
 	}
-	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
 	_, err = vault.InitializeNew(s.Config.VaultPath)
@@ -50,7 +50,7 @@ func (s *LockTestSuite) SetupTest() {
 	s.RecordPath = file.NewPath(s.T(), rand.ASCII(10))
 	s.Record = record.NewFromName(rand.ASCII(15))
 
-	err = data.SaveJSON(s.Record, s.RecordPath)
+	err = json.MarshalFile(s.Record, s.RecordPath)
 	s.Require().NoError(err)
 }
 
@@ -79,7 +79,7 @@ func (s *LockTestSuite) TestRunPathNotEmpty() {
 func (s *LockTestSuite) TestRunInvalidVaultPath() {
 	//-- arrange
 	s.Config.VaultPath = "invalid"
-	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
 	//-- act
@@ -101,7 +101,7 @@ func (s *LockTestSuite) TestRunInvalidRecord() {
 	//-- arrange
 	s.Record.Name = ""
 
-	err := data.SaveJSON(s.Record, s.RecordPath)
+	err := json.MarshalFile(s.Record, s.RecordPath)
 	s.Require().NoError(err)
 
 	//-- act

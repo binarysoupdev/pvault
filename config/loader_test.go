@@ -2,7 +2,7 @@ package config_test
 
 import (
 	"pvault/config"
-	"pvault/data"
+	"pvault/json"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -33,7 +33,7 @@ func TestLoadConfigLoadsConfig(t *testing.T) {
 		OutputPath: rand.ASCII(15),
 	}
 
-	err := data.SaveJSON(CONFIG, loader.ConfigPath)
+	err := json.MarshalFile(CONFIG, loader.ConfigPath)
 	require.NoError(t, err)
 
 	//-- act

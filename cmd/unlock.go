@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"pvault/cmd/flow"
 	"pvault/config"
-	"pvault/data"
 	"pvault/errors"
+	"pvault/json"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
@@ -63,7 +63,7 @@ func (cmd UnlockCommand) Run(args []string) error {
 	style.BoldInfo.Printf("[=] Loaded Record: %s\n", r.ID.String())
 
 	path := filepath.Join(cmd.Config.OutputPath, r.ID.String()+".json")
-	err = data.SaveJSON(r, path)
+	err = json.MarshalFilePretty(r, path, "  ")
 	if err != nil {
 		return errors.Chain(err, "error creating output record")
 	}

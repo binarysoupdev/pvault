@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"pvault/cmd"
 	"pvault/config"
-	"pvault/data"
+	"pvault/json"
 	"pvault/vault"
 	"pvault/vault/data/version1"
 	"testing"
@@ -40,7 +40,7 @@ func (s *ConfigTestSuite) SetupTest() {
 		OutputPath: file.NewPath(s.T(), ""),
 	}
 
-	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 }
 
@@ -87,7 +87,7 @@ func (s *ConfigTestSuite) TestRunNotNewConfigNotFoundReturnsError() {
 func (s *ConfigTestSuite) TestRunValidateConfigWithInvalidVaultPrintsError() {
 	//-- arrange
 	s.Config.VaultPath = file.NewPath(s.T(), "")
-	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(3)
@@ -111,7 +111,7 @@ func (s *ConfigTestSuite) TestRunValidateConfigWithOutOfDateVaultPrintsError() {
 	const LEGACY_VERSION = 1
 
 	s.Config.VaultPath = filepath.Dir(PATH)
-	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(3)
@@ -132,7 +132,7 @@ func (s *ConfigTestSuite) TestRunValidateConfigWithOutOfDateVaultPrintsError() {
 func (s *ConfigTestSuite) TestRunValidatePassWithInvalidBackupPathPrintsError() {
 	//-- arrange
 	s.Config.BackupPath = file.CreateEmpty(s.T(), "backup.txt")
-	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(3)
@@ -154,7 +154,7 @@ func (s *ConfigTestSuite) TestRunValidatePassWithInvalidBackupPathPrintsError() 
 func (s *ConfigTestSuite) TestRunValidateWithInvalidOutputPathPrintsError() {
 	//-- arrange
 	s.Config.OutputPath = "invalid"
-	err := data.SaveJSON(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(4)

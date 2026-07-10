@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"pvault/cmd/flow"
 	"pvault/config"
-	"pvault/data"
+	"pvault/json"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -30,7 +30,7 @@ func TestLoadConfigReturnsErrorWhenUsingInvalidVersion(t *testing.T) {
 	CONFIG := config.Config{
 		Version: config.VERSION + 1,
 	}
-	err := data.SaveJSON(CONFIG, loader.ConfigPath)
+	err := json.MarshalFile(CONFIG, loader.ConfigPath)
 	require.NoError(t, err)
 
 	//-- act
@@ -47,7 +47,7 @@ func TestLoadConfigReturnsErrorWhenUsingOlderVersion(t *testing.T) {
 	CONFIG := config.Config{
 		Version: config.VERSION - 1,
 	}
-	err := data.SaveJSON(CONFIG, loader.ConfigPath)
+	err := json.MarshalFile(CONFIG, loader.ConfigPath)
 	require.NoError(t, err)
 
 	//-- act
@@ -66,7 +66,7 @@ func TestLoadConfigReturnsNoErrorAndLoadsConfigWhenValid(t *testing.T) {
 		VaultPath:  "vault/path",
 		OutputPath: "output/path",
 	}
-	err := data.SaveJSON(CONFIG, loader.ConfigPath)
+	err := json.MarshalFile(CONFIG, loader.ConfigPath)
 	require.NoError(t, err)
 
 	//-- act

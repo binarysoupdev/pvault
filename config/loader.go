@@ -1,8 +1,8 @@
 package config
 
 import (
-	"pvault/data"
 	"pvault/errors"
+	"pvault/json"
 )
 
 type Loader[Config any] struct {
@@ -19,7 +19,7 @@ func NewLoader[Config any](path string) Loader[Config] {
 func (l *Loader[Config]) LoadConfig() error {
 	var err error
 
-	l.Config, err = data.LoadJSON[Config](l.ConfigPath)
+	l.Config, err = json.UnmarshalFile[Config](l.ConfigPath)
 	if err != nil {
 		return errors.Chain(err, "error loading config JSON")
 	}
