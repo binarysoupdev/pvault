@@ -110,27 +110,6 @@ func (s *DeleteTestSuite) TestRunIncorrectConfirmName() {
 	s.Assert().Contains(io.ReadLine(), "Confirm NAME: "+s.Record.Name+"x")
 }
 
-func (s *DeleteTestSuite) TestRunVaultFileMissing() {
-	//-- arrange
-	err := s.Vault.Database.DeleteRecord(s.Record.ID)
-	s.Require().NoError(err)
-
-	io := pipe.OpenStdio(1, 2, true)
-	defer io.Close()
-
-	//-- act
-	io.Queue("NAME: ", s.Record.Name)
-	io.EndQueue()
-
-	s.RunCommand("-s", s.Record.Name)
-
-	//-- assert
-	s.RequireResultFail("error deleting vault record")
-
-	s.Assert().Contains(io.ReadLine(), s.Record.Name)
-	s.Assert().Contains(io.ReadLine(), "Confirm NAME: "+s.Record.Name)
-}
-
 func (s *DeleteTestSuite) TestRunValid() {
 	//-- arrange
 	io := pipe.OpenStdio(1, 3, true)

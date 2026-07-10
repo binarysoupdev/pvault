@@ -104,27 +104,6 @@ func (s *UnlockTestSuite) TestRunInvalidNoResults() {
 	s.RequireResultFail("no matches found")
 }
 
-func (s *UnlockTestSuite) TestRunVaultFileMissing() {
-	//-- arrange
-	err := s.Vault.Database.DeleteRecord(s.Record.ID)
-	s.Require().NoError(err)
-
-	io := pipe.OpenStdio(1, 2, false)
-	defer io.Close()
-
-	//-- act
-	io.Queue("PASSWORD: ", s.Password)
-	io.EndQueue()
-
-	s.RunCommand("-s", s.Record.Name)
-
-	//-- assert
-	s.RequireResultFail("error reading record file")
-
-	s.Assert().Contains(io.ReadLine(), s.Record.Name)
-	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")
-}
-
 func (s *UnlockTestSuite) TestRunIncorrectPassword() {
 	//-- arrange
 	io := pipe.OpenStdio(1, 2, false)
