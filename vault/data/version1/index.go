@@ -54,7 +54,7 @@ func (db Database) LoadIndex() (index.IndexMap, error) {
 		name := tokens[1]
 		id, err := uuid.Parse(tokens[0])
 		if err != nil {
-			return idx, errors.Chain(err, fmt.Sprintf("[line %d] invalid uuid", line))
+			return idx, errors.ChainFormat(err, "[line %d] invalid uuid", line)
 		}
 
 		idx[name] = id
