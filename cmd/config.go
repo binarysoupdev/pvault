@@ -47,30 +47,27 @@ func (cmd ConfigCommand) generateNew() error {
 		return errors.Format("config file \"%s\" already exists", cmd.ConfigPath)
 	}
 
-	home := cmd.homePath()
+	base := config.DataPath()
 
 	config := config.Config{
 		Version:    config.VERSION,
-		VaultPath:  filepath.Join(home, "vault"),
-		BackupPath: filepath.Join(home, "backups"),
+		VaultPath:  filepath.Join(base, "vault"),
+		BackupPath: filepath.Join(base, "backups"),
 		OutputPath: ".",
 	}
 
-	err = json.MarshalFilePretty(config, cmd.ConfigPath, "  ")
+	err = os.MkdirAll(filepath.Dir(cmd.ConfigPath), 0755)
+	if err != nil {
+		return errors.Chain(err, "error creating config directory")
+	}
+
+	err = json.MarshalFilePretty(config, cmd.ConfigPath, "    ")
 	if err != nil {
 		return errors.Chain(err, "error saving config file")
 	}
 
 	style.BoldCreate.Printf("[+] Created New Config: %s\n", cmd.ConfigPath)
 	return nil
-}
-
-func (ConfigCommand) homePath() string {
-	base, err := os.UserHomeDir()
-	if err != nil {
-		return ""
-	}
-	return filepath.Join(base, ".pvault")
 }
 
 func (cmd ConfigCommand) validate() error {

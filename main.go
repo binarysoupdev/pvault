@@ -51,13 +51,10 @@ func main() {
 }
 
 func configPath() string {
-	// check for ENV variable override
 	val := os.Getenv("CONFIG")
 	if val != "" {
 		return val
 	}
 
-	// use executable path as default
-	exec, _ := os.Executable()
-	return filepath.Join(filepath.Dir(exec), "config.json")
+	return filepath.Join(config.DataPath(), "config.json")
 }

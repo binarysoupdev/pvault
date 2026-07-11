@@ -65,7 +65,7 @@ func SaveOutputRecord(cfg config.Config, r record.Record) error {
 
 	path := filepath.Join(cfg.OutputPath, r.ID.String()+".json")
 
-	err = json.MarshalFilePretty(r, path, "  ")
+	err = json.MarshalFilePretty(r, path, "    ")
 	if err != nil {
 		return errors.Chain(err, "error creating output record")
 	}

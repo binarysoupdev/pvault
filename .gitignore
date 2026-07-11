@@ -1,11 +1,7 @@
 .vscode/*
 
-tmp/legacy/*
-tmp/backups/*
-tmp/vault/*
-
-tmp/output/*
-!tmp/output/.keep
-
 pvault
+pvault-prod
 coverage.out
+
+local/*
