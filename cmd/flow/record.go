@@ -3,10 +3,12 @@ package flow
 import (
 	"path/filepath"
 	"pvault/config"
-	"pvault/errors"
-	"pvault/json"
 	"pvault/vault"
 	"pvault/vault/record"
+
+	"github.com/binarysoupdev/go-commando/json"
+
+	"github.com/binarysoupdev/go-commando/errors"
 
 	"github.com/binarysoupdev/got-style/style"
 )

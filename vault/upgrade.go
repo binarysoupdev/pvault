@@ -1,8 +1,9 @@
 package vault
 
 import (
-	"pvault/errors"
 	"pvault/vault/data/version2"
+
+	"github.com/binarysoupdev/go-commando/errors"
 )
 
 func (v Vault) IsOutOfDate() bool {

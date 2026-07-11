@@ -1,9 +1,10 @@
 package version2
 
 import (
-	"pvault/errors"
 	"pvault/vault/data"
 	"pvault/vault/index"
+
+	"github.com/binarysoupdev/go-commando/errors"
 )
 
 const VERSION = 2

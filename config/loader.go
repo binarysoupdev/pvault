@@ -1,8 +1,9 @@
 package config
 
 import (
-	"pvault/errors"
-	"pvault/json"
+	"github.com/binarysoupdev/go-commando/json"
+
+	"github.com/binarysoupdev/go-commando/errors"
 )
 
 type Loader[Config any] struct {

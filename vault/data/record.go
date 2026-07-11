@@ -3,7 +3,8 @@ package data
 import (
 	"encoding/json"
 	"os"
-	"pvault/errors"
+
+	"github.com/binarysoupdev/go-commando/errors"
 
 	"github.com/binarysoupdev/cryptool/crypt"
 )

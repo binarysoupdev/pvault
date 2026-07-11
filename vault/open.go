@@ -4,10 +4,11 @@ import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
-	"pvault/errors"
 	"pvault/vault/data"
 	"pvault/vault/data/version1"
 	"pvault/vault/data/version2"
+
+	"github.com/binarysoupdev/go-commando/errors"
 )
 
 func Open(path string) (Vault, error) {

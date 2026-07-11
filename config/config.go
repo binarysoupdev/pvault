@@ -2,7 +2,8 @@ package config
 
 import (
 	"os"
-	"pvault/errors"
+
+	"github.com/binarysoupdev/go-commando/errors"
 )
 
 const VERSION = 1

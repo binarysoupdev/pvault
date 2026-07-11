@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"pvault/cmd"
 	"pvault/config"
-	"pvault/json"
 	"pvault/vault"
 	"pvault/vault/data/version1"
 	"pvault/vault/index"
 	"pvault/vault/record"
 	"regexp"
 	"testing"
+
+	"github.com/binarysoupdev/go-commando/json"
 
 	"github.com/binarysoupdev/go-commando/test"
 	"github.com/binarysoupdev/tinsel/file"

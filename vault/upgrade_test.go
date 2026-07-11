@@ -1,11 +1,12 @@
 package vault_test
 
 import (
-	"pvault/errors"
 	"pvault/vault"
 	"pvault/vault/data"
 	"pvault/vault/data/version2"
 	"testing"
+
+	"github.com/binarysoupdev/go-commando/errors"
 
 	"github.com/binarysoupdev/tinsel/file"
 	"github.com/stretchr/testify/suite"

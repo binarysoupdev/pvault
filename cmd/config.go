@@ -6,8 +6,10 @@ import (
 	"path/filepath"
 	"pvault/cmd/flow"
 	"pvault/config"
-	"pvault/errors"
-	"pvault/json"
+
+	"github.com/binarysoupdev/go-commando/json"
+
+	"github.com/binarysoupdev/go-commando/errors"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"

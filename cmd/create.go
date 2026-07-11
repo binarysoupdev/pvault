@@ -3,8 +3,9 @@ package cmd
 import (
 	"pvault/cmd/flow"
 	"pvault/config"
-	"pvault/errors"
 	"pvault/vault/record"
+
+	"github.com/binarysoupdev/go-commando/errors"
 
 	"github.com/binarysoupdev/go-commando/command"
 )

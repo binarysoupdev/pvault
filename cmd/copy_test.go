@@ -5,12 +5,13 @@ import (
 	"os"
 	"pvault/cmd"
 	"pvault/config"
-	"pvault/json"
 	"pvault/tools/clipboard"
 	"pvault/tools/qrcode"
 	"pvault/vault"
 	"pvault/vault/record"
 	"testing"
+
+	"github.com/binarysoupdev/go-commando/json"
 
 	"github.com/binarysoupdev/go-commando/test"
 	"github.com/binarysoupdev/tinsel/file"

@@ -5,9 +5,10 @@ import (
 	"os"
 	"path/filepath"
 	"pvault/config"
-	"pvault/errors"
 	"pvault/vault"
 	"time"
+
+	"github.com/binarysoupdev/go-commando/errors"
 
 	"github.com/binarysoupdev/got-style/style"
 )

@@ -2,7 +2,8 @@ package qrcode
 
 import (
 	"fmt"
-	"pvault/errors"
+
+	"github.com/binarysoupdev/go-commando/errors"
 
 	qrcode "github.com/skip2/go-qrcode"
 )

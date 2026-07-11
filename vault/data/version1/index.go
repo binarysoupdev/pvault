@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"pvault/errors"
 	"pvault/vault/index"
 	"strings"
+
+	"github.com/binarysoupdev/go-commando/errors"
 
 	"github.com/google/uuid"
 )

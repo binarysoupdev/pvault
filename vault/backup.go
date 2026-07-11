@@ -4,7 +4,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"pvault/errors"
+
+	"github.com/binarysoupdev/go-commando/errors"
 )
 
 func (v Vault) Backup(path string) error {

@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"pvault/cmd/flow"
 	"pvault/config"
-	"pvault/json"
 	"testing"
+
+	"github.com/binarysoupdev/go-commando/json"
 
 	"github.com/binarysoupdev/tinsel/file"
 	"github.com/stretchr/testify/assert"

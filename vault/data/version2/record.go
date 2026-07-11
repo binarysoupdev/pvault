@@ -4,10 +4,11 @@ import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
-	"pvault/errors"
 	"pvault/vault/data"
 	"pvault/vault/data/version1"
 	"pvault/vault/record"
+
+	"github.com/binarysoupdev/go-commando/errors"
 
 	"github.com/google/uuid"
 )

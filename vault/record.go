@@ -1,8 +1,9 @@
 package vault
 
 import (
-	"pvault/errors"
 	"pvault/vault/record"
+
+	"github.com/binarysoupdev/go-commando/errors"
 )
 
 func (v Vault) ValidateRecord(r record.Record) error {

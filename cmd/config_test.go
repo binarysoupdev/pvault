@@ -6,10 +6,11 @@ import (
 	"path/filepath"
 	"pvault/cmd"
 	"pvault/config"
-	"pvault/json"
 	"pvault/vault"
 	"pvault/vault/data/version1"
 	"testing"
+
+	"github.com/binarysoupdev/go-commando/json"
 
 	"github.com/binarysoupdev/go-commando/test"
 	"github.com/binarysoupdev/tinsel/file"

@@ -1,7 +1,7 @@
 package record
 
 import (
-	"pvault/errors"
+	"github.com/binarysoupdev/go-commando/errors"
 
 	"github.com/google/uuid"
 )

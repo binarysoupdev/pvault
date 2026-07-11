@@ -2,7 +2,8 @@ package flow
 
 import (
 	"pvault/config"
-	"pvault/errors"
+
+	"github.com/binarysoupdev/go-commando/errors"
 )
 
 func LoadConfig(loader *config.Loader[config.Config]) error {

@@ -2,8 +2,9 @@ package config_test
 
 import (
 	"pvault/config"
-	"pvault/json"
 	"testing"
+
+	"github.com/binarysoupdev/go-commando/json"
 
 	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/rand"

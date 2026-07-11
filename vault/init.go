@@ -2,9 +2,10 @@ package vault
 
 import (
 	"os"
-	"pvault/errors"
 	"pvault/vault/data/version2"
 	"pvault/vault/index"
+
+	"github.com/binarysoupdev/go-commando/errors"
 )
 
 func InitializeNew(path string) (Vault, error) {
