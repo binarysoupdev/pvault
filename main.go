@@ -9,12 +9,11 @@ import (
 	"pvault/config"
 	"pvault/tools/clipboard"
 	"pvault/tools/qrcode"
+	"pvault/version"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/got-style/style"
 )
-
-const VERSION = "2.0.0-beta1"
 
 func main() {
 	v := flag.Bool("v", false, "display version")
@@ -22,7 +21,7 @@ func main() {
 	flag.Parse()
 
 	if *v {
-		printVersion()
+		version.Display()
 		return
 	}
 
@@ -40,7 +39,7 @@ func main() {
 	)
 
 	if *ls || len(os.Args) < 2 {
-		printVersion()
+		version.Display()
 		runner.ListCommands()
 		return
 	}
@@ -49,10 +48,6 @@ func main() {
 		style.BoldError.Print("ERROR: ")
 		fmt.Println(err)
 	}
-}
-
-func printVersion() {
-	style.New(style.BOLD, style.UNDERLINE).Printf("pvault @v%s\n", VERSION)
 }
 
 func configPath() string {
