@@ -9,7 +9,6 @@ import (
 	"pvault/vault/record"
 	"testing"
 
-	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
 	"github.com/binarysoupdev/tinsel/file"
@@ -20,7 +19,7 @@ import (
 
 type UnlockTestSuite struct {
 	test.CommandSuite[*cmd.UnlockCommand]
-	ConfigLoader cfg.Loader[config.Config]
+	ConfigLoader json.Loader[config.Config]
 	Config       config.Config
 
 	Vault    vault.Vault
@@ -30,7 +29,7 @@ type UnlockTestSuite struct {
 
 func TestUnlockCommandSuite(t *testing.T) {
 	s := UnlockTestSuite{
-		ConfigLoader: cfg.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: json.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewUnlockCommand(s.ConfigLoader))
@@ -43,7 +42,7 @@ func (s *UnlockTestSuite) SetupTest() {
 		VaultPath:  file.NewPath(s.T(), "vault"),
 		OutputPath: file.NewPath(s.T(), ""),
 	}
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
@@ -61,7 +60,7 @@ func (s *UnlockTestSuite) SetupTest() {
 
 func (s *UnlockTestSuite) TestRunFailErrorLoadingConfig() {
 	//-- arrange
-	err := os.Remove(s.ConfigLoader.ConfigPath)
+	err := os.Remove(s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	//-- act
@@ -74,7 +73,7 @@ func (s *UnlockTestSuite) TestRunFailErrorLoadingConfig() {
 func (s *UnlockTestSuite) TestRunFailConfigOutputPathInvalid() {
 	//-- arrange
 	s.Config.OutputPath = "invalid"
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	//-- act
@@ -87,7 +86,7 @@ func (s *UnlockTestSuite) TestRunFailConfigOutputPathInvalid() {
 func (s *UnlockTestSuite) TestRunInvalidVaultPath() {
 	//-- arrange
 	s.Config.VaultPath = "invalid"
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	//-- act

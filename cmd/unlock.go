@@ -5,26 +5,27 @@ import (
 	"pvault/config"
 
 	"github.com/binarysoupdev/go-commando/command"
-	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-commando/json"
 )
 
 type UnlockCommand struct {
 	command.FlagCommandBase
-	cfg.Loader[config.Config]
+
+	ConfigLoader json.Loader[config.Config]
+	Config       config.Config
 }
 
-func NewUnlockCommand(loader cfg.Loader[config.Config]) *UnlockCommand {
+func NewUnlockCommand(loader json.Loader[config.Config]) *UnlockCommand {
 	return &UnlockCommand{
 		FlagCommandBase: command.NewFlagCommandBase("unlock", "unlock a record from the vault"),
-		Loader:          loader,
+		ConfigLoader:    loader,
 	}
 }
 
 func (cmd *UnlockCommand) Initialize() error {
-	_ = cmd.FlagCommandBase.Initialize()
-
-	err := flow.LoadConfig(&cmd.Loader)
+	var err error
+	cmd.Config, err = flow.LoadConfig(cmd.ConfigLoader)
 	if err != nil {
 		return err
 	}
@@ -34,7 +35,7 @@ func (cmd *UnlockCommand) Initialize() error {
 		return errors.Chain(err, "error validating config \"output_path\"")
 	}
 
-	return nil
+	return cmd.FlagCommandBase.Initialize()
 }
 
 func (cmd UnlockCommand) Run(args []string) error {

@@ -10,7 +10,6 @@ import (
 	"pvault/vault/data/version1"
 	"testing"
 
-	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
 	"github.com/binarysoupdev/tinsel/file"
@@ -20,13 +19,13 @@ import (
 
 type ConfigTestSuite struct {
 	test.CommandSuite[*cmd.ConfigCommand]
-	ConfigLoader cfg.Loader[config.Config]
+	ConfigLoader json.Loader[config.Config]
 	Config       config.Config
 }
 
 func TestConfigCommandSuite(t *testing.T) {
 	s := ConfigTestSuite{
-		ConfigLoader: cfg.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: json.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewConfigCommand(s.ConfigLoader))
@@ -41,7 +40,7 @@ func (s *ConfigTestSuite) SetupTest() {
 		OutputPath: file.NewPath(s.T(), ""),
 	}
 
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 }
 
@@ -52,12 +51,12 @@ func (s *ConfigTestSuite) TestRunNewWithExistingConfigReturnsError() {
 	s.RunCommand("-new")
 
 	//-- assert
-	s.RequireResultFail(fmt.Sprintf("config file \"%s\" already exists", s.ConfigLoader.ConfigPath))
+	s.RequireResultFail(fmt.Sprintf("config file \"%s\" already exists", s.ConfigLoader.Path))
 }
 
 func (s *ConfigTestSuite) TestRunNewCreatesNewConfig() {
 	//-- arrange
-	err := os.Remove(s.ConfigLoader.ConfigPath)
+	err := os.Remove(s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(1)
@@ -69,13 +68,13 @@ func (s *ConfigTestSuite) TestRunNewCreatesNewConfig() {
 	//-- assert
 	s.RequireResultPass()
 
-	s.Assert().FileExists(s.ConfigLoader.ConfigPath)
-	s.Assert().Contains(out.ReadLine(), "[+] Created New Config: "+s.ConfigLoader.ConfigPath)
+	s.Assert().FileExists(s.ConfigLoader.Path)
+	s.Assert().Contains(out.ReadLine(), "[+] Created New Config: "+s.ConfigLoader.Path)
 }
 
 func (s *ConfigTestSuite) TestRunNotNewConfigNotFoundReturnsError() {
 	//-- arrange
-	err := os.Remove(s.ConfigLoader.ConfigPath)
+	err := os.Remove(s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	//-- act
@@ -88,7 +87,7 @@ func (s *ConfigTestSuite) TestRunNotNewConfigNotFoundReturnsError() {
 func (s *ConfigTestSuite) TestRunValidateConfigWithInvalidVaultPrintsError() {
 	//-- arrange
 	s.Config.VaultPath = file.NewPath(s.T(), "")
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(3)
@@ -99,7 +98,7 @@ func (s *ConfigTestSuite) TestRunValidateConfigWithInvalidVaultPrintsError() {
 
 	//-- assert
 	s.RequireResultPass()
-	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Loaded from \"%s\"", s.ConfigLoader.ConfigPath))
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Loaded from \"%s\"", s.ConfigLoader.Path))
 
 	vaultPath := out.ReadLine()
 	s.Assert().Contains(vaultPath, s.Config.VaultPath)
@@ -112,7 +111,7 @@ func (s *ConfigTestSuite) TestRunValidateConfigWithOutOfDateVaultPrintsError() {
 	const LEGACY_VERSION = 1
 
 	s.Config.VaultPath = filepath.Dir(PATH)
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(3)
@@ -123,7 +122,7 @@ func (s *ConfigTestSuite) TestRunValidateConfigWithOutOfDateVaultPrintsError() {
 
 	//-- assert
 	s.RequireResultPass()
-	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Loaded from \"%s\"", s.ConfigLoader.ConfigPath))
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Loaded from \"%s\"", s.ConfigLoader.Path))
 
 	vaultPath := out.ReadLine()
 	s.Assert().Contains(vaultPath, s.Config.VaultPath)
@@ -133,7 +132,7 @@ func (s *ConfigTestSuite) TestRunValidateConfigWithOutOfDateVaultPrintsError() {
 func (s *ConfigTestSuite) TestRunValidatePassWithInvalidBackupPathPrintsError() {
 	//-- arrange
 	s.Config.BackupPath = file.CreateEmpty(s.T(), "backup.txt")
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(3)
@@ -144,7 +143,7 @@ func (s *ConfigTestSuite) TestRunValidatePassWithInvalidBackupPathPrintsError() 
 
 	//-- assert
 	s.RequireResultPass()
-	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Loaded from \"%s\"", s.ConfigLoader.ConfigPath))
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Loaded from \"%s\"", s.ConfigLoader.Path))
 	out.SkipLines(1)
 
 	outputPath := out.ReadLine()
@@ -155,7 +154,7 @@ func (s *ConfigTestSuite) TestRunValidatePassWithInvalidBackupPathPrintsError() 
 func (s *ConfigTestSuite) TestRunValidateWithInvalidOutputPathPrintsError() {
 	//-- arrange
 	s.Config.OutputPath = "invalid"
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(4)
@@ -166,7 +165,7 @@ func (s *ConfigTestSuite) TestRunValidateWithInvalidOutputPathPrintsError() {
 
 	//-- assert
 	s.RequireResultPass()
-	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Loaded from \"%s\"", s.ConfigLoader.ConfigPath))
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Loaded from \"%s\"", s.ConfigLoader.Path))
 	out.SkipLines(2)
 
 	outputPath := out.ReadLine()
@@ -187,7 +186,7 @@ func (s *ConfigTestSuite) TestRunValidatePassConfigPrintsConfig() {
 
 	//-- assert
 	s.RequireResultPass()
-	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Loaded from \"%s\"", s.ConfigLoader.ConfigPath))
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Loaded from \"%s\"", s.ConfigLoader.Path))
 
 	vaultPath := out.ReadLine()
 	s.Assert().Contains(vaultPath, s.Config.VaultPath)

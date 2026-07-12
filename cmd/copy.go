@@ -7,37 +7,42 @@ import (
 	"pvault/tools/qrcode"
 
 	"github.com/binarysoupdev/go-commando/command"
-	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/got-style/style"
 )
 
 type CopyCommand struct {
 	command.FlagCommandBase
-	cfg.Loader[config.Config]
+
+	ConfigLoader json.Loader[config.Config]
+	Config       config.Config
 
 	clipboard clipboard.Clipboard
 	qrcode    qrcode.Renderer
 }
 
-func NewCopyCommand(loader cfg.Loader[config.Config], clipboard clipboard.Clipboard, qrcode qrcode.Renderer) *CopyCommand {
+func NewCopyCommand(loader json.Loader[config.Config], clipboard clipboard.Clipboard, qrcode qrcode.Renderer) *CopyCommand {
 	return &CopyCommand{
 		FlagCommandBase: command.NewFlagCommandBase("copy", "copy password/username of a record"),
-		Loader:          loader,
+		ConfigLoader:    loader,
 		clipboard:       clipboard,
 		qrcode:          qrcode,
 	}
 }
 
 func (cmd *CopyCommand) Initialize() error {
-	_ = cmd.FlagCommandBase.Initialize()
-
 	err := cmd.clipboard.CheckUnsupported()
 	if err != nil {
 		return errors.Chain(err, "clipboard unsupported")
 	}
 
-	return flow.LoadConfig(&cmd.Loader)
+	cmd.Config, err = flow.LoadConfig(cmd.ConfigLoader)
+	if err != nil {
+		return err
+	}
+
+	return cmd.FlagCommandBase.Initialize()
 }
 
 func (cmd CopyCommand) Run(args []string) error {

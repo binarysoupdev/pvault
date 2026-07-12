@@ -11,7 +11,6 @@ import (
 	"regexp"
 	"testing"
 
-	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
 	"github.com/binarysoupdev/tinsel/file"
@@ -24,13 +23,13 @@ import (
 
 type VaultTestSuite struct {
 	test.CommandSuite[*cmd.VaultCommand]
-	ConfigLoader cfg.Loader[config.Config]
+	ConfigLoader json.Loader[config.Config]
 	Config       config.Config
 }
 
 func TestVaultCommandSuite(t *testing.T) {
 	s := VaultTestSuite{
-		ConfigLoader: cfg.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: json.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewVaultCommand(s.ConfigLoader))
@@ -44,7 +43,7 @@ func (s *VaultTestSuite) SetupTest() {
 		BackupPath: file.NewPath(s.T(), ""),
 	}
 
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 }
 
@@ -53,7 +52,7 @@ func (s *VaultTestSuite) SetupTest() {
 func (s *VaultTestSuite) TestRunInitWithInvalidVaultPathReturnsError() {
 	//-- arrange
 	s.Config.VaultPath = file.NewPath(s.T(), "")
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	//-- act
@@ -80,7 +79,7 @@ func (s *VaultTestSuite) TestRunInitValidInitializesVault() {
 func (s *VaultTestSuite) TestRunBackupFailsWithInvalidVault() {
 	//-- arrange
 	s.Config.VaultPath = file.NewPath(s.T(), "")
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	//-- act
@@ -93,7 +92,7 @@ func (s *VaultTestSuite) TestRunBackupFailsWithInvalidVault() {
 func (s *VaultTestSuite) TestRunBackupFailsWithInvalidBackupPath() {
 	//-- arrange
 	s.Config.BackupPath = file.CreateEmpty(s.T(), "backups.txt")
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	_, err = vault.InitializeNew(s.Config.VaultPath)
@@ -133,7 +132,7 @@ func (s *VaultTestSuite) TestRunBackupPassesAndBacksUpVault() {
 func (s *VaultTestSuite) TestRunUpgradeFailsWithInvalidVault() {
 	//-- arrange
 	s.Config.VaultPath = file.NewPath(s.T(), "")
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	//-- act
@@ -160,7 +159,7 @@ func (s *VaultTestSuite) TestRunUpgradeFailsWithInvalidBackupPath() {
 	s.Config.VaultPath = file.NewPath(s.T(), "")
 	s.Config.BackupPath = file.CreateEmpty(s.T(), "backups.txt")
 
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	err = version1.New(s.Config.VaultPath).Initialize(index.IndexMap{})
@@ -178,7 +177,7 @@ func (s *VaultTestSuite) TestRunUpgradePassesAndCreatesBackupAndUpgradesDatabase
 	DIR_REGEX := regexp.MustCompile(`"([^"]*)"`)
 
 	s.Config.VaultPath = file.NewPath(s.T(), "")
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	v1 := version1.New(s.Config.VaultPath)
@@ -210,7 +209,7 @@ func (s *VaultTestSuite) TestRunUpgradePassesAndCreatesBackupAndUpgradesDatabase
 func (s *VaultTestSuite) TestRunValidateWithInvalidVaultFails() {
 	//-- arrange
 	s.Config.VaultPath = file.NewPath(s.T(), "")
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	//-- act

@@ -5,24 +5,31 @@ import (
 	"pvault/config"
 
 	"github.com/binarysoupdev/go-commando/command"
-	cfg "github.com/binarysoupdev/go-commando/config"
+	"github.com/binarysoupdev/go-commando/json"
 )
 
 type SearchCommand struct {
 	command.FlagCommandBase
-	cfg.Loader[config.Config]
+
+	ConfigLoader json.Loader[config.Config]
+	Config       config.Config
 }
 
-func NewSearchCommand(loader cfg.Loader[config.Config]) *SearchCommand {
+func NewSearchCommand(loader json.Loader[config.Config]) *SearchCommand {
 	return &SearchCommand{
 		FlagCommandBase: command.NewFlagCommandBase("search", "search records in the vault"),
-		Loader:          loader,
+		ConfigLoader:    loader,
 	}
 }
 
 func (cmd *SearchCommand) Initialize() error {
-	_ = cmd.FlagCommandBase.Initialize()
-	return flow.LoadConfig(&cmd.Loader)
+	var err error
+	cmd.Config, err = flow.LoadConfig(cmd.ConfigLoader)
+	if err != nil {
+		return err
+	}
+
+	return cmd.FlagCommandBase.Initialize()
 }
 
 func (cmd SearchCommand) Run(args []string) error {

@@ -3,33 +3,28 @@ package flow
 import (
 	"pvault/config"
 
-	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-commando/json"
 )
 
-func LoadConfig(loader *cfg.Loader[config.Config]) error {
+func LoadConfig(loader json.Loader[config.Config]) (config.Config, error) {
 	err := loader.ValidatePath()
 	if err != nil {
-		return errors.Chain(err, "invalid config path (run \"config -new\" to generate)")
+		return config.Config{}, errors.Chain(err, "invalid config path (run \"config -new\" to generate)")
 	}
 
-	err = loader.LoadVersion()
+	cfg, err := loader.Load()
 	if err != nil {
-		return errors.Chain(err, "error loading config version")
+		return config.Config{}, errors.Chain(err, "error loading config")
 	}
 
-	if config.IsUnsupported(loader.ConfigVersion) {
-		return errors.Format("unsupported version \"%d\"", loader.ConfigVersion)
+	if config.IsUnsupported(cfg.Version) {
+		return cfg, errors.Format("unsupported version \"%d\"", cfg.Version)
 	}
 
-	if config.IsOutOfDate(loader.ConfigVersion) {
-		return errors.Format("config version [%d] out-of-date (run \"config -upgrade\" to repair)", loader.ConfigVersion)
+	if config.IsOutOfDate(cfg.Version) {
+		return cfg, errors.Format("config version [%d] out-of-date (run \"config -upgrade\" to repair)", cfg.Version)
 	}
 
-	err = loader.LoadConfig()
-	if err != nil {
-		return errors.Chain(err, "error loading config")
-	}
-
-	return nil
+	return cfg, nil
 }

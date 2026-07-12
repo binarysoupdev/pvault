@@ -12,7 +12,7 @@ import (
 	"pvault/version"
 
 	"github.com/binarysoupdev/go-commando/command"
-	cfg "github.com/binarysoupdev/go-commando/config"
+	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/got-style/style"
 )
 
@@ -26,7 +26,7 @@ func main() {
 		return
 	}
 
-	configLoader := cfg.NewLoader[config.Config](configPath())
+	configLoader := json.NewLoader[config.Config](configPath())
 
 	runner := command.NewRunner(
 		cmd.NewConfigCommand(configLoader),

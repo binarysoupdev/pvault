@@ -6,26 +6,27 @@ import (
 	"pvault/vault/record"
 
 	"github.com/binarysoupdev/go-commando/command"
-	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-commando/json"
 )
 
 type CreateCommand struct {
 	command.FlagCommandBase
-	cfg.Loader[config.Config]
+
+	ConfigLoader json.Loader[config.Config]
+	Config       config.Config
 }
 
-func NewCreateCommand(loader cfg.Loader[config.Config]) *CreateCommand {
+func NewCreateCommand(loader json.Loader[config.Config]) *CreateCommand {
 	return &CreateCommand{
 		FlagCommandBase: command.NewFlagCommandBase("create", "create a new vault record"),
-		Loader:          loader,
+		ConfigLoader:    loader,
 	}
 }
 
 func (cmd *CreateCommand) Initialize() error {
-	_ = cmd.FlagCommandBase.Initialize()
-
-	err := flow.LoadConfig(&cmd.Loader)
+	var err error
+	cmd.Config, err = flow.LoadConfig(cmd.ConfigLoader)
 	if err != nil {
 		return err
 	}
@@ -35,7 +36,7 @@ func (cmd *CreateCommand) Initialize() error {
 		return errors.Chain(err, "error validating config \"output_path\"")
 	}
 
-	return nil
+	return cmd.FlagCommandBase.Initialize()
 }
 
 func (cmd CreateCommand) Run(args []string) error {

@@ -9,7 +9,6 @@ import (
 	"pvault/vault/record"
 	"testing"
 
-	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
 	"github.com/binarysoupdev/tinsel/file"
@@ -20,7 +19,7 @@ import (
 
 type DeleteTestSuite struct {
 	test.CommandSuite[*cmd.DeleteCommand]
-	ConfigLoader cfg.Loader[config.Config]
+	ConfigLoader json.Loader[config.Config]
 	Config       config.Config
 
 	Vault  vault.Vault
@@ -29,7 +28,7 @@ type DeleteTestSuite struct {
 
 func TestDeleteCommandSuite(t *testing.T) {
 	s := DeleteTestSuite{
-		ConfigLoader: cfg.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: json.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewDeleteCommand(s.ConfigLoader))
@@ -42,7 +41,7 @@ func (s *DeleteTestSuite) SetupTest() {
 		VaultPath:  file.NewPath(s.T(), "vault"),
 		OutputPath: file.NewPath(s.T(), ""),
 	}
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
@@ -59,7 +58,7 @@ func (s *DeleteTestSuite) SetupTest() {
 
 func (s *DeleteTestSuite) TestRunFailErrorLoadingConfig() {
 	//-- arrange
-	err := os.Remove(s.ConfigLoader.ConfigPath)
+	err := os.Remove(s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	//-- act
@@ -72,7 +71,7 @@ func (s *DeleteTestSuite) TestRunFailErrorLoadingConfig() {
 func (s *DeleteTestSuite) TestRunInvalidVaultPath() {
 	//-- arrange
 	s.Config.VaultPath = "invalid"
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	//-- act

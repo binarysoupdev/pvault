@@ -6,7 +6,6 @@ import (
 	"pvault/config"
 	"testing"
 
-	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/tinsel/file"
 	"github.com/stretchr/testify/assert"
@@ -15,35 +14,46 @@ import (
 
 func TestLoadConfigReturnsErrorWhenConfigNotFound(t *testing.T) {
 	//-- arrange
-	loader := cfg.NewLoader[config.Config]("invalid")
+	loader := json.NewLoader[config.Config]("invalid")
 
 	//-- act
-	res := flow.LoadConfig(&loader)
+	_, res := flow.LoadConfig(loader)
 
 	//-- assert
 	require.ErrorContains(t, res, "invalid config path")
 }
 
+func TestLoadConfigReturnsErrorWhenConfigIsInvalidJson(t *testing.T) {
+	//-- arrange
+	loader := json.NewLoader[config.Config](file.CreateEmpty(t, "invalid.json"))
+
+	//-- act
+	_, res := flow.LoadConfig(loader)
+
+	//-- assert
+	require.ErrorContains(t, res, "error loading config")
+}
+
 func TestLoadConfigReturnsErrorWhenUsingInvalidVersion(t *testing.T) {
 	//-- arrange
-	loader := cfg.NewLoader[config.Config](file.NewPath(t, "config.json"))
+	loader := json.NewLoader[config.Config](file.NewPath(t, "config.json"))
 
 	CONFIG := config.Config{
 		Version: config.VERSION + 1,
 	}
-	err := json.MarshalFile(CONFIG, loader.ConfigPath)
+	err := json.MarshalFile(CONFIG, loader.Path)
 	require.NoError(t, err)
 
 	//-- act
-	res := flow.LoadConfig(&loader)
+	_, res := flow.LoadConfig(loader)
 
 	//-- assert
 	require.ErrorContains(t, res, fmt.Sprintf("unsupported version \"%d\"", CONFIG.Version))
 }
 
-func TestLoadConfigReturnsNoErrorAndLoadsConfigWhenValid(t *testing.T) {
+func TestLoadConfigReturnsConfigAndNoErrorWhenValid(t *testing.T) {
 	//-- arrange
-	loader := cfg.NewLoader[config.Config](file.NewPath(t, "config.json"))
+	loader := json.NewLoader[config.Config](file.NewPath(t, "config.json"))
 
 	CONFIG := config.Config{
 		Version:    config.VERSION,
@@ -51,13 +61,13 @@ func TestLoadConfigReturnsNoErrorAndLoadsConfigWhenValid(t *testing.T) {
 		VaultPath:  "vault/path",
 		OutputPath: "output/path",
 	}
-	err := json.MarshalFile(CONFIG, loader.ConfigPath)
+	err := json.MarshalFile(CONFIG, loader.Path)
 	require.NoError(t, err)
 
 	//-- act
-	res := flow.LoadConfig(&loader)
+	res, err := flow.LoadConfig(loader)
 
 	//-- assert
-	require.NoError(t, res)
-	assert.Equal(t, CONFIG, loader.Config)
+	require.NoError(t, err)
+	assert.Equal(t, CONFIG, res)
 }

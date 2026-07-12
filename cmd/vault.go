@@ -6,26 +6,33 @@ import (
 	"pvault/vault"
 
 	"github.com/binarysoupdev/go-commando/command"
-	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/got-style/style"
 )
 
 type VaultCommand struct {
 	command.FlagCommandBase
-	cfg.Loader[config.Config]
+
+	ConfigLoader json.Loader[config.Config]
+	Config       config.Config
 }
 
-func NewVaultCommand(loader cfg.Loader[config.Config]) *VaultCommand {
+func NewVaultCommand(loader json.Loader[config.Config]) *VaultCommand {
 	return &VaultCommand{
 		FlagCommandBase: command.NewFlagCommandBase("vault", "configure the vault"),
-		Loader:          loader,
+		ConfigLoader:    loader,
 	}
 }
 
 func (cmd *VaultCommand) Initialize() error {
-	_ = cmd.FlagCommandBase.Initialize()
-	return flow.LoadConfig(&cmd.Loader)
+	var err error
+	cmd.Config, err = flow.LoadConfig(cmd.ConfigLoader)
+	if err != nil {
+		return err
+	}
+
+	return cmd.FlagCommandBase.Initialize()
 }
 
 func (cmd VaultCommand) Run(args []string) error {

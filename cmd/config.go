@@ -8,7 +8,6 @@ import (
 	"pvault/config"
 
 	"github.com/binarysoupdev/go-commando/command"
-	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/got-style/style"
@@ -16,13 +15,15 @@ import (
 
 type ConfigCommand struct {
 	command.FlagCommandBase
-	cfg.Loader[config.Config]
+
+	ConfigLoader json.Loader[config.Config]
+	Config       config.Config
 }
 
-func NewConfigCommand(loader cfg.Loader[config.Config]) *ConfigCommand {
+func NewConfigCommand(loader json.Loader[config.Config]) *ConfigCommand {
 	return &ConfigCommand{
 		FlagCommandBase: command.NewFlagCommandBase("config", "configure the application"),
-		Loader:          loader,
+		ConfigLoader:    loader,
 	}
 }
 
@@ -34,7 +35,8 @@ func (cmd ConfigCommand) Run(args []string) error {
 		return cmd.generateNew()
 	}
 
-	err := flow.LoadConfig(&cmd.Loader)
+	var err error
+	cmd.Config, err = flow.LoadConfig(cmd.ConfigLoader)
 	if err != nil {
 		return err
 	}
@@ -43,9 +45,9 @@ func (cmd ConfigCommand) Run(args []string) error {
 }
 
 func (cmd ConfigCommand) generateNew() error {
-	_, err := os.Stat(cmd.ConfigPath)
+	_, err := os.Stat(cmd.ConfigLoader.Path)
 	if err == nil {
-		return errors.Format("config file \"%s\" already exists", cmd.ConfigPath)
+		return errors.Format("config file \"%s\" already exists", cmd.ConfigLoader.Path)
 	}
 
 	base := config.DataPath()
@@ -57,22 +59,22 @@ func (cmd ConfigCommand) generateNew() error {
 		OutputPath: ".",
 	}
 
-	err = os.MkdirAll(filepath.Dir(cmd.ConfigPath), 0755)
+	err = os.MkdirAll(filepath.Dir(cmd.ConfigLoader.Path), 0755)
 	if err != nil {
 		return errors.Chain(err, "error creating config directory")
 	}
 
-	err = json.MarshalFilePretty(config, cmd.ConfigPath, "    ")
+	err = json.MarshalFilePretty(config, cmd.ConfigLoader.Path, "    ")
 	if err != nil {
 		return errors.Chain(err, "error saving config file")
 	}
 
-	style.BoldCreate.Printf("[+] Created New Config: %s\n", cmd.ConfigPath)
+	style.BoldCreate.Printf("[+] Created New Config: %s\n", cmd.ConfigLoader.Path)
 	return nil
 }
 
 func (cmd ConfigCommand) validate() error {
-	style.BoldInfo.Printf("[=] Loaded from \"%s\"\n", cmd.ConfigPath)
+	style.BoldInfo.Printf("[=] Loaded from \"%s\"\n", cmd.ConfigLoader.Path)
 
 	cmd.validateVaultPath()
 	cmd.validateBackupPath()

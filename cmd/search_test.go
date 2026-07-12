@@ -8,7 +8,6 @@ import (
 	"pvault/vault/record"
 	"testing"
 
-	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
 	"github.com/binarysoupdev/tinsel/file"
@@ -19,13 +18,13 @@ import (
 
 type SearchTestSuite struct {
 	test.CommandSuite[*cmd.SearchCommand]
-	ConfigLoader cfg.Loader[config.Config]
+	ConfigLoader json.Loader[config.Config]
 	Config       config.Config
 }
 
 func TestSearchCommandSuite(t *testing.T) {
 	s := SearchTestSuite{
-		ConfigLoader: cfg.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: json.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewSearchCommand(s.ConfigLoader))
@@ -38,7 +37,7 @@ func (s *SearchTestSuite) SetupTest() {
 		VaultPath:  file.NewPath(s.T(), "vault"),
 		OutputPath: file.NewPath(s.T(), ""),
 	}
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	_, err = vault.InitializeNew(s.Config.VaultPath)
@@ -49,7 +48,7 @@ func (s *SearchTestSuite) SetupTest() {
 
 func (s *SearchTestSuite) TestRunFailErrorLoadingConfig() {
 	//-- arrange
-	err := os.Remove(s.ConfigLoader.ConfigPath)
+	err := os.Remove(s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	//-- act
@@ -65,7 +64,7 @@ func (s *SearchTestSuite) TestRunInvalidVaultPath() {
 	NAME := rand.ASCII(15)
 
 	s.Config.VaultPath = "invalid"
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	//-- act

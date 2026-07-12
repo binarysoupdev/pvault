@@ -11,7 +11,6 @@ import (
 	"pvault/vault/record"
 	"testing"
 
-	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
 	"github.com/binarysoupdev/tinsel/file"
@@ -25,7 +24,7 @@ type CopyTestSuite struct {
 	Clipboard *clipboard.MockClipboard
 	QRCode    *qrcode.MockRenderer
 
-	ConfigLoader cfg.Loader[config.Config]
+	ConfigLoader json.Loader[config.Config]
 	Config       config.Config
 
 	Vault    vault.Vault
@@ -35,7 +34,7 @@ type CopyTestSuite struct {
 
 func TestCopyCommandSuite(t *testing.T) {
 	s := CopyTestSuite{
-		ConfigLoader: cfg.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: json.NewLoader[config.Config](file.NewPath(t, "config.json")),
 		Clipboard:    clipboard.Mock(),
 		QRCode:       qrcode.Mock(),
 	}
@@ -52,7 +51,7 @@ func (s *CopyTestSuite) SetupTest() {
 		Version:   config.VERSION,
 		VaultPath: file.NewPath(s.T(), "vault"),
 	}
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
@@ -84,7 +83,7 @@ func (s *CopyTestSuite) TestRunFailClipboardUnsupported() {
 
 func (s *CopyTestSuite) TestRunFailErrorLoadingConfig() {
 	//-- arrange
-	err := os.Remove(s.ConfigLoader.ConfigPath)
+	err := os.Remove(s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	//-- act
@@ -97,7 +96,7 @@ func (s *CopyTestSuite) TestRunFailErrorLoadingConfig() {
 func (s *CopyTestSuite) TestRunFailInvalidVaultPath() {
 	//-- arrange
 	s.Config.VaultPath = "invalid"
-	err := json.MarshalFile(s.Config, s.ConfigLoader.ConfigPath)
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
 	//-- act
