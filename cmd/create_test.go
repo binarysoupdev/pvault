@@ -62,19 +62,6 @@ func (s *CreateTestSuite) TestRunFailErrorLoadingConfig() {
 	s.RequireResultFail("invalid config path")
 }
 
-func (s *CreateTestSuite) TestRunFailConfigOutputPathInvalid() {
-	//-- arrange
-	s.Config.OutputPath = "invalid"
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
-
-	//-- act
-	s.RunCommand()
-
-	//-- assert
-	s.RequireResultFail("error validating config \"output_path\"")
-}
-
 func (s *CreateTestSuite) TestRunNameNotEmpty() {
 	//-- act
 	s.RunCommand("-name", "")
@@ -97,6 +84,21 @@ func (s *CreateTestSuite) TestRunInvalidVaultPath() {
 
 	//-- assert
 	s.RequireResultFail("error opening vault")
+}
+
+func (s *CreateTestSuite) TestRunFailConfigOutputPathInvalid() {
+	//-- arrange
+	const NAME = "name"
+
+	s.Config.OutputPath = "invalid"
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
+	s.Require().NoError(err)
+
+	//-- act
+	s.RunCommand("-name", NAME)
+
+	//-- assert
+	s.RequireResultFail("error validating config \"output_path\"")
 }
 
 func (s *CreateTestSuite) TestRunInvalidNameAlreadyExists() {

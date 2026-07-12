@@ -9,27 +9,25 @@ import (
 )
 
 type DeleteCommand struct {
-	command.FlagCommandBase
-
-	ConfigLoader json.Loader[config.Config]
-	Config       config.Config
+	command.CommandBase
+	command.FlagCommand
+	flow.ConfigCommand
 }
 
-func NewDeleteCommand(loader json.Loader[config.Config]) *DeleteCommand {
+func NewDeleteCommand(configLoader json.Loader[config.Config]) *DeleteCommand {
 	return &DeleteCommand{
-		FlagCommandBase: command.NewFlagCommandBase("delete", "delete a record from the vault"),
-		ConfigLoader:    loader,
+		CommandBase:   command.NewCommandBase("delete", "delete a record from the vault"),
+		ConfigCommand: flow.NewConfigCommand(configLoader),
 	}
 }
 
 func (cmd *DeleteCommand) Initialize() error {
-	var err error
-	cmd.Config, err = flow.LoadConfig(cmd.ConfigLoader)
-	if err != nil {
+	if err := cmd.LoadConfig(); err != nil {
 		return err
 	}
 
-	return cmd.FlagCommandBase.Initialize()
+	cmd.InitFlagSet(cmd.Name, cmd.Description)
+	return nil
 }
 
 func (cmd DeleteCommand) Run(args []string) error {

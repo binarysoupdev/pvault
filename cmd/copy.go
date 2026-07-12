@@ -13,21 +13,20 @@ import (
 )
 
 type CopyCommand struct {
-	command.FlagCommandBase
-
-	ConfigLoader json.Loader[config.Config]
-	Config       config.Config
+	command.CommandBase
+	command.FlagCommand
+	flow.ConfigCommand
 
 	clipboard clipboard.Clipboard
 	qrcode    qrcode.Renderer
 }
 
-func NewCopyCommand(loader json.Loader[config.Config], clipboard clipboard.Clipboard, qrcode qrcode.Renderer) *CopyCommand {
+func NewCopyCommand(configLoader json.Loader[config.Config], clipboard clipboard.Clipboard, qrcode qrcode.Renderer) *CopyCommand {
 	return &CopyCommand{
-		FlagCommandBase: command.NewFlagCommandBase("copy", "copy password/username of a record"),
-		ConfigLoader:    loader,
-		clipboard:       clipboard,
-		qrcode:          qrcode,
+		CommandBase:   command.NewCommandBase("copy", "copy password/username of a record"),
+		ConfigCommand: flow.NewConfigCommand(configLoader),
+		clipboard:     clipboard,
+		qrcode:        qrcode,
 	}
 }
 
@@ -37,12 +36,12 @@ func (cmd *CopyCommand) Initialize() error {
 		return errors.Chain(err, "clipboard unsupported")
 	}
 
-	cmd.Config, err = flow.LoadConfig(cmd.ConfigLoader)
-	if err != nil {
+	if err := cmd.LoadConfig(); err != nil {
 		return err
 	}
 
-	return cmd.FlagCommandBase.Initialize()
+	cmd.InitFlagSet(cmd.Name, cmd.Description)
+	return nil
 }
 
 func (cmd CopyCommand) Run(args []string) error {

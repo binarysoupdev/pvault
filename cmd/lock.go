@@ -13,27 +13,25 @@ import (
 )
 
 type LockCommand struct {
-	command.FlagCommandBase
-
-	ConfigLoader json.Loader[config.Config]
-	Config       config.Config
+	command.CommandBase
+	command.FlagCommand
+	flow.ConfigCommand
 }
 
-func NewLockCommand(loader json.Loader[config.Config]) *LockCommand {
+func NewLockCommand(configLoader json.Loader[config.Config]) *LockCommand {
 	return &LockCommand{
-		FlagCommandBase: command.NewFlagCommandBase("lock", "lock a record in the vault"),
-		ConfigLoader:    loader,
+		CommandBase:   command.NewCommandBase("lock", "lock a record in the vault"),
+		ConfigCommand: flow.NewConfigCommand(configLoader),
 	}
 }
 
 func (cmd *LockCommand) Initialize() error {
-	var err error
-	cmd.Config, err = flow.LoadConfig(cmd.ConfigLoader)
-	if err != nil {
+	if err := cmd.LoadConfig(); err != nil {
 		return err
 	}
 
-	return cmd.FlagCommandBase.Initialize()
+	cmd.InitFlagSet(cmd.Name, cmd.Description)
+	return nil
 }
 
 func (cmd LockCommand) Run(args []string) error {

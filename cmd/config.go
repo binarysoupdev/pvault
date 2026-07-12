@@ -14,17 +14,21 @@ import (
 )
 
 type ConfigCommand struct {
-	command.FlagCommandBase
-
-	ConfigLoader json.Loader[config.Config]
-	Config       config.Config
+	command.CommandBase
+	command.FlagCommand
+	flow.ConfigCommand
 }
 
-func NewConfigCommand(loader json.Loader[config.Config]) *ConfigCommand {
+func NewConfigCommand(configLoader json.Loader[config.Config]) *ConfigCommand {
 	return &ConfigCommand{
-		FlagCommandBase: command.NewFlagCommandBase("config", "configure the application"),
-		ConfigLoader:    loader,
+		CommandBase:   command.NewCommandBase("config", "configure the application"),
+		ConfigCommand: flow.NewConfigCommand(configLoader),
 	}
+}
+
+func (cmd *ConfigCommand) Initialize() error {
+	cmd.InitFlagSet(cmd.Name, cmd.Description)
+	return nil
 }
 
 func (cmd ConfigCommand) Run(args []string) error {
@@ -35,8 +39,7 @@ func (cmd ConfigCommand) Run(args []string) error {
 		return cmd.generateNew()
 	}
 
-	var err error
-	cmd.Config, err = flow.LoadConfig(cmd.ConfigLoader)
+	err := cmd.LoadConfig()
 	if err != nil {
 		return err
 	}

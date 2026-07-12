@@ -2,6 +2,7 @@ package cmd_test
 
 import (
 	"fmt"
+	"os"
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/vault"
@@ -48,6 +49,18 @@ func (s *VaultTestSuite) SetupTest() {
 }
 
 //=====================================
+
+func (s *VaultTestSuite) TestRunFailErrorLoadingConfig() {
+	//-- arrange
+	err := os.Remove(s.ConfigLoader.Path)
+	s.Require().NoError(err)
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultFail("invalid config path")
+}
 
 func (s *VaultTestSuite) TestRunInitWithInvalidVaultPathReturnsError() {
 	//-- arrange

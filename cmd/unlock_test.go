@@ -70,19 +70,6 @@ func (s *UnlockTestSuite) TestRunFailErrorLoadingConfig() {
 	s.RequireResultFail("invalid config path")
 }
 
-func (s *UnlockTestSuite) TestRunFailConfigOutputPathInvalid() {
-	//-- arrange
-	s.Config.OutputPath = "invalid"
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
-
-	//-- act
-	s.RunCommand()
-
-	//-- assert
-	s.RequireResultFail("error validating config \"output_path\"")
-}
-
 func (s *UnlockTestSuite) TestRunInvalidVaultPath() {
 	//-- arrange
 	s.Config.VaultPath = "invalid"
@@ -94,6 +81,19 @@ func (s *UnlockTestSuite) TestRunInvalidVaultPath() {
 
 	//-- assert
 	s.RequireResultFail("error opening vault")
+}
+
+func (s *UnlockTestSuite) TestRunFailConfigOutputPathInvalid() {
+	//-- arrange
+	s.Config.OutputPath = "invalid"
+	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
+	s.Require().NoError(err)
+
+	//-- act
+	s.RunCommand("-s", s.Record.Name)
+
+	//-- assert
+	s.RequireResultFail("error validating config \"output_path\"")
 }
 
 func (s *UnlockTestSuite) TestRunInvalidNoResults() {

@@ -9,27 +9,25 @@ import (
 )
 
 type SearchCommand struct {
-	command.FlagCommandBase
-
-	ConfigLoader json.Loader[config.Config]
-	Config       config.Config
+	command.CommandBase
+	command.FlagCommand
+	flow.ConfigCommand
 }
 
-func NewSearchCommand(loader json.Loader[config.Config]) *SearchCommand {
+func NewSearchCommand(configLoader json.Loader[config.Config]) *SearchCommand {
 	return &SearchCommand{
-		FlagCommandBase: command.NewFlagCommandBase("search", "search records in the vault"),
-		ConfigLoader:    loader,
+		CommandBase:   command.NewCommandBase("search", "search records in the vault"),
+		ConfigCommand: flow.NewConfigCommand(configLoader),
 	}
 }
 
 func (cmd *SearchCommand) Initialize() error {
-	var err error
-	cmd.Config, err = flow.LoadConfig(cmd.ConfigLoader)
-	if err != nil {
+	if err := cmd.LoadConfig(); err != nil {
 		return err
 	}
 
-	return cmd.FlagCommandBase.Initialize()
+	cmd.InitFlagSet(cmd.Name, cmd.Description)
+	return nil
 }
 
 func (cmd SearchCommand) Run(args []string) error {

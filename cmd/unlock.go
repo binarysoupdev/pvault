@@ -10,32 +10,25 @@ import (
 )
 
 type UnlockCommand struct {
-	command.FlagCommandBase
-
-	ConfigLoader json.Loader[config.Config]
-	Config       config.Config
+	command.CommandBase
+	command.FlagCommand
+	flow.ConfigCommand
 }
 
-func NewUnlockCommand(loader json.Loader[config.Config]) *UnlockCommand {
+func NewUnlockCommand(configLoader json.Loader[config.Config]) *UnlockCommand {
 	return &UnlockCommand{
-		FlagCommandBase: command.NewFlagCommandBase("unlock", "unlock a record from the vault"),
-		ConfigLoader:    loader,
+		CommandBase:   command.NewCommandBase("unlock", "unlock a record from the vault"),
+		ConfigCommand: flow.NewConfigCommand(configLoader),
 	}
 }
 
 func (cmd *UnlockCommand) Initialize() error {
-	var err error
-	cmd.Config, err = flow.LoadConfig(cmd.ConfigLoader)
-	if err != nil {
+	if err := cmd.LoadConfig(); err != nil {
 		return err
 	}
 
-	err = cmd.Config.ValidateOutputPath()
-	if err != nil {
-		return errors.Chain(err, "error validating config \"output_path\"")
-	}
-
-	return cmd.FlagCommandBase.Initialize()
+	cmd.InitFlagSet(cmd.Name, cmd.Description)
+	return nil
 }
 
 func (cmd UnlockCommand) Run(args []string) error {
@@ -45,6 +38,11 @@ func (cmd UnlockCommand) Run(args []string) error {
 	v, err := flow.OpenVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
+	}
+
+	err = cmd.Config.ValidateOutputPath()
+	if err != nil {
+		return errors.Chain(err, "error validating config \"output_path\"")
 	}
 
 	name, err := search.Select(v)

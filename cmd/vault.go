@@ -12,27 +12,25 @@ import (
 )
 
 type VaultCommand struct {
-	command.FlagCommandBase
-
-	ConfigLoader json.Loader[config.Config]
-	Config       config.Config
+	command.CommandBase
+	command.FlagCommand
+	flow.ConfigCommand
 }
 
-func NewVaultCommand(loader json.Loader[config.Config]) *VaultCommand {
+func NewVaultCommand(configLoader json.Loader[config.Config]) *VaultCommand {
 	return &VaultCommand{
-		FlagCommandBase: command.NewFlagCommandBase("vault", "configure the vault"),
-		ConfigLoader:    loader,
+		CommandBase:   command.NewCommandBase("vault", "configure the vault"),
+		ConfigCommand: flow.NewConfigCommand(configLoader),
 	}
 }
 
 func (cmd *VaultCommand) Initialize() error {
-	var err error
-	cmd.Config, err = flow.LoadConfig(cmd.ConfigLoader)
-	if err != nil {
+	if err := cmd.LoadConfig(); err != nil {
 		return err
 	}
 
-	return cmd.FlagCommandBase.Initialize()
+	cmd.InitFlagSet(cmd.Name, cmd.Description)
+	return nil
 }
 
 func (cmd VaultCommand) Run(args []string) error {
