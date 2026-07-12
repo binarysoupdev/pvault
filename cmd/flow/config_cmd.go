@@ -29,7 +29,7 @@ func (cmd *ConfigCommand) LoadConfig() error {
 		return err
 	}
 
-	if cmd.Config.Version.IsUnsupported(config.VERSION) {
+	if cmd.Config.Version.IsUnsupported(config.MIN_VERSION, config.VERSION) {
 		return errors.Format("unsupported config version \"%d\"", cmd.Config.Version)
 	}
 

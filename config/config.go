@@ -4,13 +4,19 @@ import (
 	"os"
 
 	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-commando/types"
+)
+
+const (
+	VERSION     = 1
+	MIN_VERSION = 1
 )
 
 type Config struct {
-	Version    Version `json:"version"`
-	VaultPath  string  `json:"vault_path"`
-	BackupPath string  `json:"backup_path"`
-	OutputPath string  `json:"output_path"`
+	Version    types.Version `json:"version"`
+	VaultPath  string        `json:"vault_path"`
+	BackupPath string        `json:"backup_path"`
+	OutputPath string        `json:"output_path"`
 }
 
 func (c Config) ValidateBackupPath() error {
