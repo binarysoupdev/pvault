@@ -2,10 +2,12 @@ package config
 
 const VERSION = 1
 
-func (c Config) IsVersionUnsupported() bool {
-	return c.Version < 1 || c.Version > VERSION
+type Version int
+
+func (v Version) IsUnsupported(currentVersion int) bool {
+	return v < 1 || v > Version(currentVersion)
 }
 
-func (c Config) IsVersionOutOfDate() bool {
-	return c.Version < VERSION
+func (v Version) IsOutOfDate(currentVersion int) bool {
+	return v < Version(currentVersion)
 }

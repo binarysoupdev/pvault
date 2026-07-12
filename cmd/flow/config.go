@@ -18,11 +18,11 @@ func LoadConfig(loader json.Loader[config.Config]) (config.Config, error) {
 		return config.Config{}, errors.Chain(err, "error loading config")
 	}
 
-	if cfg.IsVersionUnsupported() {
+	if cfg.Version.IsUnsupported(config.VERSION) {
 		return cfg, errors.Format("unsupported version \"%d\"", cfg.Version)
 	}
 
-	if cfg.IsVersionOutOfDate() {
+	if cfg.Version.IsOutOfDate(config.VERSION) {
 		return cfg, errors.Format("config version [%d] out-of-date (run \"config -upgrade\" to repair)", cfg.Version)
 	}
 

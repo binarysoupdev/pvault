@@ -7,10 +7,10 @@ import (
 )
 
 type Config struct {
-	Version    int    `json:"version"`
-	VaultPath  string `json:"vault_path"`
-	BackupPath string `json:"backup_path"`
-	OutputPath string `json:"output_path"`
+	Version    Version `json:"version"`
+	VaultPath  string  `json:"vault_path"`
+	BackupPath string  `json:"backup_path"`
+	OutputPath string  `json:"output_path"`
 }
 
 func (c Config) ValidateBackupPath() error {
