@@ -8,8 +8,8 @@ import (
 	"pvault/vault/record"
 	"testing"
 
+	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/json"
-
 	"github.com/binarysoupdev/go-commando/test"
 	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
@@ -19,13 +19,13 @@ import (
 
 type SearchTestSuite struct {
 	test.CommandSuite[*cmd.SearchCommand]
-	ConfigLoader config.Loader[config.Config]
+	ConfigLoader cfg.Loader[config.Config]
 	Config       config.Config
 }
 
 func TestSearchCommandSuite(t *testing.T) {
 	s := SearchTestSuite{
-		ConfigLoader: config.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: cfg.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewSearchCommand(s.ConfigLoader))
@@ -56,7 +56,7 @@ func (s *SearchTestSuite) TestRunFailErrorLoadingConfig() {
 	s.RunCommand()
 
 	//-- assert
-	s.RequireResultFail("error loading config")
+	s.RequireResultFail("invalid config path")
 }
 
 func (s *SearchTestSuite) TestRunInvalidVaultPath() {

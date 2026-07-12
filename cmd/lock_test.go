@@ -8,8 +8,8 @@ import (
 	"pvault/vault/record"
 	"testing"
 
+	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/json"
-
 	"github.com/binarysoupdev/go-commando/test"
 	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
@@ -19,7 +19,7 @@ import (
 
 type LockTestSuite struct {
 	test.CommandSuite[*cmd.LockCommand]
-	ConfigLoader config.Loader[config.Config]
+	ConfigLoader cfg.Loader[config.Config]
 	Config       config.Config
 
 	RecordPath string
@@ -28,7 +28,7 @@ type LockTestSuite struct {
 
 func TestLockCommandSuite(t *testing.T) {
 	s := LockTestSuite{
-		ConfigLoader: config.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: cfg.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewLockCommand(s.ConfigLoader))
@@ -66,7 +66,7 @@ func (s *LockTestSuite) TestRunFailErrorLoadingConfig() {
 	s.RunCommand()
 
 	//-- assert
-	s.RequireResultFail("error loading config")
+	s.RequireResultFail("invalid config path")
 }
 
 func (s *LockTestSuite) TestRunPathNotEmpty() {

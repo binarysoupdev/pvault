@@ -5,14 +5,15 @@ import (
 	"pvault/config"
 
 	"github.com/binarysoupdev/go-commando/command"
+	cfg "github.com/binarysoupdev/go-commando/config"
 )
 
 type DeleteCommand struct {
 	command.FlagCommandBase
-	config.Loader[config.Config]
+	cfg.Loader[config.Config]
 }
 
-func NewDeleteCommand(loader config.Loader[config.Config]) *DeleteCommand {
+func NewDeleteCommand(loader cfg.Loader[config.Config]) *DeleteCommand {
 	return &DeleteCommand{
 		FlagCommandBase: command.NewFlagCommandBase("delete", "delete a record from the vault"),
 		Loader:          loader,

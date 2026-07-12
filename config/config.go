@@ -6,24 +6,11 @@ import (
 	"github.com/binarysoupdev/go-commando/errors"
 )
 
-const VERSION = 1
-
 type Config struct {
 	Version    int    `json:"version"`
 	VaultPath  string `json:"vault_path"`
 	BackupPath string `json:"backup_path"`
 	OutputPath string `json:"output_path"`
-}
-
-func (c Config) NeedsUpgrading() bool {
-	return c.Version < VERSION
-}
-
-func (c Config) ValidateVersion() error {
-	if c.Version > VERSION {
-		return errors.Format("unsupported version \"%d\"", c.Version)
-	}
-	return nil
 }
 
 func (c Config) ValidateBackupPath() error {

@@ -4,17 +4,17 @@ import (
 	"pvault/cmd/flow"
 	"pvault/config"
 
-	"github.com/binarysoupdev/go-commando/errors"
-
 	"github.com/binarysoupdev/go-commando/command"
+	cfg "github.com/binarysoupdev/go-commando/config"
+	"github.com/binarysoupdev/go-commando/errors"
 )
 
 type UnlockCommand struct {
 	command.FlagCommandBase
-	config.Loader[config.Config]
+	cfg.Loader[config.Config]
 }
 
-func NewUnlockCommand(loader config.Loader[config.Config]) *UnlockCommand {
+func NewUnlockCommand(loader cfg.Loader[config.Config]) *UnlockCommand {
 	return &UnlockCommand{
 		FlagCommandBase: command.NewFlagCommandBase("unlock", "unlock a record from the vault"),
 		Loader:          loader,

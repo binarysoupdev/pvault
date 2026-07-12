@@ -6,21 +6,21 @@ import (
 	"pvault/tools/clipboard"
 	"pvault/tools/qrcode"
 
-	"github.com/binarysoupdev/go-commando/errors"
-
 	"github.com/binarysoupdev/go-commando/command"
+	cfg "github.com/binarysoupdev/go-commando/config"
+	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/binarysoupdev/got-style/style"
 )
 
 type CopyCommand struct {
 	command.FlagCommandBase
-	config.Loader[config.Config]
+	cfg.Loader[config.Config]
 
 	clipboard clipboard.Clipboard
 	qrcode    qrcode.Renderer
 }
 
-func NewCopyCommand(loader config.Loader[config.Config], clipboard clipboard.Clipboard, qrcode qrcode.Renderer) *CopyCommand {
+func NewCopyCommand(loader cfg.Loader[config.Config], clipboard clipboard.Clipboard, qrcode qrcode.Renderer) *CopyCommand {
 	return &CopyCommand{
 		FlagCommandBase: command.NewFlagCommandBase("copy", "copy password/username of a record"),
 		Loader:          loader,

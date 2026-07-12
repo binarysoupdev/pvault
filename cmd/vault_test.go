@@ -11,8 +11,8 @@ import (
 	"regexp"
 	"testing"
 
+	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/json"
-
 	"github.com/binarysoupdev/go-commando/test"
 	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
@@ -24,13 +24,13 @@ import (
 
 type VaultTestSuite struct {
 	test.CommandSuite[*cmd.VaultCommand]
-	ConfigLoader config.Loader[config.Config]
+	ConfigLoader cfg.Loader[config.Config]
 	Config       config.Config
 }
 
 func TestVaultCommandSuite(t *testing.T) {
 	s := VaultTestSuite{
-		ConfigLoader: config.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: cfg.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewVaultCommand(s.ConfigLoader))

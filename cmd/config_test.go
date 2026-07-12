@@ -10,8 +10,8 @@ import (
 	"pvault/vault/data/version1"
 	"testing"
 
+	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/json"
-
 	"github.com/binarysoupdev/go-commando/test"
 	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
@@ -20,13 +20,13 @@ import (
 
 type ConfigTestSuite struct {
 	test.CommandSuite[*cmd.ConfigCommand]
-	ConfigLoader config.Loader[config.Config]
+	ConfigLoader cfg.Loader[config.Config]
 	Config       config.Config
 }
 
 func TestConfigCommandSuite(t *testing.T) {
 	s := ConfigTestSuite{
-		ConfigLoader: config.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: cfg.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewConfigCommand(s.ConfigLoader))
@@ -82,7 +82,7 @@ func (s *ConfigTestSuite) TestRunNotNewConfigNotFoundReturnsError() {
 	s.RunCommand()
 
 	//-- assert
-	s.RequireResultFail("error loading config")
+	s.RequireResultFail("invalid config path")
 }
 
 func (s *ConfigTestSuite) TestRunValidateConfigWithInvalidVaultPrintsError() {

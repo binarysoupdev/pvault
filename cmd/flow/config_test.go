@@ -6,8 +6,8 @@ import (
 	"pvault/config"
 	"testing"
 
+	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/json"
-
 	"github.com/binarysoupdev/tinsel/file"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,18 +15,18 @@ import (
 
 func TestLoadConfigReturnsErrorWhenConfigNotFound(t *testing.T) {
 	//-- arrange
-	loader := config.NewLoader[config.Config]("invalid")
+	loader := cfg.NewLoader[config.Config]("invalid")
 
 	//-- act
 	res := flow.LoadConfig(&loader)
 
 	//-- assert
-	require.ErrorContains(t, res, "error loading config")
+	require.ErrorContains(t, res, "invalid config path")
 }
 
 func TestLoadConfigReturnsErrorWhenUsingInvalidVersion(t *testing.T) {
 	//-- arrange
-	loader := config.NewLoader[config.Config](file.NewPath(t, "config.json"))
+	loader := cfg.NewLoader[config.Config](file.NewPath(t, "config.json"))
 
 	CONFIG := config.Config{
 		Version: config.VERSION + 1,
@@ -38,32 +38,16 @@ func TestLoadConfigReturnsErrorWhenUsingInvalidVersion(t *testing.T) {
 	res := flow.LoadConfig(&loader)
 
 	//-- assert
-	require.ErrorContains(t, res, "error validating config version")
-}
-
-func TestLoadConfigReturnsErrorWhenUsingOlderVersion(t *testing.T) {
-	//-- arrange
-	loader := config.NewLoader[config.Config](file.NewPath(t, "config.json"))
-
-	CONFIG := config.Config{
-		Version: config.VERSION - 1,
-	}
-	err := json.MarshalFile(CONFIG, loader.ConfigPath)
-	require.NoError(t, err)
-
-	//-- act
-	res := flow.LoadConfig(&loader)
-
-	//-- assert
-	require.ErrorContains(t, res, fmt.Sprintf("config version [%d] out-of-date", CONFIG.Version))
+	require.ErrorContains(t, res, fmt.Sprintf("unsupported version \"%d\"", CONFIG.Version))
 }
 
 func TestLoadConfigReturnsNoErrorAndLoadsConfigWhenValid(t *testing.T) {
 	//-- arrange
-	loader := config.NewLoader[config.Config](file.NewPath(t, "config.json"))
+	loader := cfg.NewLoader[config.Config](file.NewPath(t, "config.json"))
 
 	CONFIG := config.Config{
 		Version:    config.VERSION,
+		BackupPath: "backup/path",
 		VaultPath:  "vault/path",
 		OutputPath: "output/path",
 	}

@@ -30,10 +30,10 @@ func (r Record) Validate() error {
 	errs := errors.Errors{}
 
 	if r.ID == uuid.Nil {
-		errs.Add("\"ID\" cannot be nil (all zeroes)")
+		errs.AddNew("\"ID\" cannot be nil (all zeroes)")
 	}
 	if r.Name == "" {
-		errs.Add("\"Name\" cannot be empty")
+		errs.AddNew("\"Name\" cannot be empty")
 	}
 
 	return errs.Collapse(", ")

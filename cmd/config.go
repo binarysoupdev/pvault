@@ -7,20 +7,19 @@ import (
 	"pvault/cmd/flow"
 	"pvault/config"
 
-	"github.com/binarysoupdev/go-commando/json"
-
-	"github.com/binarysoupdev/go-commando/errors"
-
 	"github.com/binarysoupdev/go-commando/command"
+	cfg "github.com/binarysoupdev/go-commando/config"
+	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/got-style/style"
 )
 
 type ConfigCommand struct {
 	command.FlagCommandBase
-	config.Loader[config.Config]
+	cfg.Loader[config.Config]
 }
 
-func NewConfigCommand(loader config.Loader[config.Config]) *ConfigCommand {
+func NewConfigCommand(loader cfg.Loader[config.Config]) *ConfigCommand {
 	return &ConfigCommand{
 		FlagCommandBase: command.NewFlagCommandBase("config", "configure the application"),
 		Loader:          loader,

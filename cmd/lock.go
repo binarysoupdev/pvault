@@ -6,20 +6,19 @@ import (
 	"pvault/config"
 	"pvault/vault/record"
 
-	"github.com/binarysoupdev/go-commando/json"
-
-	"github.com/binarysoupdev/go-commando/errors"
-
 	"github.com/binarysoupdev/go-commando/command"
+	cfg "github.com/binarysoupdev/go-commando/config"
+	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/got-style/style"
 )
 
 type LockCommand struct {
 	command.FlagCommandBase
-	config.Loader[config.Config]
+	cfg.Loader[config.Config]
 }
 
-func NewLockCommand(loader config.Loader[config.Config]) *LockCommand {
+func NewLockCommand(loader cfg.Loader[config.Config]) *LockCommand {
 	return &LockCommand{
 		FlagCommandBase: command.NewFlagCommandBase("lock", "lock a record in the vault"),
 		Loader:          loader,

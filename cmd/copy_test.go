@@ -11,8 +11,8 @@ import (
 	"pvault/vault/record"
 	"testing"
 
+	cfg "github.com/binarysoupdev/go-commando/config"
 	"github.com/binarysoupdev/go-commando/json"
-
 	"github.com/binarysoupdev/go-commando/test"
 	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
@@ -25,7 +25,7 @@ type CopyTestSuite struct {
 	Clipboard *clipboard.MockClipboard
 	QRCode    *qrcode.MockRenderer
 
-	ConfigLoader config.Loader[config.Config]
+	ConfigLoader cfg.Loader[config.Config]
 	Config       config.Config
 
 	Vault    vault.Vault
@@ -35,7 +35,7 @@ type CopyTestSuite struct {
 
 func TestCopyCommandSuite(t *testing.T) {
 	s := CopyTestSuite{
-		ConfigLoader: config.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: cfg.NewLoader[config.Config](file.NewPath(t, "config.json")),
 		Clipboard:    clipboard.Mock(),
 		QRCode:       qrcode.Mock(),
 	}
@@ -91,7 +91,7 @@ func (s *CopyTestSuite) TestRunFailErrorLoadingConfig() {
 	s.RunCommand()
 
 	//-- assert
-	s.RequireResultFail("error loading config")
+	s.RequireResultFail("invalid config path")
 }
 
 func (s *CopyTestSuite) TestRunFailInvalidVaultPath() {
