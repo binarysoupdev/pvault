@@ -7,41 +7,66 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestIsUnsupportedReturnsTrueWhenVersionLessThanMin(t *testing.T) {
+func TestIsVersionUnsupportedReturnsTrueWhenVersionLessThanMin(t *testing.T) {
+	//-- arrange
+	cfg := config.Config{
+		Version: 0,
+	}
+
 	//-- act
-	res := config.IsUnsupported(config.MIN_VERSION - 1)
+	res := cfg.IsVersionUnsupported()
 
 	//-- assert
 	require.True(t, res)
 }
 
-func TestIsUnsupportedReturnsTrueWhenVersionGreaterThanCurrent(t *testing.T) {
+func TestIsVersionUnsupportedReturnsTrueWhenVersionGreaterThanCurrent(t *testing.T) {
+	//-- arrange
+	cfg := config.Config{
+		Version: config.VERSION + 1,
+	}
+
 	//-- act
-	res := config.IsUnsupported(config.VERSION + 1)
+	res := cfg.IsVersionUnsupported()
 
 	//-- assert
 	require.True(t, res)
 }
 
-func TestIsUnsupportedReturnsFalseWhenVersionValid(t *testing.T) {
+func TestIsVersionUnsupportedReturnsFalseWhenVersionValid(t *testing.T) {
+	//-- arrange
+	cfg := config.Config{
+		Version: config.VERSION,
+	}
+
 	//-- act
-	res := config.IsUnsupported(config.VERSION)
+	res := cfg.IsVersionUnsupported()
 
 	//-- assert
 	require.False(t, res)
 }
 
-func TestIsOutOfDateReturnsTrueWhenVersionLessThanCurrent(t *testing.T) {
+func TestIsVersionOutOfDateReturnsTrueWhenVersionLessThanCurrent(t *testing.T) {
+	//-- arrange
+	cfg := config.Config{
+		Version: config.VERSION - 1,
+	}
+
 	//-- act
-	res := config.IsOutOfDate(config.VERSION - 1)
+	res := cfg.IsVersionOutOfDate()
 
 	//-- assert
 	require.True(t, res)
 }
 
-func TestIsOutOfDateReturnsFalseWhenVersionEqualsCurrent(t *testing.T) {
+func TestIsVersionOutOfDateReturnsFalseWhenVersionEqualsCurrent(t *testing.T) {
+	//-- arrange
+	cfg := config.Config{
+		Version: config.VERSION,
+	}
+
 	//-- act
-	res := config.IsOutOfDate(config.VERSION)
+	res := cfg.IsVersionOutOfDate()
 
 	//-- assert
 	require.False(t, res)

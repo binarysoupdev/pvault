@@ -1,14 +1,11 @@
 package config
 
-const (
-	MIN_VERSION = 1
-	VERSION     = 1
-)
+const VERSION = 1
 
-func IsUnsupported(version int) bool {
-	return version < MIN_VERSION || version > VERSION
+func (c Config) IsVersionUnsupported() bool {
+	return c.Version < 1 || c.Version > VERSION
 }
 
-func IsOutOfDate(version int) bool {
-	return version < VERSION
+func (c Config) IsVersionOutOfDate() bool {
+	return c.Version < VERSION
 }
