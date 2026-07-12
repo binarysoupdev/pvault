@@ -4,6 +4,8 @@ github.com/binarysoupdev/cryptool v1.0.0 h1:jMrM7jlTmw+p2hPHn+LNp4EmINPI60DdDbj3
 github.com/binarysoupdev/cryptool v1.0.0/go.mod h1:TjlWiLszDprJ6Tpc8ff4zHjoF+VPicykFxNElNyumPU=
 github.com/binarysoupdev/go-commando v1.3.1 h1:J+Z16WLNYIvVQA/P0DiWNP8LGqxh6H2obQnrIW3ODls=
 github.com/binarysoupdev/go-commando v1.3.1/go.mod h1:RXjpje+Lk0CtXew1boXQ1LMTQQAqXqM+6KSg64ftSKk=
+github.com/binarysoupdev/go-commando v1.4.0 h1:bjQ1pH54XKIoER+C5virKj0vJm9EPdSyjqc85gO5k2k=
+github.com/binarysoupdev/go-commando v1.4.0/go.mod h1:RXjpje+Lk0CtXew1boXQ1LMTQQAqXqM+6KSg64ftSKk=
 github.com/binarysoupdev/got-style v1.1.0 h1:f5D2tsWE5ttftoYPSuF33J74tnTQ4uiAbkuvdZzrack=
 github.com/binarysoupdev/got-style v1.1.0/go.mod h1:3Dp1Ng/kovJAeDxPrLaSVFNfa4tFVUucFZ7jG44DQFc=
 github.com/binarysoupdev/tinsel v0.2.0 h1:1NLKe/58LZtRfVyLdKehcCmnrq7lXW4MZM+4DfGJAzs=
