@@ -37,7 +37,7 @@ func (cmd VaultCommand) Run(args []string) error {
 	init := cmd.Flags.Bool("init", false, "initialize the vault")
 	backup := cmd.Flags.Bool("backup", false, "backup the vault to the backup directory")
 	upgrade := cmd.Flags.Bool("upgrade", false, "upgrade the vault if it's out-of-date")
-	cmd.Flags.Parse(args)
+	cmd.ParseFlags(args)
 
 	if *init {
 		return cmd.initialize()

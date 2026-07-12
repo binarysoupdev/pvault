@@ -48,7 +48,7 @@ func (cmd CopyCommand) Run(args []string) error {
 	search := flow.NewSearchFlow(cmd.Flags)
 	username := cmd.Flags.Bool("username", false, "copy username instead of password")
 	qr := cmd.Flags.Bool("qr", false, "render as a qrcode")
-	cmd.Flags.Parse(args)
+	cmd.ParseFlags(args)
 
 	v, err := flow.OpenVault(cmd.Config.VaultPath)
 	if err != nil {

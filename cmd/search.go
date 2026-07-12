@@ -32,7 +32,7 @@ func (cmd *SearchCommand) Initialize() error {
 
 func (cmd SearchCommand) Run(args []string) error {
 	search := flow.NewSearchFlow(cmd.Flags)
-	cmd.Flags.Parse(args)
+	cmd.ParseFlags(args)
 
 	v, err := flow.OpenVault(cmd.Config.VaultPath)
 	if err != nil {

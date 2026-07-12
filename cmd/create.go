@@ -34,7 +34,7 @@ func (cmd *CreateCommand) Initialize() error {
 
 func (cmd CreateCommand) Run(args []string) error {
 	name := cmd.Flags.String("name", "", "name of the record")
-	cmd.Flags.Parse(args)
+	cmd.ParseFlags(args)
 
 	if *name == "" {
 		return errors.New("\"name\" cannot be empty")

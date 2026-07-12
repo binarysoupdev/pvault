@@ -36,7 +36,7 @@ func (cmd *LockCommand) Initialize() error {
 
 func (cmd LockCommand) Run(args []string) error {
 	path := cmd.Flags.String("path", "", "path to the record JSON")
-	cmd.Flags.Parse(args)
+	cmd.ParseFlags(args)
 
 	if *path == "" {
 		return errors.New("\"path\" cannot be empty")

@@ -33,7 +33,7 @@ func (cmd *ConfigCommand) Initialize() error {
 
 func (cmd ConfigCommand) Run(args []string) error {
 	new := cmd.Flags.Bool("new", false, "generate a new config file")
-	cmd.Flags.Parse(args)
+	cmd.ParseFlags(args)
 
 	if *new {
 		return cmd.generateNew()
