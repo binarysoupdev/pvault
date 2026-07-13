@@ -3,7 +3,7 @@ package vault_test
 import (
 	"pvault/vault"
 	"pvault/vault/database"
-	"pvault/vault/database/version2"
+	v2 "pvault/vault/database/version/v2"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/errors"
@@ -70,6 +70,6 @@ func (s *UpgradeTestSuite) TestUpgradeValidRunsUpgrade() {
 	//-- arrange
 	s.Require().NoError(res)
 
-	s.Require().IsType(version2.Database{}, s.Vault.Database)
-	s.Assert().FileExists(s.Vault.Database.(version2.Database).IndexPath())
+	s.Require().IsType(v2.Database{}, s.Vault.Database)
+	s.Assert().FileExists(s.Vault.Database.(v2.Database).IndexPath())
 }

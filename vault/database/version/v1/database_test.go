@@ -1,9 +1,9 @@
-package version1_test
+package v1_test
 
 import (
 	"os"
-	"pvault/vault/database/version1"
-	"pvault/vault/database/version2"
+	v1 "pvault/vault/database/version/v1"
+	v2 "pvault/vault/database/version/v2"
 	"pvault/vault/index"
 	"pvault/vault/record"
 	"testing"
@@ -17,7 +17,7 @@ import (
 
 func TestInitializeSucceedsAndSavesIndex(t *testing.T) {
 	//-- arrange
-	db := version1.New(file.NewPath(t, ""))
+	db := v1.New(file.NewPath(t, ""))
 
 	INDEX := index.IndexMap{
 		"name1": uuid.New(),
@@ -37,8 +37,8 @@ func TestInitializeSucceedsAndSavesIndex(t *testing.T) {
 
 func TestUpgradeValidUpgradesVault(t *testing.T) {
 	//-- arrange
-	db := version1.New(file.NewPath(t, ""))
-	TARGET := version2.New(db.Path)
+	db := v1.New(file.NewPath(t, ""))
+	TARGET := v2.New(db.Path)
 
 	file, err := os.Create(db.IndexPath())
 	require.NoError(t, err)

@@ -1,4 +1,4 @@
-package version1
+package v1
 
 import (
 	"bufio"
@@ -61,5 +61,5 @@ func (db Database) LoadIndex() (index.IndexMap, error) {
 		idx[name] = id
 	}
 
-	return idx, nil
+	return idx, scanner.Err()
 }

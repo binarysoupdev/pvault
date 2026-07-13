@@ -1,11 +1,11 @@
-package version2
+package v2
 
 import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
 	"pvault/vault/database"
-	"pvault/vault/database/version1"
+	v1 "pvault/vault/database/version/v1"
 	"pvault/vault/record"
 
 	"github.com/binarysoupdev/go-commando/errors"
@@ -37,7 +37,7 @@ func (db Database) LoadRecord(id uuid.UUID, password string) (record.RecordV2, e
 
 	switch version {
 	case 1:
-		return version1.New(db.Path).ParseRecordV1(id, password, raw)
+		return v1.New(db.Path).ParseRecordV1(id, password, raw)
 	case 2:
 		return database.DecryptRecord[record.RecordV2](password, raw)
 	default:

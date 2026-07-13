@@ -2,7 +2,7 @@ package vault
 
 import (
 	"os"
-	"pvault/vault/database/version2"
+	v2 "pvault/vault/database/version/v2"
 	"pvault/vault/index"
 
 	"github.com/binarysoupdev/go-commando/errors"
@@ -22,7 +22,7 @@ func InitializeNew(path string) (Vault, error) {
 	v := Vault{
 		Path:     path,
 		Index:    index.IndexMap{},
-		Database: version2.New(path),
+		Database: v2.New(path),
 	}
 
 	err = v.Database.Initialize(v.Index)

@@ -1,7 +1,7 @@
-package version1_test
+package v1_test
 
 import (
-	"pvault/vault/database/version1"
+	v1 "pvault/vault/database/version/v1"
 	"pvault/vault/index"
 	"testing"
 
@@ -14,7 +14,7 @@ import (
 
 func TestLoadIndexValidLoadsIndexMap(t *testing.T) {
 	//-- arrange
-	db := version1.New(file.NewPath(t, ""))
+	db := v1.New(file.NewPath(t, ""))
 
 	rand := rand.New(0)
 	INDEX := index.IndexMap{

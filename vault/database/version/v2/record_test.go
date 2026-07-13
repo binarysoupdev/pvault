@@ -1,11 +1,11 @@
-package version2_test
+package v2_test
 
 import (
 	"encoding/binary"
 	"fmt"
 	"os"
-	"pvault/vault/database/version1"
-	"pvault/vault/database/version2"
+	v1 "pvault/vault/database/version/v1"
+	v2 "pvault/vault/database/version/v2"
 	"pvault/vault/record"
 	"testing"
 
@@ -16,7 +16,7 @@ import (
 
 type RecordTestSuite struct {
 	suite.Suite
-	Database version2.Database
+	Database v2.Database
 	Record   record.RecordV2
 	Password string
 }
@@ -26,7 +26,7 @@ func TestRecordTestSuite(t *testing.T) {
 }
 
 func (s *RecordTestSuite) SetupTest() {
-	s.Database = version2.New(file.NewPath(s.T(), ""))
+	s.Database = v2.New(file.NewPath(s.T(), ""))
 
 	rand := rand.New(0)
 	s.Record = record.NewFromName(rand.ASCII(10))
@@ -87,7 +87,7 @@ func (s *RecordTestSuite) TestLoadRecordWithIncorrectPasswordReturnsError() {
 
 func (s *RecordTestSuite) TestLoadRecordWithUnsupportedVersionReturnsError() {
 	//-- arrange
-	VERSION := version2.RECORD_VERSION + 1
+	VERSION := v2.RECORD_VERSION + 1
 
 	version := make([]byte, 2)
 	binary.BigEndian.PutUint16(version, VERSION)
@@ -106,7 +106,7 @@ func (s *RecordTestSuite) TestLoadRecordVersion1ReturnsRecord() {
 	//-- arrange
 	s.Record.Other = map[string]any{}
 
-	err := version1.New(s.Database.Path).SaveRecordV1(s.Database.RecordPath(s.Record.ID), s.Record, s.Password)
+	err := v1.New(s.Database.Path).SaveRecordV1(s.Database.RecordPath(s.Record.ID), s.Record, s.Password)
 	s.Require().NoError(err)
 
 	//-- act

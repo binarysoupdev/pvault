@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"pvault/vault"
 	"pvault/vault/database"
-	"pvault/vault/database/version2"
+	v2 "pvault/vault/database/version/v2"
 	"pvault/vault/index"
 	"testing"
 
@@ -38,7 +38,7 @@ func TestInitializeNewCreatesDirectoryAndIndexFile(t *testing.T) {
 	require.NoError(t, res)
 
 	assert.DirExists(t, PATH)
-	assert.FileExists(t, filepath.Join(PATH, version2.INDEX_FILE))
+	assert.FileExists(t, filepath.Join(PATH, v2.INDEX_FILE))
 }
 
 func TestReloadIndexWhereDatabaseLoadIndexFailsReturnsError(t *testing.T) {

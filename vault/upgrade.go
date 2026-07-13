@@ -1,7 +1,7 @@
 package vault
 
 import (
-	"pvault/vault/database/version2"
+	v2 "pvault/vault/database/version/v2"
 
 	"github.com/binarysoupdev/go-commando/errors"
 )
@@ -15,7 +15,7 @@ func (v *Vault) Upgrade() error {
 		return errors.New("vault is up-to-date")
 	}
 
-	db := version2.New(v.Path)
+	db := v2.New(v.Path)
 
 	err := db.Initialize(v.Index)
 	if err != nil {
