@@ -1,7 +1,7 @@
 package vault
 
 import (
-	v2 "pvault/vault/record/version/v2"
+	v2 "pvault/vault/record/version2"
 
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/google/uuid"
@@ -43,7 +43,7 @@ func (v Vault) LoadRecord(name string, password string) (v2.Record, error) {
 		return v2.Record{}, errors.Chain(err, "error loading record from database")
 	}
 
-	return r, nil
+	return r.Convert(), nil
 }
 
 func (v Vault) DeleteRecord(name string) (uuid.UUID, error) {

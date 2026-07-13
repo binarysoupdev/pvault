@@ -5,9 +5,9 @@ import (
 	"pvault/cmd/flow"
 	"pvault/config"
 	"pvault/vault"
-	"pvault/vault/database/version1"
+	dbv1 "pvault/vault/database/version1"
 	"pvault/vault/index"
-	v1 "pvault/vault/record/version/v1"
+
 	"regexp"
 	"testing"
 
@@ -21,14 +21,14 @@ func TestOpenVaultReturnsErrorWhenVaultOutOfDate(t *testing.T) {
 	//-- arrange
 	PATH := file.NewPath(t, "")
 
-	err := version1.NewDatabase(PATH).Initialize(index.IndexMap{})
+	err := dbv1.NewDatabase(PATH).Initialize(index.IndexMap{})
 	require.NoError(t, err)
 
 	//-- act
 	_, res := flow.OpenVault(PATH)
 
 	//-- assert
-	require.ErrorContains(t, res, fmt.Sprintf("vault (@v%d) out-of-date", v1.VERSION))
+	require.ErrorContains(t, res, fmt.Sprintf("vault (@v%d) out-of-date", dbv1.VERSION))
 }
 
 func TestOpenVaultReturnsErrorWithInvalidPath(t *testing.T) {

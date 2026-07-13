@@ -7,7 +7,7 @@ import (
 )
 
 func Open(path string) (Vault, error) {
-	db, err := database.DetectVersion(path)
+	db, err := database.Find(path)
 	if err != nil {
 		return Vault{}, err
 	}

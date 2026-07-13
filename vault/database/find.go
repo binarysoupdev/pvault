@@ -10,7 +10,7 @@ import (
 	"github.com/binarysoupdev/go-commando/errors"
 )
 
-func DetectVersion(path string) (Database, error) {
+func Find(path string) (Database, error) {
 	_, err := os.Stat(filepath.Join(path, version2.INDEX_FILE))
 	if err == nil {
 		return detectFromVersionHeader(path, version2.INDEX_FILE)

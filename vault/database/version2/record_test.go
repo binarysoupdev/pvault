@@ -4,9 +4,9 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
-	"pvault/vault/database/version1"
 	"pvault/vault/database/version2"
-	v2 "pvault/vault/record/version/v2"
+	v1 "pvault/vault/record/version1"
+	v2 "pvault/vault/record/version2"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -29,7 +29,7 @@ func (s *RecordTestSuite) SetupTest() {
 	s.Database = version2.NewDatabase(file.NewPath(s.T(), ""))
 
 	rand := rand.New(0)
-	s.Record = v2.NewFromName(rand.ASCII(10))
+	s.Record = v2.NewRecord(rand.ASCII(10))
 	s.Record.Username = rand.ASCII(10)
 	s.Record.Password = rand.ASCII(30)
 	s.Record.Other = map[string]any{"A": rand.ASCII(5), "B": true}
@@ -47,7 +47,7 @@ func (s *RecordTestSuite) TestSaveRecordWithInvalidDatabasePathReturnError() {
 	res := s.Database.SaveRecord(s.Record, s.Password)
 
 	//-- assert
-	s.Require().ErrorContains(res, "error creating record file")
+	s.Require().ErrorContains(res, "error writing record file")
 }
 
 func (s *RecordTestSuite) TestSaveRecordSavesRecord() {
@@ -105,8 +105,14 @@ func (s *RecordTestSuite) TestLoadRecordWithUnsupportedVersionReturnsError() {
 func (s *RecordTestSuite) TestLoadRecordVersion1ReturnsRecord() {
 	//-- arrange
 	s.Record.Other = map[string]any{}
+	v1 := v1.Record{
+		ID:       s.Record.ID,
+		Name:     s.Record.Name,
+		Username: s.Record.Username,
+		Password: s.Record.Password,
+	}
 
-	err := version1.NewDatabase(s.Database.Path).SaveRecordV1(s.Database.RecordPath(s.Record.ID), s.Record, s.Password)
+	err := s.Database.SaveRecord(v1, s.Password)
 	s.Require().NoError(err)
 
 	//-- act
@@ -114,7 +120,7 @@ func (s *RecordTestSuite) TestLoadRecordVersion1ReturnsRecord() {
 
 	//-- assert
 	s.Require().NoError(err)
-	s.Assert().Equal(s.Record, r)
+	s.Assert().Equal(s.Record, r.Convert())
 }
 
 func (s *RecordTestSuite) TestLoadRecordVersion2ReturnsRecord() {

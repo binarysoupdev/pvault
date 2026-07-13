@@ -5,7 +5,7 @@ import (
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/vault"
-	v2 "pvault/vault/record/version/v2"
+	record "pvault/vault/record/version2"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/json"
@@ -90,7 +90,7 @@ func (s *SearchTestSuite) TestRunValidDisplaySearchResults() {
 	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
 
-	err = v.SaveRecord(v2.NewFromName(NAME), rand.ASCII(30))
+	err = v.SaveRecord(record.NewRecord(NAME), rand.ASCII(30))
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(1)

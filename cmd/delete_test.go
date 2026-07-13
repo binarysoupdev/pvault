@@ -6,7 +6,7 @@ import (
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/vault"
-	v2 "pvault/vault/record/version/v2"
+	v2 "pvault/vault/record/version2"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/json"
@@ -45,7 +45,7 @@ func (s *DeleteTestSuite) SetupTest() {
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
-	s.Record = v2.NewFromName(rand.ASCII(15))
+	s.Record = v2.NewRecord(rand.ASCII(15))
 
 	s.Vault, err = vault.InitializeNew(s.Config.VaultPath)
 	s.Require().NoError(err)

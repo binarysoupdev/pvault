@@ -4,6 +4,7 @@ import (
 	"os"
 	"pvault/vault/database/version2"
 	"pvault/vault/index"
+	v1 "pvault/vault/record/version1"
 
 	"github.com/binarysoupdev/go-commando/errors"
 )
@@ -50,9 +51,7 @@ func (db Database) Upgrade(idx index.IndexMap) error {
 		}
 		defer file.Close()
 
-		file.Write(db.buildRecordV1Header(name))
-		file.Write(raw[LEGACY_HASH_SIZE:])
-
+		file.Write(v1.MarshalFromLegacy(name, raw))
 		_ = os.Remove(legacyFile)
 	}
 

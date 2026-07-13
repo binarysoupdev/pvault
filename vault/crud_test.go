@@ -6,7 +6,7 @@ import (
 	"pvault/vault"
 	"pvault/vault/database"
 	"pvault/vault/index"
-	v2 "pvault/vault/record/version/v2"
+	record "pvault/vault/record/version2"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/rand"
@@ -19,7 +19,7 @@ type CRUDTestSuite struct {
 	DatabaseMock database.DatabaseMock
 
 	Vault    vault.Vault
-	Record   v2.Record
+	Record   record.Record
 	Password string
 }
 
@@ -36,7 +36,7 @@ func (s *CRUDTestSuite) SetupTest() {
 	}
 
 	rand := rand.New(0)
-	s.Record = v2.NewFromName(rand.ASCII(10))
+	s.Record = record.NewRecord(rand.ASCII(10))
 	s.Record.Username = rand.ASCII(10)
 	s.Record.Password = rand.ASCII(30)
 	s.Record.Other = map[string]any{"A": rand.ASCII(5), "B": true}
@@ -46,7 +46,7 @@ func (s *CRUDTestSuite) SetupTest() {
 
 func (s *CRUDTestSuite) TestSaveRecordWithInvalidRecordReturnsError() {
 	//-- act
-	res := s.Vault.SaveRecord(v2.Record{}, "")
+	res := s.Vault.SaveRecord(record.Record{}, "")
 
 	//-- assert
 	s.Require().ErrorContains(res, "error validating record")

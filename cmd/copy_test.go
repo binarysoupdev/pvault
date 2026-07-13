@@ -8,7 +8,7 @@ import (
 	"pvault/tools/clipboard"
 	"pvault/tools/qrcode"
 	"pvault/vault"
-	v2 "pvault/vault/record/version/v2"
+	v2 "pvault/vault/record/version2"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/json"
@@ -55,7 +55,7 @@ func (s *CopyTestSuite) SetupTest() {
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
-	s.Record = v2.NewFromName(rand.ASCII(15))
+	s.Record = v2.NewRecord(rand.ASCII(15))
 	s.Record.Username = rand.ASCII(10)
 	s.Record.Password = rand.ASCII(30)
 

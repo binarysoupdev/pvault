@@ -17,7 +17,7 @@ type Record struct {
 	Other    map[string]any `json:"other"`
 }
 
-func NewFromName(name string) Record {
+func NewRecord(name string) Record {
 	return Record{
 		ID:       uuid.New(),
 		Name:     name,

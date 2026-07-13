@@ -1,7 +1,7 @@
 package v1
 
 import (
-	v2 "pvault/vault/record/version/v2"
+	v2 "pvault/vault/record/version2"
 
 	"github.com/google/uuid"
 )
@@ -13,9 +13,16 @@ type Record struct {
 	Username      string   `json:"username"`
 	URL           string   `json:"url"`
 	RecoveryCodes []string `json:"recovery_codes"`
+
+	ID   uuid.UUID
+	Name string
 }
 
-func (r Record) Upgrade(id uuid.UUID, name string) v2.Record {
+func (r Record) GetID() uuid.UUID {
+	return r.ID
+}
+
+func (r Record) Convert() v2.Record {
 	other := map[string]any{}
 
 	if r.URL != "" {
@@ -26,17 +33,10 @@ func (r Record) Upgrade(id uuid.UUID, name string) v2.Record {
 	}
 
 	return v2.Record{
-		ID:       id,
-		Name:     name,
+		ID:       r.ID,
+		Name:     r.Name,
 		Username: r.Username,
 		Password: r.Password,
 		Other:    other,
-	}
-}
-
-func Downgrade(r v2.Record) Record {
-	return Record{
-		Password: r.Password,
-		Username: r.Username,
 	}
 }

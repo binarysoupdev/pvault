@@ -5,7 +5,7 @@ import (
 	"pvault/vault/database/version1"
 	"pvault/vault/database/version2"
 	"pvault/vault/index"
-	v1 "pvault/vault/record/version/v1"
+	v1 "pvault/vault/record/version1"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -62,7 +62,10 @@ func TestUpgradeValidUpgradesVault(t *testing.T) {
 			RecoveryCodes: []string{rand.ASCII(10), rand.ASCII(10)},
 		}
 
-		err := db.SaveLegacyRecord(id, PASSWORD, LEGACY[id])
+		bytes, err := LEGACY[id].MarshalToLegacy(PASSWORD)
+		require.NoError(t, err)
+
+		os.WriteFile(db.RecordPath(id), bytes, 0666)
 		require.NoError(t, err)
 	}
 
@@ -76,8 +79,10 @@ func TestUpgradeValidUpgradesVault(t *testing.T) {
 	for name, id := range INDEX {
 		assert.NoFileExists(t, db.RecordPath(id))
 
-		r, err := TARGET.LoadRecord(id, PASSWORD)
+		generic, err := TARGET.LoadRecord(id, PASSWORD)
 		require.NoError(t, err)
+
+		r := generic.Convert()
 
 		assert.Equal(t, id, r.ID)
 		assert.Equal(t, name, r.Name)

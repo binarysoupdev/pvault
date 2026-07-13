@@ -3,7 +3,7 @@ package vault_test
 import (
 	"fmt"
 	"pvault/vault"
-	v2 "pvault/vault/record/version/v2"
+	record "pvault/vault/record/version2"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -52,7 +52,7 @@ func (s *BackupTestSuite) TestBackupValidBacksUpIndexFileAndRecord() {
 	rand := rand.New(0)
 	const NUM_RECORDS = 5
 	for range NUM_RECORDS {
-		err := s.Vault.SaveRecord(v2.NewFromName(rand.ASCII(10)), rand.ASCII(30))
+		err := s.Vault.SaveRecord(record.NewRecord(rand.ASCII(10)), rand.ASCII(30))
 		s.Require().NoError(err)
 	}
 

@@ -2,7 +2,7 @@ package database
 
 import (
 	"pvault/vault/index"
-	v2 "pvault/vault/record/version/v2"
+	"pvault/vault/record"
 
 	"github.com/google/uuid"
 )
@@ -10,7 +10,7 @@ import (
 type DatabaseMock struct {
 	Version uint16
 	Index   index.IndexMap
-	Record  v2.Record
+	Record  record.Record
 
 	InitializeError   error
 	UpgradeError      error
@@ -50,16 +50,16 @@ func (DatabaseMock) RecordPath(id uuid.UUID) string {
 	return ""
 }
 
-func (db *DatabaseMock) SaveRecord(r v2.Record, password string) error {
+func (db *DatabaseMock) SaveRecord(r record.Record, password string) error {
 	db.Record = r
 	return db.SaveRecordError
 }
 
-func (db DatabaseMock) LoadRecord(id uuid.UUID, password string) (v2.Record, error) {
+func (db DatabaseMock) LoadRecord(id uuid.UUID, password string) (record.Record, error) {
 	return db.Record, db.LoadRecordError
 }
 
 func (db *DatabaseMock) DeleteRecord(id uuid.UUID) error {
-	db.Record = v2.Record{}
+	db.Record = nil
 	return db.DeleteRecordError
 }
