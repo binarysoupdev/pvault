@@ -21,7 +21,7 @@ import (
 func TestSaveVaultRecordReturnsErrorWithInvalidRecord(t *testing.T) {
 	//-- arrange
 	VAULT := vault.Vault{}
-	RECORD := record.Record{}
+	RECORD := record.RecordV2{}
 
 	//-- act
 	res := flow.SaveVaultRecord(VAULT, RECORD)
@@ -256,7 +256,7 @@ func TestSaveOutputRecordReturnsErrorWhenOutputPathInvalid(t *testing.T) {
 	CONFIG := config.Config{
 		OutputPath: "invalid",
 	}
-	RECORD := record.Record{}
+	RECORD := record.RecordV2{}
 
 	//-- act
 	res := flow.SaveOutputRecord(CONFIG, RECORD)

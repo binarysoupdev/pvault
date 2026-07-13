@@ -5,7 +5,7 @@ import (
 	"pvault/vault/data/version1"
 	"pvault/vault/data/version2"
 	"pvault/vault/index"
-	"pvault/vault/record/legacy"
+	"pvault/vault/record"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -47,7 +47,7 @@ func TestUpgradeValidUpgradesVault(t *testing.T) {
 	rand := rand.New(0)
 	PASSWORD := rand.ASCII(30)
 
-	LEGACY := map[uuid.UUID]legacy.RecordV1{}
+	LEGACY := map[uuid.UUID]record.RecordV1{}
 	INDEX := index.IndexMap{}
 
 	const NUM_LEGACY_FILES = 5
@@ -55,7 +55,7 @@ func TestUpgradeValidUpgradesVault(t *testing.T) {
 		id := uuid.New()
 
 		INDEX[rand.ASCII(10)] = id
-		LEGACY[id] = legacy.RecordV1{
+		LEGACY[id] = record.RecordV1{
 			Password:      rand.ASCII(30),
 			Username:      rand.ASCII(15),
 			URL:           rand.ASCII(15),

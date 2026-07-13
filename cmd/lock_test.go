@@ -22,7 +22,7 @@ type LockTestSuite struct {
 	Config       config.Config
 
 	RecordPath string
-	Record     record.Record
+	Record     record.RecordV2
 }
 
 func TestLockCommandSuite(t *testing.T) {

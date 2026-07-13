@@ -6,8 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// Version 2
-type Record struct {
+type RecordV2 struct {
 	ID   uuid.UUID `json:"id"`
 	Name string    `json:"name"`
 
@@ -16,8 +15,8 @@ type Record struct {
 	Other    map[string]any `json:"other"`
 }
 
-func NewFromName(name string) Record {
-	return Record{
+func NewFromName(name string) RecordV2 {
+	return RecordV2{
 		ID:       uuid.New(),
 		Name:     name,
 		Username: "",
@@ -26,7 +25,7 @@ func NewFromName(name string) Record {
 	}
 }
 
-func (r Record) Validate() error {
+func (r RecordV2) Validate() error {
 	errs := errors.Errors{}
 
 	if r.ID == uuid.Nil {

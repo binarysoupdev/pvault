@@ -1,7 +1,7 @@
-package legacy_test
+package record_test
 
 import (
-	"pvault/vault/record/legacy"
+	"pvault/vault/record"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/rand"
@@ -16,7 +16,7 @@ func TestRecordV1UpgradeUpgradesRecord(t *testing.T) {
 	ID := uuid.New()
 	NAME := rand.ASCII(15)
 
-	v1 := legacy.RecordV1{
+	v1 := record.RecordV1{
 		Password:      rand.ASCII(30),
 		Username:      rand.ASCII(15),
 		URL:           rand.ASCII(15),

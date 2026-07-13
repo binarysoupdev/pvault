@@ -10,7 +10,7 @@ import (
 type DatabaseMock struct {
 	Version uint16
 	Index   index.IndexMap
-	Record  record.Record
+	Record  record.RecordV2
 
 	InitializeError   error
 	UpgradeError      error
@@ -50,16 +50,16 @@ func (DatabaseMock) RecordPath(id uuid.UUID) string {
 	return ""
 }
 
-func (db *DatabaseMock) SaveRecord(r record.Record, password string) error {
+func (db *DatabaseMock) SaveRecord(r record.RecordV2, password string) error {
 	db.Record = r
 	return db.SaveRecordError
 }
 
-func (db DatabaseMock) LoadRecord(id uuid.UUID, password string) (record.Record, error) {
+func (db DatabaseMock) LoadRecord(id uuid.UUID, password string) (record.RecordV2, error) {
 	return db.Record, db.LoadRecordError
 }
 
 func (db *DatabaseMock) DeleteRecord(id uuid.UUID) error {
-	db.Record = record.Record{}
+	db.Record = record.RecordV2{}
 	return db.DeleteRecordError
 }

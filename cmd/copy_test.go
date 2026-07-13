@@ -28,7 +28,7 @@ type CopyTestSuite struct {
 	Config       config.Config
 
 	Vault    vault.Vault
-	Record   record.Record
+	Record   record.RecordV2
 	Password string
 }
 

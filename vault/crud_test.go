@@ -19,7 +19,7 @@ type CRUDTestSuite struct {
 	DatabaseMock data.DatabaseMock
 
 	Vault    vault.Vault
-	Record   record.Record
+	Record   record.RecordV2
 	Password string
 }
 
@@ -46,7 +46,7 @@ func (s *CRUDTestSuite) SetupTest() {
 
 func (s *CRUDTestSuite) TestSaveRecordWithInvalidRecordReturnsError() {
 	//-- act
-	res := s.Vault.SaveRecord(record.Record{}, "")
+	res := s.Vault.SaveRecord(record.RecordV2{}, "")
 
 	//-- assert
 	s.Require().ErrorContains(res, "error validating record")

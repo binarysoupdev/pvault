@@ -19,17 +19,17 @@ func (db Database) RecordPath(id uuid.UUID) string {
 	return filepath.Join(db.Path, id.String())
 }
 
-func (db Database) SaveRecord(r record.Record, password string) error {
+func (db Database) SaveRecord(r record.RecordV2, password string) error {
 	header := make([]byte, 2)
 	binary.BigEndian.PutUint16(header, RECORD_VERSION)
 
 	return data.SaveEncryptedRecord(db.RecordPath(r.ID), password, header, r)
 }
 
-func (db Database) LoadRecord(id uuid.UUID, password string) (record.Record, error) {
+func (db Database) LoadRecord(id uuid.UUID, password string) (record.RecordV2, error) {
 	raw, err := os.ReadFile(db.RecordPath(id))
 	if err != nil {
-		return record.Record{}, errors.Chain(err, "error reading record file")
+		return record.RecordV2{}, errors.Chain(err, "error reading record file")
 	}
 
 	version := binary.BigEndian.Uint16(raw)
@@ -39,9 +39,9 @@ func (db Database) LoadRecord(id uuid.UUID, password string) (record.Record, err
 	case 1:
 		return version1.New(db.Path).ParseRecordV1(id, password, raw)
 	case 2:
-		return data.DecryptRecord[record.Record](password, raw)
+		return data.DecryptRecord[record.RecordV2](password, raw)
 	default:
-		return record.Record{}, errors.Format("unsupported record version \"%d\"", version)
+		return record.RecordV2{}, errors.Format("unsupported record version \"%d\"", version)
 	}
 }
 

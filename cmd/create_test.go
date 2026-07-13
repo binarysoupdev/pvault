@@ -174,7 +174,7 @@ func (s *CreateTestSuite) TestRunValid() {
 	err = s.Vault.ReloadIndex()
 	s.Require().NoError(err)
 
-	r1, err := json.UnmarshalFile[record.Record](OUTPUT_FILE)
+	r1, err := json.UnmarshalFile[record.RecordV2](OUTPUT_FILE)
 	s.Require().NoError(err)
 
 	r2, err := s.Vault.LoadRecord(NAME, PASSWORD)

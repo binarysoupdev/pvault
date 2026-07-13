@@ -23,7 +23,7 @@ type DeleteTestSuite struct {
 	Config       config.Config
 
 	Vault  vault.Vault
-	Record record.Record
+	Record record.RecordV2
 }
 
 func TestDeleteCommandSuite(t *testing.T) {

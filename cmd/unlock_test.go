@@ -23,7 +23,7 @@ type UnlockTestSuite struct {
 	Config       config.Config
 
 	Vault    vault.Vault
-	Record   record.Record
+	Record   record.RecordV2
 	Password string
 }
 
@@ -143,7 +143,7 @@ func (s *UnlockTestSuite) TestRunValid() {
 	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
 	s.Assert().Contains(io.ReadLine(), "[+] "+OUTPUT_FILE)
 
-	record, err := json.UnmarshalFile[record.Record](OUTPUT_FILE)
+	record, err := json.UnmarshalFile[record.RecordV2](OUTPUT_FILE)
 	s.Require().NoError(err)
 	s.Assert().Equal(s.Record, record)
 }

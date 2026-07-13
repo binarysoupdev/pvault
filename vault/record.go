@@ -6,7 +6,7 @@ import (
 	"github.com/binarysoupdev/go-commando/errors"
 )
 
-func (v Vault) ValidateRecord(r record.Record) error {
+func (v Vault) ValidateRecord(r record.RecordV2) error {
 	err := r.Validate()
 	if err != nil {
 		return err

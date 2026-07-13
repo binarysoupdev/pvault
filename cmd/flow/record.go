@@ -13,7 +13,7 @@ import (
 	"github.com/binarysoupdev/got-style/style"
 )
 
-func SaveVaultRecord(v vault.Vault, r record.Record) error {
+func SaveVaultRecord(v vault.Vault, r record.RecordV2) error {
 	err := v.ValidateRecord(r)
 	if err != nil {
 		return errors.Chain(err, "error validating record")
@@ -33,12 +33,12 @@ func SaveVaultRecord(v vault.Vault, r record.Record) error {
 	return nil
 }
 
-func LoadVaultRecord(v vault.Vault, name string) (record.Record, error) {
+func LoadVaultRecord(v vault.Vault, name string) (record.RecordV2, error) {
 	password := PromptPassword("Enter PASSWORD: ")
 
 	r, err := v.LoadRecord(name, password)
 	if err != nil {
-		return record.Record{}, errors.Chain(err, "error loading vault record")
+		return record.RecordV2{}, errors.Chain(err, "error loading vault record")
 	}
 
 	style.BoldInfo.Printf("[=] Loaded Record: %s\n", r.ID.String())
@@ -59,7 +59,7 @@ func DeleteVaultRecord(v vault.Vault, name string) error {
 	return nil
 }
 
-func SaveOutputRecord(cfg config.Config, r record.Record) error {
+func SaveOutputRecord(cfg config.Config, r record.RecordV2) error {
 	err := cfg.ValidateOutputPath()
 	if err != nil {
 		return errors.Chain(err, "error validating output path")

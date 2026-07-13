@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (v Vault) SaveRecord(r record.Record, password string) error {
+func (v Vault) SaveRecord(r record.RecordV2, password string) error {
 	err := v.ValidateRecord(r)
 	if err != nil {
 		return errors.Chain(err, "error validating record")
@@ -33,15 +33,15 @@ func (v Vault) SaveRecord(r record.Record, password string) error {
 	return nil
 }
 
-func (v Vault) LoadRecord(name string, password string) (record.Record, error) {
+func (v Vault) LoadRecord(name string, password string) (record.RecordV2, error) {
 	id, ok := v.Index[name]
 	if !ok {
-		return record.Record{}, errors.Format("name \"%s\" not found", name)
+		return record.RecordV2{}, errors.Format("name \"%s\" not found", name)
 	}
 
 	r, err := v.Database.LoadRecord(id, password)
 	if err != nil {
-		return record.Record{}, errors.Chain(err, "error loading record from database")
+		return record.RecordV2{}, errors.Chain(err, "error loading record from database")
 	}
 
 	return r, nil

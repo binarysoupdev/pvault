@@ -1,8 +1,6 @@
-package legacy
+package record
 
 import (
-	"pvault/vault/record"
-
 	"github.com/google/uuid"
 )
 
@@ -13,7 +11,7 @@ type RecordV1 struct {
 	RecoveryCodes []string `json:"recovery_codes"`
 }
 
-func (r RecordV1) Upgrade(id uuid.UUID, name string) record.Record {
+func (r RecordV1) Upgrade(id uuid.UUID, name string) RecordV2 {
 	other := map[string]any{}
 
 	if r.URL != "" {
@@ -23,7 +21,7 @@ func (r RecordV1) Upgrade(id uuid.UUID, name string) record.Record {
 		other["recovery_codes"] = r.RecoveryCodes
 	}
 
-	return record.Record{
+	return RecordV2{
 		ID:       id,
 		Name:     name,
 		Username: r.Username,

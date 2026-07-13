@@ -47,7 +47,7 @@ func (cmd LockCommand) Run(args []string) error {
 		return err
 	}
 
-	r, err := json.UnmarshalFile[record.Record](*path)
+	r, err := json.UnmarshalFile[record.RecordV2](*path)
 	if err != nil {
 		return errors.Chain(err, "error loading source record")
 	}

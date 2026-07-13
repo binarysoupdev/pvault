@@ -10,7 +10,7 @@ import (
 
 func TestValidateInvalid(t *testing.T) {
 	//-- act
-	res := record.Record{}.Validate()
+	res := record.RecordV2{}.Validate()
 
 	//-- assert
 	assert.ErrorContains(t, res, "\"ID\" cannot be nil (all zeroes)")

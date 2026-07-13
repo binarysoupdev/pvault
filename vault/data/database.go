@@ -18,7 +18,7 @@ type Database interface {
 	LoadIndex() (index.IndexMap, error)
 
 	RecordPath(id uuid.UUID) string
-	SaveRecord(r record.Record, password string) error
-	LoadRecord(id uuid.UUID, password string) (record.Record, error)
+	SaveRecord(r record.RecordV2, password string) error
+	LoadRecord(id uuid.UUID, password string) (record.RecordV2, error)
 	DeleteRecord(id uuid.UUID) error
 }

@@ -17,7 +17,7 @@ import (
 type RecordTestSuite struct {
 	suite.Suite
 	Database version2.Database
-	Record   record.Record
+	Record   record.RecordV2
 	Password string
 }
 
