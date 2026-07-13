@@ -1,4 +1,4 @@
-package record
+package v2
 
 import (
 	"github.com/binarysoupdev/go-commando/errors"
@@ -6,7 +6,9 @@ import (
 	"github.com/google/uuid"
 )
 
-type RecordV2 struct {
+const VERSION = 2
+
+type Record struct {
 	ID   uuid.UUID `json:"id"`
 	Name string    `json:"name"`
 
@@ -15,8 +17,8 @@ type RecordV2 struct {
 	Other    map[string]any `json:"other"`
 }
 
-func NewFromName(name string) RecordV2 {
-	return RecordV2{
+func NewFromName(name string) Record {
+	return Record{
 		ID:       uuid.New(),
 		Name:     name,
 		Username: "",
@@ -25,7 +27,7 @@ func NewFromName(name string) RecordV2 {
 	}
 }
 
-func (r RecordV2) Validate() error {
+func (r Record) Validate() error {
 	errs := errors.Errors{}
 
 	if r.ID == uuid.Nil {

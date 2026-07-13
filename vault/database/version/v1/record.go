@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"path/filepath"
 	"pvault/vault/database"
-	"pvault/vault/record"
+	v2 "pvault/vault/record/version/v2"
 
 	"github.com/google/uuid"
 )
@@ -18,19 +18,19 @@ func (db Database) RecordPath(id uuid.UUID) string {
 	return filepath.Join(db.Path, id.String()+".crypt")
 }
 
-func (db Database) SaveRecord(r record.RecordV2, password string) error {
+func (db Database) SaveRecord(r v2.Record, password string) error {
 	return database.NotSupportedError{}
 }
 
-func (Database) LoadRecord(id uuid.UUID, password string) (record.RecordV2, error) {
-	return record.RecordV2{}, database.NotSupportedError{}
+func (Database) LoadRecord(id uuid.UUID, password string) (v2.Record, error) {
+	return v2.Record{}, database.NotSupportedError{}
 }
 
 func (Database) DeleteRecord(id uuid.UUID) error {
 	return database.NotSupportedError{}
 }
 
-func (db Database) SaveRecordV1(path string, r record.RecordV2, password string) error {
+func (db Database) SaveRecordV1(path string, r v2.Record, password string) error {
 	v1 := record.RecordV1{
 		Password: r.Password,
 		Username: r.Username,
@@ -50,7 +50,7 @@ func (Database) buildRecordV1Header(name string) []byte {
 	return header
 }
 
-func (db Database) ParseRecordV1(id uuid.UUID, password string, raw []byte) (record.RecordV2, error) {
+func (db Database) ParseRecordV1(id uuid.UUID, password string, raw []byte) (v2.Record, error) {
 	length := binary.BigEndian.Uint16(raw)
 	raw = raw[2:]
 
@@ -59,7 +59,7 @@ func (db Database) ParseRecordV1(id uuid.UUID, password string, raw []byte) (rec
 
 	r, err := database.DecryptRecord[record.RecordV1](password, raw)
 	if err != nil {
-		return record.RecordV2{}, err
+		return v2.Record{}, err
 	}
 
 	return r.Upgrade(id, name), nil

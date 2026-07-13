@@ -2,7 +2,7 @@ package database
 
 import (
 	"pvault/vault/index"
-	"pvault/vault/record"
+	v2 "pvault/vault/record/version/v2"
 
 	"github.com/google/uuid"
 )
@@ -18,7 +18,7 @@ type Database interface {
 	LoadIndex() (index.IndexMap, error)
 
 	RecordPath(id uuid.UUID) string
-	SaveRecord(r record.RecordV2, password string) error
-	LoadRecord(id uuid.UUID, password string) (record.RecordV2, error)
+	SaveRecord(r v2.Record, password string) error
+	LoadRecord(id uuid.UUID, password string) (v2.Record, error)
 	DeleteRecord(id uuid.UUID) error
 }

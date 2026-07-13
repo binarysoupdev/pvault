@@ -6,7 +6,6 @@ import (
 	"os"
 	v1 "pvault/vault/database/version/v1"
 	v2 "pvault/vault/database/version/v2"
-	"pvault/vault/record"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -17,7 +16,7 @@ import (
 type RecordTestSuite struct {
 	suite.Suite
 	Database v2.Database
-	Record   record.RecordV2
+	Record   v2.Record
 	Password string
 }
 

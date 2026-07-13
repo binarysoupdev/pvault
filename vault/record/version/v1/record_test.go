@@ -1,7 +1,7 @@
-package record_test
+package v1_test
 
 import (
-	"pvault/vault/record"
+	v1 "pvault/vault/record/version/v1"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/rand"
@@ -9,14 +9,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRecordV1UpgradeUpgradesRecord(t *testing.T) {
+func TestRecordUpgradeUpgradesRecord(t *testing.T) {
 	//-- arrange
 	rand := rand.New(0)
 
 	ID := uuid.New()
 	NAME := rand.ASCII(15)
 
-	v1 := record.RecordV1{
+	r := v1.Record{
 		Password:      rand.ASCII(30),
 		Username:      rand.ASCII(15),
 		URL:           rand.ASCII(15),
@@ -24,13 +24,13 @@ func TestRecordV1UpgradeUpgradesRecord(t *testing.T) {
 	}
 
 	//-- act
-	res := v1.Upgrade(ID, NAME)
+	res := r.Upgrade(ID, NAME)
 
 	//-- assert
 	assert.Equal(t, ID, res.ID)
 	assert.Equal(t, NAME, res.Name)
-	assert.Equal(t, v1.Password, res.Password)
-	assert.Equal(t, v1.Username, res.Username)
-	assert.Equal(t, v1.URL, res.Other["url"])
-	assert.Equal(t, v1.RecoveryCodes, res.Other["recovery_codes"])
+	assert.Equal(t, r.Password, res.Password)
+	assert.Equal(t, r.Username, res.Username)
+	assert.Equal(t, r.URL, res.Other["url"])
+	assert.Equal(t, r.RecoveryCodes, res.Other["recovery_codes"])
 }

@@ -1,7 +1,6 @@
-package record_test
+package v2_test
 
 import (
-	"pvault/vault/record"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/rand"

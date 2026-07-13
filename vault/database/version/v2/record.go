@@ -4,9 +4,8 @@ import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
-	"pvault/vault/database"
-	v1 "pvault/vault/database/version/v1"
-	"pvault/vault/record"
+	v1 "pvault/vault/record/version/v1"
+	v2 "pvault/vault/record/version/v2"
 
 	"github.com/binarysoupdev/go-commando/errors"
 
@@ -19,29 +18,35 @@ func (db Database) RecordPath(id uuid.UUID) string {
 	return filepath.Join(db.Path, id.String())
 }
 
-func (db Database) SaveRecord(r record.RecordV2, password string) error {
-	header := make([]byte, 2)
-	binary.BigEndian.PutUint16(header, RECORD_VERSION)
-
-	return database.SaveEncryptedRecord(db.RecordPath(r.ID), password, header, r)
-}
-
-func (db Database) LoadRecord(id uuid.UUID, password string) (record.RecordV2, error) {
-	raw, err := os.ReadFile(db.RecordPath(id))
+func (db Database) SaveRecord(r v2.Record, password string) error {
+	bytes, err := r.Marshal(password)
 	if err != nil {
-		return record.RecordV2{}, errors.Chain(err, "error reading record file")
+		return errors.Chain(err, "error encrypting record")
 	}
 
-	version := binary.BigEndian.Uint16(raw)
-	raw = raw[2:]
+	err = os.WriteFile(db.RecordPath(r.ID), bytes, 0666)
+	if err != nil {
+		return errors.Chain(err, "error writing record file")
+	}
+
+	return nil
+}
+
+func (db Database) LoadRecord(id uuid.UUID, password string) (v2.Record, error) {
+	bytes, err := os.ReadFile(db.RecordPath(id))
+	if err != nil {
+		return v2.Record{}, errors.Chain(err, "error reading record file")
+	}
+
+	version := binary.BigEndian.Uint16(bytes)
 
 	switch version {
 	case 1:
-		return v1.New(db.Path).ParseRecordV1(id, password, raw)
+		return v1.Unmarshal(password, bytes, id)
 	case 2:
-		return database.DecryptRecord[record.RecordV2](password, raw)
+		return v2.Unmarshal(password, bytes)
 	default:
-		return record.RecordV2{}, errors.Format("unsupported record version \"%d\"", version)
+		return v2.Record{}, errors.Format("unsupported record version \"%d\"", version)
 	}
 }
 
