@@ -2,8 +2,8 @@ package version1_test
 
 import (
 	"os"
-	"pvault/vault/data/version1"
-	"pvault/vault/data/version2"
+	"pvault/vault/database/version1"
+	"pvault/vault/database/version2"
 	"pvault/vault/index"
 	"pvault/vault/record"
 	"testing"

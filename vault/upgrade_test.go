@@ -2,8 +2,8 @@ package vault_test
 
 import (
 	"pvault/vault"
-	"pvault/vault/data"
-	"pvault/vault/data/version2"
+	"pvault/vault/database"
+	"pvault/vault/database/version2"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/errors"
@@ -14,7 +14,7 @@ import (
 
 type UpgradeTestSuite struct {
 	suite.Suite
-	DatabaseMock data.DatabaseMock
+	DatabaseMock database.DatabaseMock
 	Vault        vault.Vault
 }
 
@@ -23,7 +23,7 @@ func TestUpgradeTestSuite(t *testing.T) {
 }
 
 func (s *UpgradeTestSuite) SetupTest() {
-	s.DatabaseMock = data.DatabaseMock{
+	s.DatabaseMock = database.DatabaseMock{
 		Version: vault.CURRENT_VERSION - 1,
 	}
 

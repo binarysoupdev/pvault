@@ -6,7 +6,7 @@ import (
 	"pvault/cmd/flow"
 	"pvault/config"
 	"pvault/vault"
-	"pvault/vault/data"
+	"pvault/vault/database"
 	"pvault/vault/index"
 	"pvault/vault/record"
 	"testing"
@@ -56,7 +56,7 @@ func TestSaveVaultRecordReturnsErrorWhenVerifyPasswordDoesNotMatch(t *testing.T)
 func TestSaveVaultRecordReturnsErrorWhenDatabaseSaveRecordFails(t *testing.T) {
 	//-- arrange
 	VAULT := vault.Vault{
-		Database: &data.DatabaseMock{
+		Database: &database.DatabaseMock{
 			SaveRecordError: errors.New(""),
 		},
 	}
@@ -82,7 +82,7 @@ func TestSaveVaultRecordReturnsErrorWhenDatabaseSaveRecordFails(t *testing.T) {
 
 func TestSaveVaultRecordReturnsNoErrorAndSavesRecordWhenValid(t *testing.T) {
 	//-- arrange
-	mock := data.DatabaseMock{}
+	mock := database.DatabaseMock{}
 
 	VAULT := vault.Vault{
 		Database: &mock,
@@ -117,7 +117,7 @@ func TestLoadVaultRecordReturnsErrorWhenDatabaseLoadRecordFails(t *testing.T) {
 	//-- arrange
 	const NAME = "name"
 	VAULT := vault.Vault{
-		Database: &data.DatabaseMock{
+		Database: &database.DatabaseMock{
 			LoadRecordError: errors.New(""),
 		},
 		Index: index.IndexMap{
@@ -144,7 +144,7 @@ func TestLoadVaultRecordReturnsErrorWhenDatabaseLoadRecordFails(t *testing.T) {
 func TestLoadVaultRecordReturnsRecordAndNoErrorWhenValid(t *testing.T) {
 	//-- arrange
 	const NAME = "name"
-	mock := data.DatabaseMock{
+	mock := database.DatabaseMock{
 		Record: record.NewFromName(NAME),
 	}
 
@@ -197,7 +197,7 @@ func TestDeleteVaultRecordReturnsErrorWhenDatabaseDeleteRecordFails(t *testing.T
 	//-- arrange
 	const NAME = "name"
 	VAULT := vault.Vault{
-		Database: &data.DatabaseMock{
+		Database: &database.DatabaseMock{
 			DeleteRecordError: errors.New(""),
 		},
 		Index: index.IndexMap{
@@ -222,7 +222,7 @@ func TestDeleteVaultRecordReturnsErrorWhenDatabaseDeleteRecordFails(t *testing.T
 func TestDeleteVaultRecordReturnsNoErrorAndDeletesRecordWhenValid(t *testing.T) {
 	//-- arrange
 	const NAME = "name"
-	mock := data.DatabaseMock{
+	mock := database.DatabaseMock{
 		Record: record.NewFromName(NAME),
 	}
 

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"pvault/vault"
-	"pvault/vault/data"
+	"pvault/vault/database"
 	"pvault/vault/index"
 	"pvault/vault/record"
 	"testing"
@@ -16,7 +16,7 @@ import (
 
 type CRUDTestSuite struct {
 	suite.Suite
-	DatabaseMock data.DatabaseMock
+	DatabaseMock database.DatabaseMock
 
 	Vault    vault.Vault
 	Record   record.RecordV2
@@ -28,7 +28,7 @@ func TestCRUDTestSuite(t *testing.T) {
 }
 
 func (s *CRUDTestSuite) SetupTest() {
-	s.DatabaseMock = data.DatabaseMock{}
+	s.DatabaseMock = database.DatabaseMock{}
 
 	s.Vault = vault.Vault{
 		Index:    index.IndexMap{},

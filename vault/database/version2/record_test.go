@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
-	"pvault/vault/data/version1"
-	"pvault/vault/data/version2"
+	"pvault/vault/database/version1"
+	"pvault/vault/database/version2"
 	"pvault/vault/record"
 	"testing"
 

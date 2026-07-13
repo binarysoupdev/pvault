@@ -4,8 +4,8 @@ import (
 	"errors"
 	"path/filepath"
 	"pvault/vault"
-	"pvault/vault/data"
-	"pvault/vault/data/version2"
+	"pvault/vault/database"
+	"pvault/vault/database/version2"
 	"pvault/vault/index"
 	"testing"
 
@@ -44,7 +44,7 @@ func TestInitializeNewCreatesDirectoryAndIndexFile(t *testing.T) {
 func TestReloadIndexWhereDatabaseLoadIndexFailsReturnsError(t *testing.T) {
 	//-- arrange
 	v := vault.Vault{
-		Database: &data.DatabaseMock{
+		Database: &database.DatabaseMock{
 			LoadIndexError: errors.New(""),
 		},
 	}
@@ -64,7 +64,7 @@ func TestReloadIndexValidUpdatesVaultIndex(t *testing.T) {
 	}
 
 	v := vault.Vault{
-		Database: &data.DatabaseMock{
+		Database: &database.DatabaseMock{
 			Index: INDEX,
 		},
 	}

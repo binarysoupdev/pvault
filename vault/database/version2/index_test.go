@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"pvault/vault"
-	"pvault/vault/data/version2"
+	"pvault/vault/database/version2"
 	"pvault/vault/index"
 	"testing"
 

@@ -4,8 +4,8 @@ import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
-	"pvault/vault/data"
-	"pvault/vault/data/version1"
+	"pvault/vault/database"
+	"pvault/vault/database/version1"
 	"pvault/vault/record"
 
 	"github.com/binarysoupdev/go-commando/errors"
@@ -23,7 +23,7 @@ func (db Database) SaveRecord(r record.RecordV2, password string) error {
 	header := make([]byte, 2)
 	binary.BigEndian.PutUint16(header, RECORD_VERSION)
 
-	return data.SaveEncryptedRecord(db.RecordPath(r.ID), password, header, r)
+	return database.SaveEncryptedRecord(db.RecordPath(r.ID), password, header, r)
 }
 
 func (db Database) LoadRecord(id uuid.UUID, password string) (record.RecordV2, error) {
@@ -39,7 +39,7 @@ func (db Database) LoadRecord(id uuid.UUID, password string) (record.RecordV2, e
 	case 1:
 		return version1.New(db.Path).ParseRecordV1(id, password, raw)
 	case 2:
-		return data.DecryptRecord[record.RecordV2](password, raw)
+		return database.DecryptRecord[record.RecordV2](password, raw)
 	default:
 		return record.RecordV2{}, errors.Format("unsupported record version \"%d\"", version)
 	}

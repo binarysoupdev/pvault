@@ -1,7 +1,7 @@
 package version2
 
 import (
-	"pvault/vault/data"
+	"pvault/vault/database"
 	"pvault/vault/index"
 
 	"github.com/binarysoupdev/go-commando/errors"
@@ -32,6 +32,6 @@ func (db Database) Initialize(idx index.IndexMap) error {
 	return nil
 }
 
-func (Database) Upgrade(idx index.IndexMap, target data.Database) error {
-	return data.NotSupportedError{}
+func (Database) Upgrade(idx index.IndexMap, target database.Database) error {
+	return database.NotSupportedError{}
 }

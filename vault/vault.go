@@ -1,7 +1,7 @@
 package vault
 
 import (
-	"pvault/vault/data"
+	"pvault/vault/database"
 	"pvault/vault/index"
 )
 
@@ -10,7 +10,7 @@ const CURRENT_VERSION uint16 = 2
 type Vault struct {
 	Path     string
 	Index    index.IndexMap
-	Database data.Database
+	Database database.Database
 }
 
 func (v Vault) Version() uint16 {

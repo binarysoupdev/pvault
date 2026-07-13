@@ -1,7 +1,7 @@
 package vault
 
 import (
-	"pvault/vault/data/version2"
+	"pvault/vault/database/version2"
 
 	"github.com/binarysoupdev/go-commando/errors"
 )

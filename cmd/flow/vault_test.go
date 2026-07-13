@@ -5,7 +5,7 @@ import (
 	"pvault/cmd/flow"
 	"pvault/config"
 	"pvault/vault"
-	"pvault/vault/data/version1"
+	"pvault/vault/database/version1"
 	"pvault/vault/index"
 	"regexp"
 	"testing"

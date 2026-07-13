@@ -4,9 +4,9 @@ import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
-	"pvault/vault/data"
-	"pvault/vault/data/version1"
-	"pvault/vault/data/version2"
+	"pvault/vault/database"
+	"pvault/vault/database/version1"
+	"pvault/vault/database/version2"
 
 	"github.com/binarysoupdev/go-commando/errors"
 )
@@ -29,7 +29,7 @@ func Open(path string) (Vault, error) {
 	}, nil
 }
 
-func detectDatabase(path string) (data.Database, error) {
+func detectDatabase(path string) (database.Database, error) {
 	_, err := os.Stat(filepath.Join(path, version2.INDEX_FILE))
 	if err == nil {
 		return detectDatabaseFromVersionHeader(path, version2.INDEX_FILE)
@@ -43,7 +43,7 @@ func detectDatabase(path string) (data.Database, error) {
 	return nil, errors.New("index file not found")
 }
 
-func detectDatabaseFromVersionHeader(path, indexFile string) (data.Database, error) {
+func detectDatabaseFromVersionHeader(path, indexFile string) (database.Database, error) {
 	header := make([]byte, 2)
 
 	file, err := os.Open(filepath.Join(path, indexFile))

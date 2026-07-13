@@ -7,7 +7,7 @@ import (
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/vault"
-	"pvault/vault/data/version1"
+	"pvault/vault/database/version1"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/json"

@@ -2,7 +2,7 @@ package version1
 
 import (
 	"os"
-	"pvault/vault/data"
+	"pvault/vault/database"
 	"pvault/vault/index"
 
 	"github.com/binarysoupdev/go-commando/errors"
@@ -33,7 +33,7 @@ func (db Database) Initialize(idx index.IndexMap) error {
 	return nil
 }
 
-func (db Database) Upgrade(idx index.IndexMap, target data.Database) error {
+func (db Database) Upgrade(idx index.IndexMap, target database.Database) error {
 	for name, id := range idx {
 		legacyFile := db.RecordPath(id)
 

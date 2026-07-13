@@ -6,7 +6,7 @@ import (
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/vault"
-	"pvault/vault/data/version1"
+	"pvault/vault/database/version1"
 	"pvault/vault/index"
 	"pvault/vault/record"
 	"regexp"

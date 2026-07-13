@@ -3,7 +3,7 @@ package version1
 import (
 	"encoding/binary"
 	"path/filepath"
-	"pvault/vault/data"
+	"pvault/vault/database"
 	"pvault/vault/record"
 
 	"github.com/google/uuid"
@@ -19,15 +19,15 @@ func (db Database) RecordPath(id uuid.UUID) string {
 }
 
 func (db Database) SaveRecord(r record.RecordV2, password string) error {
-	return data.NotSupportedError{}
+	return database.NotSupportedError{}
 }
 
 func (Database) LoadRecord(id uuid.UUID, password string) (record.RecordV2, error) {
-	return record.RecordV2{}, data.NotSupportedError{}
+	return record.RecordV2{}, database.NotSupportedError{}
 }
 
 func (Database) DeleteRecord(id uuid.UUID) error {
-	return data.NotSupportedError{}
+	return database.NotSupportedError{}
 }
 
 func (db Database) SaveRecordV1(path string, r record.RecordV2, password string) error {
@@ -37,7 +37,7 @@ func (db Database) SaveRecordV1(path string, r record.RecordV2, password string)
 	}
 	header := db.buildRecordV1Header(r.Name)
 
-	return data.SaveEncryptedRecord(path, password, header, v1)
+	return database.SaveEncryptedRecord(path, password, header, v1)
 }
 
 func (Database) buildRecordV1Header(name string) []byte {
@@ -57,7 +57,7 @@ func (db Database) ParseRecordV1(id uuid.UUID, password string, raw []byte) (rec
 	name := string(raw[:length])
 	raw = raw[length:]
 
-	r, err := data.DecryptRecord[record.RecordV1](password, raw)
+	r, err := database.DecryptRecord[record.RecordV1](password, raw)
 	if err != nil {
 		return record.RecordV2{}, err
 	}
@@ -67,5 +67,5 @@ func (db Database) ParseRecordV1(id uuid.UUID, password string, raw []byte) (rec
 
 func (db Database) SaveLegacyRecord(id uuid.UUID, password string, r record.RecordV1) error {
 	hash := make([]byte, LEGACY_HASH_SIZE)
-	return data.SaveEncryptedRecord(db.RecordPath(id), password, hash, r)
+	return database.SaveEncryptedRecord(db.RecordPath(id), password, hash, r)
 }
