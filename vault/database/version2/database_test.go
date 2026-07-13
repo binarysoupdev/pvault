@@ -1,7 +1,7 @@
-package v2_test
+package version2_test
 
 import (
-	v2 "pvault/vault/database/version/v2"
+	"pvault/vault/database/version2"
 	"pvault/vault/index"
 	"testing"
 
@@ -13,7 +13,7 @@ import (
 
 func TestInitializeSucceedsAndSavesIndex(t *testing.T) {
 	//-- arrange
-	db := v2.New(file.NewPath(t, ""))
+	db := version2.NewDatabase(file.NewPath(t, ""))
 
 	INDEX := index.IndexMap{
 		"name1": uuid.New(),

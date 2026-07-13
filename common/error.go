@@ -1,4 +1,4 @@
-package database
+package common
 
 type NotSupportedError struct{}
 

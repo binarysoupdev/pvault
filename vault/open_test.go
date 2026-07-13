@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"pvault/vault"
-	v1 "pvault/vault/database/version/v1"
-	v2 "pvault/vault/database/version/v2"
+	"pvault/vault/database/version1"
+	"pvault/vault/database/version2"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -28,7 +28,7 @@ func TestOpenUnsupportedVersionReturnsError(t *testing.T) {
 	//-- arrange
 	VERSION := vault.CURRENT_VERSION + 1
 
-	file, PATH := file.Create(t, v2.INDEX_FILE)
+	file, PATH := file.Create(t, version2.INDEX_FILE)
 	file.Write([]byte{0, byte(VERSION), 0, 0})
 	file.Close()
 
@@ -41,7 +41,7 @@ func TestOpenUnsupportedVersionReturnsError(t *testing.T) {
 
 func TestOpenLegacyFileLoadsCorrectDecoder(t *testing.T) {
 	//-- arrange
-	PATH := file.CreateEmpty(t, v1.INDEX_FILE)
+	PATH := file.CreateEmpty(t, version1.INDEX_FILE)
 	VAULT_PATH := filepath.Dir(PATH)
 
 	//-- act
@@ -52,14 +52,14 @@ func TestOpenLegacyFileLoadsCorrectDecoder(t *testing.T) {
 
 	assert.Equal(t, VAULT_PATH, v.Path)
 	assert.NotNil(t, v.Index)
-	assert.IsType(t, v1.Database{}, v.Database)
+	assert.IsType(t, version1.Database{}, v.Database)
 }
 
 func TestOpenModernFileLoadsCorrectDecoder(t *testing.T) {
 	//-- arrange
-	DATABASE := v2.Database{}
+	DATABASE := version2.Database{}
 
-	file, PATH := file.Create(t, v2.INDEX_FILE)
+	file, PATH := file.Create(t, version2.INDEX_FILE)
 	file.Write([]byte{0, byte(DATABASE.GetVersion()), 0, 0})
 	file.Close()
 

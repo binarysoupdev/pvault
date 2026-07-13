@@ -1,8 +1,8 @@
-package v1
+package version1
 
 import (
 	"os"
-	"pvault/vault/database"
+	"pvault/vault/database/version2"
 	"pvault/vault/index"
 
 	"github.com/binarysoupdev/go-commando/errors"
@@ -14,7 +14,7 @@ type Database struct {
 	Path string
 }
 
-func New(path string) Database {
+func NewDatabase(path string) Database {
 	return Database{
 		Path: path,
 	}
@@ -33,7 +33,9 @@ func (db Database) Initialize(idx index.IndexMap) error {
 	return nil
 }
 
-func (db Database) Upgrade(idx index.IndexMap, target database.Database) error {
+func (db Database) Upgrade(idx index.IndexMap) error {
+	target := version2.NewDatabase(db.Path)
+
 	for name, id := range idx {
 		legacyFile := db.RecordPath(id)
 

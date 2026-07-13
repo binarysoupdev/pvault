@@ -18,6 +18,7 @@ func (v Vault) Backup(path string) error {
 		return errors.Format("\"%s\" is not a directory", path)
 	}
 
+	// TODO: move backup to database
 	err = v.backupFile(path, v.Database.IndexPath())
 	if err != nil {
 		return errors.Chain(err, "error backing index file")

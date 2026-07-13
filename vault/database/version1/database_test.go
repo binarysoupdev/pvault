@@ -1,11 +1,11 @@
-package v1_test
+package version1_test
 
 import (
 	"os"
-	v1 "pvault/vault/database/version/v1"
-	v2 "pvault/vault/database/version/v2"
+	"pvault/vault/database/version1"
+	"pvault/vault/database/version2"
 	"pvault/vault/index"
-	"pvault/vault/record"
+	v1 "pvault/vault/record/version/v1"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -17,7 +17,7 @@ import (
 
 func TestInitializeSucceedsAndSavesIndex(t *testing.T) {
 	//-- arrange
-	db := v1.New(file.NewPath(t, ""))
+	db := version1.NewDatabase(file.NewPath(t, ""))
 
 	INDEX := index.IndexMap{
 		"name1": uuid.New(),
@@ -37,8 +37,8 @@ func TestInitializeSucceedsAndSavesIndex(t *testing.T) {
 
 func TestUpgradeValidUpgradesVault(t *testing.T) {
 	//-- arrange
-	db := v1.New(file.NewPath(t, ""))
-	TARGET := v2.New(db.Path)
+	db := version1.NewDatabase(file.NewPath(t, ""))
+	TARGET := version2.NewDatabase(db.Path)
 
 	file, err := os.Create(db.IndexPath())
 	require.NoError(t, err)
@@ -47,7 +47,7 @@ func TestUpgradeValidUpgradesVault(t *testing.T) {
 	rand := rand.New(0)
 	PASSWORD := rand.ASCII(30)
 
-	LEGACY := map[uuid.UUID]record.RecordV1{}
+	LEGACY := map[uuid.UUID]v1.Record{}
 	INDEX := index.IndexMap{}
 
 	const NUM_LEGACY_FILES = 5
@@ -55,7 +55,7 @@ func TestUpgradeValidUpgradesVault(t *testing.T) {
 		id := uuid.New()
 
 		INDEX[rand.ASCII(10)] = id
-		LEGACY[id] = record.RecordV1{
+		LEGACY[id] = v1.Record{
 			Password:      rand.ASCII(30),
 			Username:      rand.ASCII(15),
 			URL:           rand.ASCII(15),
@@ -67,7 +67,7 @@ func TestUpgradeValidUpgradesVault(t *testing.T) {
 	}
 
 	//-- act
-	res := db.Upgrade(INDEX, TARGET)
+	res := db.Upgrade(INDEX)
 
 	//-- assert
 	require.NoError(t, res)

@@ -6,9 +6,9 @@ import (
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/vault"
-	v1 "pvault/vault/database/version/v1"
+	"pvault/vault/database/version1"
 	"pvault/vault/index"
-	"pvault/vault/record"
+	v2 "pvault/vault/record/version/v2"
 	"regexp"
 	"testing"
 
@@ -175,7 +175,7 @@ func (s *VaultTestSuite) TestRunUpgradeFailsWithInvalidBackupPath() {
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
-	err = v1.New(s.Config.VaultPath).Initialize(index.IndexMap{})
+	err = version1.NewDatabase(s.Config.VaultPath).Initialize(index.IndexMap{})
 	s.Require().NoError(err)
 
 	//-- act
@@ -193,7 +193,7 @@ func (s *VaultTestSuite) TestRunUpgradePassesAndCreatesBackupAndUpgradesDatabase
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
-	v1 := v1.New(s.Config.VaultPath)
+	v1 := version1.NewDatabase(s.Config.VaultPath)
 	err = v1.Initialize(index.IndexMap{})
 	s.Require().NoError(err)
 
@@ -241,7 +241,7 @@ func (s *VaultTestSuite) TestRunValidatePassPrintsVaultPathAndRecordCount() {
 
 	NUM_RECORDS := 5
 	for range NUM_RECORDS {
-		err := v.SaveRecord(record.NewFromName(rand.ASCII(10)), rand.ASCII(30))
+		err := v.SaveRecord(v2.NewFromName(rand.ASCII(10)), rand.ASCII(30))
 		s.Require().NoError(err)
 	}
 

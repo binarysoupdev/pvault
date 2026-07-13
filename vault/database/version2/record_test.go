@@ -1,11 +1,12 @@
-package v2_test
+package version2_test
 
 import (
 	"encoding/binary"
 	"fmt"
 	"os"
-	v1 "pvault/vault/database/version/v1"
-	v2 "pvault/vault/database/version/v2"
+	"pvault/vault/database/version1"
+	"pvault/vault/database/version2"
+	v2 "pvault/vault/record/version/v2"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -15,7 +16,7 @@ import (
 
 type RecordTestSuite struct {
 	suite.Suite
-	Database v2.Database
+	Database version2.Database
 	Record   v2.Record
 	Password string
 }
@@ -25,10 +26,10 @@ func TestRecordTestSuite(t *testing.T) {
 }
 
 func (s *RecordTestSuite) SetupTest() {
-	s.Database = v2.New(file.NewPath(s.T(), ""))
+	s.Database = version2.NewDatabase(file.NewPath(s.T(), ""))
 
 	rand := rand.New(0)
-	s.Record = record.NewFromName(rand.ASCII(10))
+	s.Record = v2.NewFromName(rand.ASCII(10))
 	s.Record.Username = rand.ASCII(10)
 	s.Record.Password = rand.ASCII(30)
 	s.Record.Other = map[string]any{"A": rand.ASCII(5), "B": true}
@@ -86,7 +87,7 @@ func (s *RecordTestSuite) TestLoadRecordWithIncorrectPasswordReturnsError() {
 
 func (s *RecordTestSuite) TestLoadRecordWithUnsupportedVersionReturnsError() {
 	//-- arrange
-	VERSION := v2.RECORD_VERSION + 1
+	VERSION := version2.RECORD_VERSION + 1
 
 	version := make([]byte, 2)
 	binary.BigEndian.PutUint16(version, VERSION)
@@ -105,7 +106,7 @@ func (s *RecordTestSuite) TestLoadRecordVersion1ReturnsRecord() {
 	//-- arrange
 	s.Record.Other = map[string]any{}
 
-	err := v1.New(s.Database.Path).SaveRecordV1(s.Database.RecordPath(s.Record.ID), s.Record, s.Password)
+	err := version1.NewDatabase(s.Database.Path).SaveRecordV1(s.Database.RecordPath(s.Record.ID), s.Record, s.Password)
 	s.Require().NoError(err)
 
 	//-- act

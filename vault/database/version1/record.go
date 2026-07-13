@@ -1,9 +1,10 @@
-package v1
+package version1
 
 import (
 	"encoding/binary"
 	"path/filepath"
-	"pvault/vault/database"
+	"pvault/common"
+	v1 "pvault/vault/record/version/v1"
 	v2 "pvault/vault/record/version/v2"
 
 	"github.com/google/uuid"
@@ -19,19 +20,19 @@ func (db Database) RecordPath(id uuid.UUID) string {
 }
 
 func (db Database) SaveRecord(r v2.Record, password string) error {
-	return database.NotSupportedError{}
+	return common.NotSupportedError{}
 }
 
 func (Database) LoadRecord(id uuid.UUID, password string) (v2.Record, error) {
-	return v2.Record{}, database.NotSupportedError{}
+	return v2.Record{}, common.NotSupportedError{}
 }
 
 func (Database) DeleteRecord(id uuid.UUID) error {
-	return database.NotSupportedError{}
+	return common.NotSupportedError{}
 }
 
 func (db Database) SaveRecordV1(path string, r v2.Record, password string) error {
-	v1 := record.RecordV1{
+	v1 := v1.Record{
 		Password: r.Password,
 		Username: r.Username,
 	}

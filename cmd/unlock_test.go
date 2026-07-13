@@ -6,7 +6,7 @@ import (
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/vault"
-	"pvault/vault/record"
+	v2 "pvault/vault/record/version/v2"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/json"
@@ -23,7 +23,7 @@ type UnlockTestSuite struct {
 	Config       config.Config
 
 	Vault    vault.Vault
-	Record   record.RecordV2
+	Record   v2.Record
 	Password string
 }
 
@@ -46,7 +46,7 @@ func (s *UnlockTestSuite) SetupTest() {
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
-	s.Record = record.NewFromName(rand.ASCII(15))
+	s.Record = v2.NewFromName(rand.ASCII(15))
 	s.Password = rand.ASCII(30)
 
 	s.Vault, err = vault.InitializeNew(s.Config.VaultPath)
@@ -143,7 +143,7 @@ func (s *UnlockTestSuite) TestRunValid() {
 	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
 	s.Assert().Contains(io.ReadLine(), "[+] "+OUTPUT_FILE)
 
-	record, err := json.UnmarshalFile[record.RecordV2](OUTPUT_FILE)
+	record, err := json.UnmarshalFile[v2.Record](OUTPUT_FILE)
 	s.Require().NoError(err)
 	s.Assert().Equal(s.Record, record)
 }

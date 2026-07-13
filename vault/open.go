@@ -1,18 +1,18 @@
 package vault
 
 import (
-	"pvault/vault/database/version"
+	"pvault/vault/database"
 
 	"github.com/binarysoupdev/go-commando/errors"
 )
 
 func Open(path string) (Vault, error) {
-	database, err := version.Detect(path)
+	db, err := database.DetectVersion(path)
 	if err != nil {
 		return Vault{}, err
 	}
 
-	idx, err := database.LoadIndex()
+	idx, err := db.LoadIndex()
 	if err != nil {
 		return Vault{}, errors.Chain(err, "error parsing index file")
 	}
@@ -20,6 +20,6 @@ func Open(path string) (Vault, error) {
 	return Vault{
 		Path:     path,
 		Index:    idx,
-		Database: database,
+		Database: db,
 	}, nil
 }

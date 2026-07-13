@@ -11,7 +11,7 @@ type Database interface {
 	GetVersion() uint16
 
 	Initialize(idx index.IndexMap) error
-	Upgrade(idx index.IndexMap, target Database) error
+	Upgrade(idx index.IndexMap) error
 
 	IndexPath() string
 	SaveIndex(idx index.IndexMap) error

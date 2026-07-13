@@ -1,14 +1,13 @@
 package vault
 
 import (
-	"pvault/vault/record"
+	v2 "pvault/vault/record/version/v2"
 
 	"github.com/binarysoupdev/go-commando/errors"
-
 	"github.com/google/uuid"
 )
 
-func (v Vault) SaveRecord(r record.RecordV2, password string) error {
+func (v Vault) SaveRecord(r v2.Record, password string) error {
 	err := v.ValidateRecord(r)
 	if err != nil {
 		return errors.Chain(err, "error validating record")
@@ -33,15 +32,15 @@ func (v Vault) SaveRecord(r record.RecordV2, password string) error {
 	return nil
 }
 
-func (v Vault) LoadRecord(name string, password string) (record.RecordV2, error) {
+func (v Vault) LoadRecord(name string, password string) (v2.Record, error) {
 	id, ok := v.Index[name]
 	if !ok {
-		return record.RecordV2{}, errors.Format("name \"%s\" not found", name)
+		return v2.Record{}, errors.Format("name \"%s\" not found", name)
 	}
 
 	r, err := v.Database.LoadRecord(id, password)
 	if err != nil {
-		return record.RecordV2{}, errors.Chain(err, "error loading record from database")
+		return v2.Record{}, errors.Chain(err, "error loading record from database")
 	}
 
 	return r, nil

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"pvault/vault"
 	"pvault/vault/index"
-	"pvault/vault/record"
+	v2 "pvault/vault/record/version/v2"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/rand"
@@ -14,7 +14,7 @@ import (
 
 func TestValidateRecordInvalidRecord(t *testing.T) {
 	//-- arrange
-	RECORD := record.NewFromName("")
+	RECORD := v2.NewFromName("")
 
 	//-- act
 	res := vault.Vault{}.ValidateRecord(RECORD)
@@ -28,7 +28,7 @@ func TestValidateRecordNameAlreadyExists(t *testing.T) {
 	rand := rand.New(0)
 	NAME := rand.ASCII(15)
 
-	RECORD := record.NewFromName(NAME)
+	RECORD := v2.NewFromName(NAME)
 
 	v := vault.Vault{
 		Index: index.IndexMap{

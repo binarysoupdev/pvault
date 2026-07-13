@@ -5,7 +5,7 @@ import (
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/vault"
-	"pvault/vault/record"
+	v2 "pvault/vault/record/version/v2"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/json"
@@ -22,7 +22,7 @@ type LockTestSuite struct {
 	Config       config.Config
 
 	RecordPath string
-	Record     record.RecordV2
+	Record     v2.Record
 }
 
 func TestLockCommandSuite(t *testing.T) {
@@ -48,7 +48,7 @@ func (s *LockTestSuite) SetupTest() {
 
 	rand := rand.New(0)
 	s.RecordPath = file.NewPath(s.T(), rand.ASCII(10))
-	s.Record = record.NewFromName(rand.ASCII(15))
+	s.Record = v2.NewFromName(rand.ASCII(15))
 
 	err = json.MarshalFile(s.Record, s.RecordPath)
 	s.Require().NoError(err)
@@ -117,7 +117,7 @@ func (s *LockTestSuite) TestRunInvalidNameAlreadyExists() {
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
-	err = v.SaveRecord(record.NewFromName(s.Record.Name), rand.ASCII(30))
+	err = v.SaveRecord(v2.NewFromName(s.Record.Name), rand.ASCII(30))
 	s.Require().NoError(err)
 
 	//-- act
@@ -182,7 +182,7 @@ func (s *LockTestSuite) TestRunValidSaveNew() {
 
 func (s *LockTestSuite) TestRunValidUpdateExisting() {
 	//-- arrange
-	OLD_RECORD := record.NewFromName(s.Record.Name + "x")
+	OLD_RECORD := v2.NewFromName(s.Record.Name + "x")
 	OLD_RECORD.ID = s.Record.ID
 
 	rand := rand.New(0)

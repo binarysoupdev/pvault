@@ -1,6 +1,7 @@
 package v2_test
 
 import (
+	v2 "pvault/vault/record/version/v2"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/rand"
@@ -9,7 +10,7 @@ import (
 
 func TestValidateInvalid(t *testing.T) {
 	//-- act
-	res := record.RecordV2{}.Validate()
+	res := v2.Record{}.Validate()
 
 	//-- assert
 	assert.ErrorContains(t, res, "\"ID\" cannot be nil (all zeroes)")
@@ -19,7 +20,7 @@ func TestValidateInvalid(t *testing.T) {
 func TestValidateValid(t *testing.T) {
 	//-- arrange
 	rand := rand.New(0)
-	r := record.NewFromName(rand.ASCII(15))
+	r := v2.NewFromName(rand.ASCII(15))
 
 	//-- act
 	res := r.Validate()

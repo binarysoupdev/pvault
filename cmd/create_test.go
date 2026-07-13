@@ -6,7 +6,7 @@ import (
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/vault"
-	"pvault/vault/record"
+	v2 "pvault/vault/record/version/v2"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/json"
@@ -109,7 +109,7 @@ func (s *CreateTestSuite) TestRunInvalidNameAlreadyExists() {
 	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
 
-	err = v.SaveRecord(record.NewFromName(NAME), rand.ASCII(30))
+	err = v.SaveRecord(v2.NewFromName(NAME), rand.ASCII(30))
 	s.Require().NoError(err)
 
 	//-- act
@@ -174,7 +174,7 @@ func (s *CreateTestSuite) TestRunValid() {
 	err = s.Vault.ReloadIndex()
 	s.Require().NoError(err)
 
-	r1, err := json.UnmarshalFile[record.RecordV2](OUTPUT_FILE)
+	r1, err := json.UnmarshalFile[v2.Record](OUTPUT_FILE)
 	s.Require().NoError(err)
 
 	r2, err := s.Vault.LoadRecord(NAME, PASSWORD)

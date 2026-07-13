@@ -8,7 +8,7 @@ import (
 	"pvault/vault"
 	"pvault/vault/database"
 	"pvault/vault/index"
-	"pvault/vault/record"
+	v2 "pvault/vault/record/version/v2"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -21,7 +21,7 @@ import (
 func TestSaveVaultRecordReturnsErrorWithInvalidRecord(t *testing.T) {
 	//-- arrange
 	VAULT := vault.Vault{}
-	RECORD := record.RecordV2{}
+	RECORD := v2.Record{}
 
 	//-- act
 	res := flow.SaveVaultRecord(VAULT, RECORD)
@@ -33,7 +33,7 @@ func TestSaveVaultRecordReturnsErrorWithInvalidRecord(t *testing.T) {
 func TestSaveVaultRecordReturnsErrorWhenVerifyPasswordDoesNotMatch(t *testing.T) {
 	//-- arrange
 	VAULT := vault.Vault{}
-	RECORD := record.NewFromName("name")
+	RECORD := v2.NewFromName("name")
 
 	const PASSWORD = "Password123!"
 
@@ -60,7 +60,7 @@ func TestSaveVaultRecordReturnsErrorWhenDatabaseSaveRecordFails(t *testing.T) {
 			SaveRecordError: errors.New(""),
 		},
 	}
-	RECORD := record.NewFromName("name")
+	RECORD := v2.NewFromName("name")
 
 	const PASSWORD = "Password123!"
 
@@ -88,7 +88,7 @@ func TestSaveVaultRecordReturnsNoErrorAndSavesRecordWhenValid(t *testing.T) {
 		Database: &mock,
 		Index:    index.IndexMap{},
 	}
-	RECORD := record.NewFromName("name")
+	RECORD := v2.NewFromName("name")
 
 	const PASSWORD = "Password123!"
 
@@ -145,7 +145,7 @@ func TestLoadVaultRecordReturnsRecordAndNoErrorWhenValid(t *testing.T) {
 	//-- arrange
 	const NAME = "name"
 	mock := database.DatabaseMock{
-		Record: record.NewFromName(NAME),
+		Record: v2.NewFromName(NAME),
 	}
 
 	VAULT := vault.Vault{
@@ -223,7 +223,7 @@ func TestDeleteVaultRecordReturnsNoErrorAndDeletesRecordWhenValid(t *testing.T) 
 	//-- arrange
 	const NAME = "name"
 	mock := database.DatabaseMock{
-		Record: record.NewFromName(NAME),
+		Record: v2.NewFromName(NAME),
 	}
 
 	VAULT := vault.Vault{
@@ -256,7 +256,7 @@ func TestSaveOutputRecordReturnsErrorWhenOutputPathInvalid(t *testing.T) {
 	CONFIG := config.Config{
 		OutputPath: "invalid",
 	}
-	RECORD := record.RecordV2{}
+	RECORD := v2.Record{}
 
 	//-- act
 	res := flow.SaveOutputRecord(CONFIG, RECORD)
@@ -270,7 +270,7 @@ func TestSaveOutputRecordReturnsNoErrorAndSavesJsonWhenValid(t *testing.T) {
 	CONFIG := config.Config{
 		OutputPath: file.NewPath(t, ""),
 	}
-	RECORD := record.NewFromName("name")
+	RECORD := v2.NewFromName("name")
 
 	out := pipe.OpenStdout(1)
 	defer out.Close()

@@ -1,7 +1,7 @@
-package v2
+package version2
 
 import (
-	"pvault/vault/database"
+	"pvault/common"
 	"pvault/vault/index"
 
 	"github.com/binarysoupdev/go-commando/errors"
@@ -13,7 +13,7 @@ type Database struct {
 	Path string
 }
 
-func New(path string) Database {
+func NewDatabase(path string) Database {
 	return Database{
 		Path: path,
 	}
@@ -32,6 +32,6 @@ func (db Database) Initialize(idx index.IndexMap) error {
 	return nil
 }
 
-func (Database) Upgrade(idx index.IndexMap, target database.Database) error {
-	return database.NotSupportedError{}
+func (Database) Upgrade(idx index.IndexMap) error {
+	return common.NotSupportedError{}
 }
