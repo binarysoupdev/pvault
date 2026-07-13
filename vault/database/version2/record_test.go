@@ -29,7 +29,7 @@ func (s *RecordTestSuite) SetupTest() {
 	s.Database = version2.NewDatabase(file.NewPath(s.T(), ""))
 
 	rand := rand.New(0)
-	s.Record = v2.NewRecord(rand.ASCII(10))
+	s.Record = v2.NewEmptyRecord(rand.ASCII(10))
 	s.Record.Username = rand.ASCII(10)
 	s.Record.Password = rand.ASCII(30)
 	s.Record.Other = map[string]any{"A": rand.ASCII(5), "B": true}

@@ -241,7 +241,7 @@ func (s *VaultTestSuite) TestRunValidatePassPrintsVaultPathAndRecordCount() {
 
 	NUM_RECORDS := 5
 	for range NUM_RECORDS {
-		err := v.SaveRecord(record.NewRecord(rand.ASCII(10)), rand.ASCII(30))
+		err := v.SaveRecord(record.NewEmptyRecord(rand.ASCII(10)), rand.ASCII(30))
 		s.Require().NoError(err)
 	}
 

@@ -48,7 +48,7 @@ func (s *LockTestSuite) SetupTest() {
 
 	rand := rand.New(0)
 	s.RecordPath = file.NewPath(s.T(), rand.ASCII(10))
-	s.Record = v2.NewRecord(rand.ASCII(15))
+	s.Record = v2.NewEmptyRecord(rand.ASCII(15))
 
 	err = json.MarshalFile(s.Record, s.RecordPath)
 	s.Require().NoError(err)
@@ -117,7 +117,7 @@ func (s *LockTestSuite) TestRunInvalidNameAlreadyExists() {
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
-	err = v.SaveRecord(v2.NewRecord(s.Record.Name), rand.ASCII(30))
+	err = v.SaveRecord(v2.NewEmptyRecord(s.Record.Name), rand.ASCII(30))
 	s.Require().NoError(err)
 
 	//-- act
@@ -182,7 +182,7 @@ func (s *LockTestSuite) TestRunValidSaveNew() {
 
 func (s *LockTestSuite) TestRunValidUpdateExisting() {
 	//-- arrange
-	OLD_RECORD := v2.NewRecord(s.Record.Name + "x")
+	OLD_RECORD := v2.NewEmptyRecord(s.Record.Name + "x")
 	OLD_RECORD.ID = s.Record.ID
 
 	rand := rand.New(0)

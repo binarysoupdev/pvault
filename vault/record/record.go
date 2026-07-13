@@ -17,7 +17,7 @@ type Record interface {
 }
 
 func New(name string) v2.Record {
-	return v2.NewRecord(name)
+	return v2.NewEmptyRecord(name)
 }
 
 func LoadFromFile(path string) (v2.Record, error) {

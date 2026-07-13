@@ -45,7 +45,7 @@ func (s *DeleteTestSuite) SetupTest() {
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
-	s.Record = v2.NewRecord(rand.ASCII(15))
+	s.Record = v2.NewEmptyRecord(rand.ASCII(15))
 
 	s.Vault, err = vault.InitializeNew(s.Config.VaultPath)
 	s.Require().NoError(err)

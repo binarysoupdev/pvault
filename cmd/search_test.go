@@ -90,7 +90,7 @@ func (s *SearchTestSuite) TestRunValidDisplaySearchResults() {
 	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
 
-	err = v.SaveRecord(record.NewRecord(NAME), rand.ASCII(30))
+	err = v.SaveRecord(record.NewEmptyRecord(NAME), rand.ASCII(30))
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(1)

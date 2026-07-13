@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"pvault/common"
 	v2 "pvault/vault/record/version2"
 
 	"github.com/google/uuid"
@@ -28,7 +27,8 @@ func (r Record) GetName() string {
 }
 
 func (r Record) Validate() error {
-	return common.NotSupportedError{}
+	// v1 only used for testing
+	return nil
 }
 
 func (r Record) Upgrade() v2.Record {

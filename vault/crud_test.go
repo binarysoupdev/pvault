@@ -36,7 +36,7 @@ func (s *CRUDTestSuite) SetupTest() {
 	}
 
 	rand := rand.New(0)
-	s.Record = record.NewRecord(rand.ASCII(10))
+	s.Record = record.NewEmptyRecord(rand.ASCII(10))
 	s.Record.Username = rand.ASCII(10)
 	s.Record.Password = rand.ASCII(30)
 	s.Record.Other = map[string]any{"A": rand.ASCII(5), "B": true}

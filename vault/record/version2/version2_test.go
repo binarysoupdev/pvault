@@ -20,7 +20,7 @@ func TestValidateInvalid(t *testing.T) {
 func TestValidateValid(t *testing.T) {
 	//-- arrange
 	rand := rand.New(0)
-	r := record.NewRecord(rand.ASCII(15))
+	r := record.NewEmptyRecord(rand.ASCII(15))
 
 	//-- act
 	res := r.Validate()

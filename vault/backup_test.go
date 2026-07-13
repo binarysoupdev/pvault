@@ -52,7 +52,7 @@ func (s *BackupTestSuite) TestBackupValidBacksUpIndexFileAndRecord() {
 	rand := rand.New(0)
 	const NUM_RECORDS = 5
 	for range NUM_RECORDS {
-		err := s.Vault.SaveRecord(record.NewRecord(rand.ASCII(10)), rand.ASCII(30))
+		err := s.Vault.SaveRecord(record.NewEmptyRecord(rand.ASCII(10)), rand.ASCII(30))
 		s.Require().NoError(err)
 	}
 

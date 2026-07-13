@@ -33,7 +33,7 @@ func TestSaveVaultRecordReturnsErrorWithInvalidRecord(t *testing.T) {
 func TestSaveVaultRecordReturnsErrorWhenVerifyPasswordDoesNotMatch(t *testing.T) {
 	//-- arrange
 	VAULT := vault.Vault{}
-	RECORD := record.NewRecord("name")
+	RECORD := record.NewEmptyRecord("name")
 
 	const PASSWORD = "Password123!"
 
@@ -60,7 +60,7 @@ func TestSaveVaultRecordReturnsErrorWhenDatabaseSaveRecordFails(t *testing.T) {
 			SaveRecordError: errors.New(""),
 		},
 	}
-	RECORD := record.NewRecord("name")
+	RECORD := record.NewEmptyRecord("name")
 
 	const PASSWORD = "Password123!"
 
@@ -88,7 +88,7 @@ func TestSaveVaultRecordReturnsNoErrorAndSavesRecordWhenValid(t *testing.T) {
 		Database: &mock,
 		Index:    index.IndexMap{},
 	}
-	RECORD := record.NewRecord("name")
+	RECORD := record.NewEmptyRecord("name")
 
 	const PASSWORD = "Password123!"
 
@@ -145,7 +145,7 @@ func TestLoadVaultRecordReturnsRecordAndNoErrorWhenValid(t *testing.T) {
 	//-- arrange
 	const NAME = "name"
 	mock := database.DatabaseMock{
-		Record: record.NewRecord(NAME),
+		Record: record.NewEmptyRecord(NAME),
 	}
 
 	VAULT := vault.Vault{
@@ -223,7 +223,7 @@ func TestDeleteVaultRecordReturnsNoErrorAndDeletesRecordWhenValid(t *testing.T) 
 	//-- arrange
 	const NAME = "name"
 	mock := database.DatabaseMock{
-		Record: record.NewRecord(NAME),
+		Record: record.NewEmptyRecord(NAME),
 	}
 
 	VAULT := vault.Vault{
@@ -270,7 +270,7 @@ func TestSaveOutputRecordReturnsNoErrorAndSavesJsonWhenValid(t *testing.T) {
 	CONFIG := config.Config{
 		OutputPath: file.NewPath(t, ""),
 	}
-	RECORD := record.NewRecord("name")
+	RECORD := record.NewEmptyRecord("name")
 
 	out := pipe.OpenStdout(1)
 	defer out.Close()

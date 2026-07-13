@@ -6,7 +6,7 @@ import (
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/vault"
-	record "pvault/vault/record/version2"
+	v1 "pvault/vault/record/version1"
 	v2 "pvault/vault/record/version2"
 	"testing"
 
@@ -15,6 +15,7 @@ import (
 	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
 	"github.com/binarysoupdev/tinsel/rand"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -47,7 +48,7 @@ func (s *UnlockTestSuite) SetupTest() {
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
-	s.Record = v2.NewRecord(rand.ASCII(15))
+	s.Record = v2.NewEmptyRecord(rand.ASCII(15))
 	s.Password = rand.ASCII(30)
 
 	s.Vault, err = vault.InitializeNew(s.Config.VaultPath)
@@ -144,7 +145,43 @@ func (s *UnlockTestSuite) TestRunValid() {
 	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
 	s.Assert().Contains(io.ReadLine(), "[+] "+OUTPUT_FILE)
 
-	record, err := json.UnmarshalFile[record.Record](OUTPUT_FILE)
+	record, err := json.UnmarshalFile[v2.Record](OUTPUT_FILE)
 	s.Require().NoError(err)
 	s.Assert().Equal(s.Record, record)
+}
+
+func (s *UnlockTestSuite) TestRunPassesAndOutputRecordWasUpgradedWhenUnlockingOlderVersion() {
+	//-- arrange
+	r1 := v1.Record{
+		ID:       uuid.New(),
+		Name:     "record v1",
+		Username: "foo",
+		Password: "bar",
+	}
+
+	err := s.Vault.SaveRecord(r1, s.Password)
+	s.Require().NoError(err)
+
+	OUTPUT_FILE := filepath.Join(s.Config.OutputPath, r1.ID.String()+".json")
+
+	io := pipe.OpenStdio(1, 4, false)
+	defer io.Close()
+
+	//-- act
+	io.Queue("PASSWORD: ", s.Password)
+	io.EndQueue()
+
+	s.RunCommand("-s", r1.Name)
+
+	//-- assert
+	s.RequireResultPass()
+
+	s.Assert().Contains(io.ReadLine(), r1.Name)
+	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")
+	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+r1.ID.String())
+	s.Assert().Contains(io.ReadLine(), "[+] "+OUTPUT_FILE)
+
+	record, err := json.UnmarshalFile[v2.Record](OUTPUT_FILE)
+	s.Require().NoError(err)
+	s.Assert().Equal(r1.Upgrade(), record)
 }

@@ -14,7 +14,7 @@ import (
 
 func TestValidateRecordInvalidRecord(t *testing.T) {
 	//-- arrange
-	RECORD := record.NewRecord("")
+	RECORD := record.NewEmptyRecord("")
 
 	//-- act
 	res := vault.Vault{}.ValidateRecord(RECORD)
@@ -28,7 +28,7 @@ func TestValidateRecordNameAlreadyExists(t *testing.T) {
 	rand := rand.New(0)
 	NAME := rand.ASCII(15)
 
-	RECORD := record.NewRecord(NAME)
+	RECORD := record.NewEmptyRecord(NAME)
 
 	v := vault.Vault{
 		Index: index.IndexMap{

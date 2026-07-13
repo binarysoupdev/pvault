@@ -55,7 +55,7 @@ func (s *CopyTestSuite) SetupTest() {
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
-	s.Record = v2.NewRecord(rand.ASCII(15))
+	s.Record = v2.NewEmptyRecord(rand.ASCII(15))
 	s.Record.Username = rand.ASCII(10)
 	s.Record.Password = rand.ASCII(30)
 
