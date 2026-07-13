@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (idx Index) Load() (index.IndexMap, error) {
+func (idx Index) LoadIndex() (index.IndexMap, error) {
 	raw, err := os.ReadFile(idx.filepath())
 	if err != nil {
 		return index.IndexMap{}, errors.Chain(err, "error reading index file")

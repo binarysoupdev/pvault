@@ -6,7 +6,7 @@ type Index interface {
 	GetVersion()
 	RecordPath(id uuid.UUID) string
 
-	Save(m IndexMap) error
-	Load() (IndexMap, error)
+	SaveIndex(m IndexMap) error
+	LoadIndex() (IndexMap, error)
 	Upgrade(m IndexMap) error
 }
