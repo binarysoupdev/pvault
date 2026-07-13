@@ -1,6 +1,7 @@
 package record
 
 import (
+	"io"
 	v2 "pvault/vault/record/version2"
 
 	"github.com/binarysoupdev/go-commando/json"
@@ -12,7 +13,7 @@ type Record interface {
 	GetName() string
 
 	Validate() error
-	Marshal(password string) ([]byte, error)
+	Encode(w io.Writer, password string) error
 	Upgrade() v2.Record
 }
 

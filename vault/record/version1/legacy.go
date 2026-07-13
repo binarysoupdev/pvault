@@ -1,20 +1,21 @@
 package v1
 
-import "pvault/crypt"
+import (
+	"io"
+	"pvault/crypt"
+)
 
 const LEGACY_HASH_SIZE = 60
 
-func MarshalFromLegacy(name string, bytes []byte) []byte {
-	return append(buildHeader(name), bytes[LEGACY_HASH_SIZE:]...)
+func EncodeFromLegacy(w io.Writer, name string, bytes []byte) {
+	writeHeader(w, name)
+	w.Write(bytes[LEGACY_HASH_SIZE:])
 }
 
-func (r Record) MarshalToLegacy(password string) ([]byte, error) {
+func (r Record) EncodeToLegacy(w io.Writer, password string) error {
 	hash := make([]byte, LEGACY_HASH_SIZE)
+	w.Write(hash)
 
-	ciphertext, err := crypt.Marshal(password, r)
-	if err != nil {
-		return nil, err
-	}
-
-	return append(hash, ciphertext...), nil
+	_, err := crypt.Encode(w, password, r)
+	return err
 }

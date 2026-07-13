@@ -51,7 +51,7 @@ func (db Database) Upgrade(idx index.IndexMap) error {
 		}
 		defer file.Close()
 
-		file.Write(v1.MarshalFromLegacy(name, raw))
+		v1.EncodeFromLegacy(file, name, raw)
 		_ = os.Remove(legacyFile)
 	}
 

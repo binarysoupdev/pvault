@@ -2,9 +2,9 @@ package crypt
 
 import (
 	"encoding/json"
+	"io"
 
 	"github.com/binarysoupdev/cryptool/crypt"
-	"github.com/binarysoupdev/go-commando/errors"
 )
 
 func Unmarshal[T any](password string, ciphertext Ciphertext) (T, error) {
@@ -13,13 +13,23 @@ func Unmarshal[T any](password string, ciphertext Ciphertext) (T, error) {
 
 	plaintext, err := c.Decrypt(ciphertext.Text())
 	if err != nil {
-		return obj, errors.Chain(err, "error decrypting ciphertext")
+		return obj, err
 	}
 
 	err = json.Unmarshal(plaintext, &obj)
 	if err != nil {
-		return obj, errors.Chain(err, "error unmarshaling json")
+		return obj, err
 	}
 
 	return obj, nil
+}
+
+func Decode[T any](r io.Reader, password string) (T, error) {
+	var obj T
+	ciphertext, err := io.ReadAll(r)
+	if err != nil {
+		return obj, err
+	}
+
+	return Unmarshal[T](password, ciphertext)
 }

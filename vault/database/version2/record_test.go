@@ -47,7 +47,7 @@ func (s *RecordTestSuite) TestSaveRecordWithInvalidDatabasePathReturnError() {
 	res := s.Database.SaveRecord(s.Record, s.Password)
 
 	//-- assert
-	s.Require().ErrorContains(res, "error writing record file")
+	s.Require().ErrorContains(res, "error creating record file")
 }
 
 func (s *RecordTestSuite) TestSaveRecordSavesRecord() {
@@ -70,7 +70,7 @@ func (s *RecordTestSuite) TestLoadRecordWithInvalidDatabasePathReturnsError() {
 	_, res := s.Database.LoadRecord(s.Record.ID, s.Password)
 
 	//-- assert
-	s.Require().ErrorContains(res, "error reading record file")
+	s.Require().ErrorContains(res, "error opening record file")
 }
 
 func (s *RecordTestSuite) TestLoadRecordWithIncorrectPasswordReturnsError() {
@@ -82,7 +82,7 @@ func (s *RecordTestSuite) TestLoadRecordWithIncorrectPasswordReturnsError() {
 	_, res := s.Database.LoadRecord(s.Record.ID, s.Password+"x")
 
 	//-- assert
-	s.Require().ErrorContains(res, "error decrypting ciphertext")
+	s.Require().ErrorContains(res, "error decrypting record")
 }
 
 func (s *RecordTestSuite) TestLoadRecordWithUnsupportedVersionReturnsError() {

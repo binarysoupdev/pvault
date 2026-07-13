@@ -62,11 +62,11 @@ func TestUpgradeValidUpgradesVault(t *testing.T) {
 			RecoveryCodes: []string{rand.ASCII(10), rand.ASCII(10)},
 		}
 
-		bytes, err := LEGACY[id].MarshalToLegacy(PASSWORD)
+		file, err := os.Create(db.RecordPath(id))
 		require.NoError(t, err)
+		defer file.Close()
 
-		os.WriteFile(db.RecordPath(id), bytes, 0666)
-		require.NoError(t, err)
+		LEGACY[id].EncodeToLegacy(file, PASSWORD)
 	}
 
 	//-- act

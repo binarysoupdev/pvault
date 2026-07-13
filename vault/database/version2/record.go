@@ -16,28 +16,30 @@ func (db Database) RecordPath(id uuid.UUID) string {
 }
 
 func (db Database) SaveRecord(r record.Record, password string) error {
-	bytes, err := r.Marshal(password)
+	file, err := os.Create(db.RecordPath(r.GetID()))
 	if err != nil {
-		return errors.Chain(err, "error encrypting record")
+		return errors.Chain(err, "error creating record file")
 	}
+	defer file.Close()
 
-	err = os.WriteFile(db.RecordPath(r.GetID()), bytes, 0666)
+	err = r.Encode(file, password)
 	if err != nil {
-		return errors.Chain(err, "error writing record file")
+		return errors.Chain(err, "error encoding record")
 	}
 
 	return nil
 }
 
 func (db Database) LoadRecord(id uuid.UUID, password string) (record.Record, error) {
-	bytes, err := os.ReadFile(db.RecordPath(id))
+	file, err := os.Open(db.RecordPath(id))
 	if err != nil {
-		return nil, errors.Chain(err, "error reading record file")
+		return nil, errors.Chain(err, "error opening record file")
 	}
+	defer file.Close()
 
-	r, err := record.UnmarshalGeneric(password, bytes, id)
+	r, err := record.Decode(file, password, id)
 	if err != nil {
-		return nil, errors.Chain(err, "error unmarshaling record")
+		return nil, errors.Chain(err, "error decoding record")
 	}
 
 	return r, nil
