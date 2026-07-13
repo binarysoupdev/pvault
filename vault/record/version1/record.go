@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"pvault/common"
 	v2 "pvault/vault/record/version2"
 
 	"github.com/google/uuid"
@@ -22,7 +23,15 @@ func (r Record) GetID() uuid.UUID {
 	return r.ID
 }
 
-func (r Record) Convert() v2.Record {
+func (r Record) GetName() string {
+	return r.Name
+}
+
+func (r Record) Validate() error {
+	return common.NotSupportedError{}
+}
+
+func (r Record) Upgrade() v2.Record {
 	other := map[string]any{}
 
 	if r.URL != "" {

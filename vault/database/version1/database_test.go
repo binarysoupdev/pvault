@@ -79,18 +79,18 @@ func TestUpgradeValidUpgradesVault(t *testing.T) {
 	for name, id := range INDEX {
 		assert.NoFileExists(t, db.RecordPath(id))
 
-		generic, err := TARGET.LoadRecord(id, PASSWORD)
+		r, err := TARGET.LoadRecord(id, PASSWORD)
 		require.NoError(t, err)
 
-		r := generic.Convert()
+		r2 := r.Upgrade()
 
-		assert.Equal(t, id, r.ID)
-		assert.Equal(t, name, r.Name)
+		assert.Equal(t, id, r2.ID)
+		assert.Equal(t, name, r2.Name)
 
 		file := LEGACY[id]
-		assert.Equal(t, file.Password, r.Password)
-		assert.Equal(t, file.Username, r.Username)
-		assert.Equal(t, file.URL, r.Other["url"])
-		assert.Equal(t, file.RecoveryCodes, r.Other["recovery_codes"])
+		assert.Equal(t, file.Password, r2.Password)
+		assert.Equal(t, file.Username, r2.Username)
+		assert.Equal(t, file.URL, r2.Other["url"])
+		assert.Equal(t, file.RecoveryCodes, r2.Other["recovery_codes"])
 	}
 }

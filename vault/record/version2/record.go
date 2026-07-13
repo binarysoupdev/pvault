@@ -27,6 +27,14 @@ func NewRecord(name string) Record {
 	}
 }
 
+func (r Record) GetID() uuid.UUID {
+	return r.ID
+}
+
+func (r Record) GetName() string {
+	return r.Name
+}
+
 func (r Record) Validate() error {
 	errs := errors.Errors{}
 
@@ -40,10 +48,6 @@ func (r Record) Validate() error {
 	return errs.Collapse(", ")
 }
 
-func (r Record) GetID() uuid.UUID {
-	return r.ID
-}
-
-func (r Record) Convert() Record {
+func (r Record) Upgrade() Record {
 	return r
 }

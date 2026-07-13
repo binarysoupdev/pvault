@@ -4,7 +4,7 @@ import (
 	"os"
 	"pvault/cmd/flow"
 	"pvault/config"
-	v2 "pvault/vault/record/version2"
+	"pvault/vault/record"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/go-commando/errors"
@@ -47,7 +47,7 @@ func (cmd LockCommand) Run(args []string) error {
 		return err
 	}
 
-	r, err := json.UnmarshalFile[v2.Record](*path)
+	r, err := record.LoadFromFile(*path)
 	if err != nil {
 		return errors.Chain(err, "error loading source record")
 	}

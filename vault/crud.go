@@ -1,13 +1,13 @@
 package vault
 
 import (
-	v2 "pvault/vault/record/version2"
+	"pvault/vault/record"
 
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/google/uuid"
 )
 
-func (v Vault) SaveRecord(r v2.Record, password string) error {
+func (v Vault) SaveRecord(r record.Record, password string) error {
 	err := v.ValidateRecord(r)
 	if err != nil {
 		return errors.Chain(err, "error validating record")
@@ -18,11 +18,11 @@ func (v Vault) SaveRecord(r v2.Record, password string) error {
 		return errors.Chain(err, "error saving record to database")
 	}
 
-	existingName, ok := v.Index.FindName(r.ID)
-	if ok && existingName != r.Name {
+	existingName, ok := v.Index.FindName(r.GetID())
+	if ok && existingName != r.GetName() {
 		delete(v.Index, existingName)
 	}
-	v.Index[r.Name] = r.ID
+	v.Index[r.GetName()] = r.GetID()
 
 	err = v.Database.SaveIndex(v.Index)
 	if err != nil {
@@ -32,18 +32,18 @@ func (v Vault) SaveRecord(r v2.Record, password string) error {
 	return nil
 }
 
-func (v Vault) LoadRecord(name string, password string) (v2.Record, error) {
+func (v Vault) LoadRecord(name string, password string) (record.Record, error) {
 	id, ok := v.Index[name]
 	if !ok {
-		return v2.Record{}, errors.Format("name \"%s\" not found", name)
+		return nil, errors.Format("name \"%s\" not found", name)
 	}
 
 	r, err := v.Database.LoadRecord(id, password)
 	if err != nil {
-		return v2.Record{}, errors.Chain(err, "error loading record from database")
+		return nil, errors.Chain(err, "error loading record from database")
 	}
 
-	return r.Convert(), nil
+	return r, nil
 }
 
 func (v Vault) DeleteRecord(name string) (uuid.UUID, error) {

@@ -3,7 +3,7 @@ package cmd
 import (
 	"pvault/cmd/flow"
 	"pvault/config"
-	v2 "pvault/vault/record/version2"
+	"pvault/vault/record"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/go-commando/errors"
@@ -50,7 +50,7 @@ func (cmd CreateCommand) Run(args []string) error {
 		return errors.Chain(err, "error validating config \"output_path\"")
 	}
 
-	r := v2.NewRecord(*name)
+	r := record.New(*name)
 
 	err = flow.SaveVaultRecord(v, r)
 	if err != nil {

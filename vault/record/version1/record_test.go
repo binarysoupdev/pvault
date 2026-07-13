@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRecordConvertConvertsRecord(t *testing.T) {
+func TestRecordUpgradeUpgradesRecord(t *testing.T) {
 	//-- arrange
 	rand := rand.New(0)
 
@@ -23,7 +23,7 @@ func TestRecordConvertConvertsRecord(t *testing.T) {
 	}
 
 	//-- act
-	res := r.Convert()
+	res := r.Upgrade()
 
 	//-- assert
 	assert.Equal(t, r.ID, res.ID)

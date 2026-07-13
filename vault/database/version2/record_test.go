@@ -120,7 +120,7 @@ func (s *RecordTestSuite) TestLoadRecordVersion1ReturnsRecord() {
 
 	//-- assert
 	s.Require().NoError(err)
-	s.Assert().Equal(s.Record, r.Convert())
+	s.Assert().Equal(s.Record, r.Upgrade())
 }
 
 func (s *RecordTestSuite) TestLoadRecordVersion2ReturnsRecord() {

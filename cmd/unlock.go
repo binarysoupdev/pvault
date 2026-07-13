@@ -55,7 +55,7 @@ func (cmd UnlockCommand) Run(args []string) error {
 		return err
 	}
 
-	err = flow.SaveOutputRecord(cmd.Config, r)
+	err = flow.SaveOutputRecord(cmd.Config, r.Upgrade())
 	if err != nil {
 		return err
 	}
