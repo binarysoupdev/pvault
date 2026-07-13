@@ -5,7 +5,6 @@ import (
 	"pvault/crypt"
 
 	"github.com/binarysoupdev/go-commando/errors"
-	"github.com/google/uuid"
 )
 
 func Unmarshal(password string, bytes []byte) (Record, error) {
@@ -15,10 +14,6 @@ func Unmarshal(password string, bytes []byte) (Record, error) {
 	}
 
 	return crypt.Unmarshal[Record](password, bytes[2:])
-}
-
-func (r Record) GetID() uuid.UUID {
-	return r.ID
 }
 
 func (r Record) Marshal(password string) ([]byte, error) {
@@ -31,8 +26,4 @@ func (r Record) Marshal(password string) ([]byte, error) {
 	binary.BigEndian.PutUint16(header, VERSION)
 
 	return append(header, ciphertext...), nil
-}
-
-func (r Record) Convert() Record {
-	return r
 }

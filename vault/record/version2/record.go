@@ -39,3 +39,11 @@ func (r Record) Validate() error {
 
 	return errs.Collapse(", ")
 }
+
+func (r Record) GetID() uuid.UUID {
+	return r.ID
+}
+
+func (r Record) Convert() Record {
+	return r
+}
