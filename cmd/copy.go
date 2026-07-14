@@ -52,7 +52,7 @@ func (cmd CopyCommand) Run(args []string) error {
 
 	v, err := flow.LoadVault(cmd.Config.VaultPath)
 	if err != nil {
-		return errors.Chain(err, "error loading vault")
+		return err
 	}
 
 	name, err := search.Select(v)
