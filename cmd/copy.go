@@ -67,19 +67,18 @@ func (cmd CopyCommand) Run(args []string) error {
 
 	const USERNAME_FIELD = "USERNAME"
 	const PASSWORD_FIELD = "PASSWORD"
-	r2 := r.Upgrade()
 
 	if *qr {
 		if *username {
-			return cmd.renderToQRCode(USERNAME_FIELD, r2.Username)
+			return cmd.renderToQRCode(USERNAME_FIELD, r.Username)
 		} else {
-			return cmd.renderToQRCode(PASSWORD_FIELD, r2.Password)
+			return cmd.renderToQRCode(PASSWORD_FIELD, r.Password)
 		}
 	} else {
 		if *username {
-			return cmd.copyToClipboard(USERNAME_FIELD, r2.Username)
+			return cmd.copyToClipboard(USERNAME_FIELD, r.Username)
 		} else {
-			return cmd.copyToClipboard(PASSWORD_FIELD, r2.Password)
+			return cmd.copyToClipboard(PASSWORD_FIELD, r.Password)
 		}
 	}
 }

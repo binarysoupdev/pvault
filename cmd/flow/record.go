@@ -4,16 +4,14 @@ import (
 	"path/filepath"
 	"pvault/config"
 	"pvault/vault"
-	"pvault/vault/record"
-
-	"github.com/binarysoupdev/go-commando/json"
+	v2 "pvault/vault/record/version2"
 
 	"github.com/binarysoupdev/go-commando/errors"
-
+	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/got-style/style"
 )
 
-func SaveVaultRecord(v vault.Vault, r record.Record) error {
+func SaveVaultRecord(v vault.Vault, r v2.Record) error {
 	err := v.ValidateRecord(r)
 	if err != nil {
 		return errors.Chain(err, "error validating record")
@@ -33,16 +31,16 @@ func SaveVaultRecord(v vault.Vault, r record.Record) error {
 	return nil
 }
 
-func LoadVaultRecord(v vault.Vault, name string) (record.Record, error) {
+func LoadVaultRecord(v vault.Vault, name string) (v2.Record, error) {
 	password := PromptPassword("Enter PASSWORD: ")
 
 	r, err := v.LoadRecord(name, password)
 	if err != nil {
-		return nil, errors.Chain(err, "error loading vault record")
+		return v2.Record{}, errors.Chain(err, "error loading vault record")
 	}
 
 	style.BoldInfo.Printf("[=] Loaded Record: %s\n", r.GetID().String())
-	return r, nil
+	return r.Upgrade(), nil
 }
 
 func DeleteVaultRecord(v vault.Vault, name string) error {
@@ -59,7 +57,7 @@ func DeleteVaultRecord(v vault.Vault, name string) error {
 	return nil
 }
 
-func SaveOutputRecord(cfg config.Config, r record.Record) error {
+func SaveOutputRecord(cfg config.Config, r v2.Record) error {
 	err := cfg.ValidateOutputPath()
 	if err != nil {
 		return errors.Chain(err, "error validating output path")
