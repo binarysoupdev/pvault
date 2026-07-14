@@ -50,9 +50,9 @@ func (cmd CopyCommand) Run(args []string) error {
 	qr := cmd.Flags.Bool("qr", false, "render as a qrcode")
 	cmd.ParseFlags(args)
 
-	v, err := flow.OpenVault(cmd.Config.VaultPath)
+	v, err := flow.LoadVault(cmd.Config.VaultPath)
 	if err != nil {
-		return errors.Chain(err, "error opening vault")
+		return errors.Chain(err, "error loading vault")
 	}
 
 	name, err := search.Select(v)

@@ -6,8 +6,8 @@ import (
 	"pvault/cmd"
 	"pvault/config"
 	"pvault/vault"
-	"pvault/vault/database/version1"
-	"pvault/vault/index"
+	"pvault/vault/data"
+	v1 "pvault/vault/index/version1"
 	record "pvault/vault/record/version2"
 	"regexp"
 	"testing"
@@ -175,7 +175,7 @@ func (s *VaultTestSuite) TestRunUpgradeFailsWithInvalidBackupPath() {
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
-	err = version1.NewDatabase(s.Config.VaultPath).Initialize(index.IndexMap{})
+	err = v1.NewIndex(s.Config.VaultPath).Initialize(data.NameMap{})
 	s.Require().NoError(err)
 
 	//-- act
@@ -193,8 +193,8 @@ func (s *VaultTestSuite) TestRunUpgradePassesAndCreatesBackupAndUpgradesDatabase
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
-	v1 := version1.NewDatabase(s.Config.VaultPath)
-	err = v1.Initialize(index.IndexMap{})
+	v1 := v1.NewIndex(s.Config.VaultPath)
+	err = v1.Initialize(data.NameMap{})
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(2)

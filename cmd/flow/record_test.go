@@ -6,8 +6,7 @@ import (
 	"pvault/cmd/flow"
 	"pvault/config"
 	"pvault/vault"
-	"pvault/vault/database"
-	"pvault/vault/index"
+	"pvault/vault/data"
 	record "pvault/vault/record/version2"
 	"testing"
 
@@ -86,7 +85,7 @@ func TestSaveVaultRecordReturnsNoErrorAndSavesRecordWhenValid(t *testing.T) {
 
 	VAULT := vault.Vault{
 		Database: &mock,
-		Index:    index.IndexMap{},
+		Index:    data.NameMap{},
 	}
 	RECORD := record.NewEmptyRecord("name")
 
@@ -120,7 +119,7 @@ func TestLoadVaultRecordReturnsErrorWhenDatabaseLoadRecordFails(t *testing.T) {
 		Database: &database.DatabaseMock{
 			LoadRecordError: errors.New(""),
 		},
-		Index: index.IndexMap{
+		Index: data.NameMap{
 			NAME: uuid.Nil,
 		},
 	}
@@ -150,7 +149,7 @@ func TestLoadVaultRecordReturnsRecordAndNoErrorWhenValid(t *testing.T) {
 
 	VAULT := vault.Vault{
 		Database: &mock,
-		Index: index.IndexMap{
+		Index: data.NameMap{
 			NAME: uuid.Nil,
 		},
 	}
@@ -200,7 +199,7 @@ func TestDeleteVaultRecordReturnsErrorWhenDatabaseDeleteRecordFails(t *testing.T
 		Database: &database.DatabaseMock{
 			DeleteRecordError: errors.New(""),
 		},
-		Index: index.IndexMap{
+		Index: data.NameMap{
 			NAME: uuid.Nil,
 		},
 	}
@@ -228,7 +227,7 @@ func TestDeleteVaultRecordReturnsNoErrorAndDeletesRecordWhenValid(t *testing.T) 
 
 	VAULT := vault.Vault{
 		Database: &mock,
-		Index: index.IndexMap{
+		Index: data.NameMap{
 			NAME: uuid.Nil,
 		},
 	}

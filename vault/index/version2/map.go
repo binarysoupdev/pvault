@@ -3,13 +3,13 @@ package v2
 import (
 	"encoding/binary"
 	"os"
-	"pvault/vault/index"
+	"pvault/vault/data"
 
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/google/uuid"
 )
 
-func (idx Index) SaveIndex(m index.IndexMap) error {
+func (idx Index) SaveMap(m data.NameMap) error {
 	file, err := os.Create(idx.Filepath())
 	if err != nil {
 		return errors.Chain(err, "error creating index file")
@@ -49,4 +49,39 @@ func (Index) writeEntry(file *os.File, name string, id uuid.UUID) error {
 
 	_, err := file.Write(entry)
 	return err
+}
+
+func (idx Index) LoadMap() (data.NameMap, error) {
+	raw, err := os.ReadFile(idx.Filepath())
+	if err != nil {
+		return data.NameMap{}, errors.Chain(err, "error reading index file")
+	}
+	header := raw[:4]
+
+	version := binary.BigEndian.Uint16(header)
+	if int(version) != idx.GetVersion() {
+		return data.NameMap{}, errors.Format("incorrect version \"%d\"", version)
+	}
+
+	entryCount := binary.BigEndian.Uint16(header[2:])
+	ptr := len(header)
+
+	m := data.NameMap{}
+
+	for range entryCount {
+		length := int(binary.BigEndian.Uint16(raw[ptr : ptr+2]))
+		ptr += 2
+
+		idx.decodeEntry(m, raw[ptr:ptr+length])
+		ptr += length
+	}
+
+	return m, nil
+}
+
+func (Index) decodeEntry(idx data.NameMap, raw []byte) {
+	id, _ := uuid.FromBytes(raw[:16])
+	name := string(raw[16:])
+
+	idx[name] = id
 }

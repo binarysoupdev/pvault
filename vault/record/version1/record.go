@@ -1,8 +1,6 @@
 package v1
 
 import (
-	v2 "pvault/vault/record/version2"
-
 	"github.com/google/uuid"
 )
 
@@ -18,34 +16,14 @@ type Record struct {
 	Name string
 }
 
+func (r Record) GetVersion() int {
+	return VERSION
+}
+
 func (r Record) GetID() uuid.UUID {
 	return r.ID
 }
 
 func (r Record) GetName() string {
 	return r.Name
-}
-
-func (r Record) Validate() error {
-	// v1 only used for testing
-	return nil
-}
-
-func (r Record) Upgrade() v2.Record {
-	other := map[string]any{}
-
-	if r.URL != "" {
-		other["url"] = r.URL
-	}
-	if len(r.RecoveryCodes) > 0 {
-		other["recovery_codes"] = r.RecoveryCodes
-	}
-
-	return v2.Record{
-		ID:       r.ID,
-		Name:     r.Name,
-		Username: r.Username,
-		Password: r.Password,
-		Other:    other,
-	}
 }

@@ -1,7 +1,7 @@
-package index_test
+package data_test
 
 import (
-	"pvault/vault/index"
+	"pvault/vault/data"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/rand"
@@ -12,7 +12,7 @@ import (
 
 func TestFindNameNameNotFoundReturnsNotFound(t *testing.T) {
 	//-- arrange
-	idx := index.IndexMap{}
+	idx := data.NameMap{}
 
 	//-- act
 	_, found := idx.FindName(uuid.Nil)
@@ -27,7 +27,7 @@ func TestFindNameNameFoundReturnsName(t *testing.T) {
 	NAME := rand.ASCII(15)
 	ID := uuid.New()
 
-	idx := index.IndexMap{NAME: ID}
+	idx := data.NameMap{NAME: ID}
 
 	//-- act
 	res, found := idx.FindName(ID)
@@ -41,7 +41,7 @@ func TestGetNamesReturnsAllNames(t *testing.T) {
 	//-- arrange
 	rand := rand.New(0)
 
-	idx := index.IndexMap{
+	idx := data.NameMap{
 		rand.ASCII(15): uuid.Nil,
 		rand.ASCII(15): uuid.Nil,
 		rand.ASCII(15): uuid.Nil,
@@ -63,7 +63,7 @@ func TestSearchNamesReturnsMatches(t *testing.T) {
 	//-- arrange
 	NAMES := []string{"Foo2", "Bar1", "Foo1"}
 
-	idx := index.IndexMap{
+	idx := data.NameMap{
 		NAMES[0]: uuid.Nil,
 		NAMES[1]: uuid.Nil,
 		NAMES[2]: uuid.Nil,

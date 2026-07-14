@@ -61,18 +61,18 @@ func (cmd VaultCommand) initialize() error {
 }
 
 func (cmd VaultCommand) backup() error {
-	v, err := vault.Open(cmd.Config.VaultPath)
+	v, err := vault.Load(cmd.Config.VaultPath)
 	if err != nil {
-		return errors.Chain(err, "error opening vault")
+		return errors.Chain(err, "error loading vault")
 	}
 
 	return flow.BackupVault(v, cmd.Config)
 }
 
 func (cmd VaultCommand) upgrade() error {
-	v, err := vault.Open(cmd.Config.VaultPath)
+	v, err := vault.Load(cmd.Config.VaultPath)
 	if err != nil {
-		return errors.Chain(err, "error opening vault")
+		return errors.Chain(err, "error loading vault")
 	}
 
 	if !v.IsOutOfDate() {
@@ -95,13 +95,13 @@ func (cmd VaultCommand) upgrade() error {
 }
 
 func (cmd VaultCommand) validate() error {
-	v, err := flow.OpenVault(cmd.Config.VaultPath)
+	v, err := flow.LoadVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
 	}
 
 	style.BoldInfo.Printf("[=] Vault verified at \"%s\" (@v%d)\n", v.Path, v.Version())
-	style.Info.Printf("[%d] records found\n", len(v.Index))
+	style.Info.Printf("[%d] records found\n", len(v.Map))
 
 	return nil
 }

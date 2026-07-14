@@ -5,8 +5,8 @@ import (
 	"pvault/cmd/flow"
 	"pvault/config"
 	"pvault/vault"
-	dbv1 "pvault/vault/database/version1"
-	"pvault/vault/index"
+	"pvault/vault/data"
+	dbv1 "pvault/vault/index/version1"
 
 	"regexp"
 	"testing"
@@ -21,7 +21,7 @@ func TestOpenVaultReturnsErrorWhenVaultOutOfDate(t *testing.T) {
 	//-- arrange
 	PATH := file.NewPath(t, "")
 
-	err := dbv1.NewDatabase(PATH).Initialize(index.IndexMap{})
+	err := dbv1.NewDatabase(PATH).Initialize(data.NameMap{})
 	require.NoError(t, err)
 
 	//-- act

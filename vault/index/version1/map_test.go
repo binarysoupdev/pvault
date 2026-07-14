@@ -1,8 +1,8 @@
 package v1_test
 
 import (
-	"pvault/vault/database/version1"
-	"pvault/vault/index"
+	"pvault/vault/data"
+	v1 "pvault/vault/index/version1"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -14,10 +14,10 @@ import (
 
 func TestLoadIndexValidLoadsIndexMap(t *testing.T) {
 	//-- arrange
-	db := version1.NewDatabase(file.NewPath(t, ""))
+	db := v1.NewIndex(file.NewPath(t, ""))
 
 	rand := rand.New(0)
-	INDEX := index.IndexMap{
+	INDEX := data.NameMap{
 		rand.ASCII(10): uuid.New(),
 		rand.ASCII(15): uuid.New(),
 		rand.ASCII(20): uuid.New(),

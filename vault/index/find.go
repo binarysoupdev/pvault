@@ -1,29 +1,16 @@
-package database
+package index
 
 import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
-	v1 "pvault/vault/database/version1"
-	v2 "pvault/vault/database/version2"
-	"pvault/vault/index"
+	v1 "pvault/vault/index/version1"
+	v2 "pvault/vault/index/version2"
 
 	"github.com/binarysoupdev/go-commando/errors"
-	"github.com/google/uuid"
 )
 
-type Index interface {
-	GetVersion() int
-
-	Filepath() string
-	RecordPath(id uuid.UUID) string
-
-	SaveIndex(idx index.IndexMap) error
-	LoadIndex() (index.IndexMap, error)
-	Upgrade(idx index.IndexMap) error
-}
-
-func detectIndex(path string) (Index, error) {
+func Find(path string) (Index, error) {
 	_, err := os.Stat(filepath.Join(path, v2.FILENAME))
 	if err == nil {
 		return detectFromVersionHeader(path, v2.FILENAME)

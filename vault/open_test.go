@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"pvault/vault"
-	"pvault/vault/database/version1"
-	"pvault/vault/database/version2"
+	"pvault/vault/index/version1"
+	"pvault/vault/index/version2"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"

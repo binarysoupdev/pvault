@@ -6,9 +6,9 @@ func (v Vault) Search(term string) []string {
 	var matches []string
 
 	if term == "" {
-		matches = v.Index.GetNames()
+		matches = v.Map.GetNames()
 	} else {
-		matches = v.Index.SearchNames(term)
+		matches = v.Map.SearchNames(term)
 	}
 
 	slices.Sort(matches)

@@ -2,10 +2,9 @@ package v1_test
 
 import (
 	"os"
-	"pvault/vault/database/version1"
-	"pvault/vault/database/version2"
-	"pvault/vault/index"
-	v1 "pvault/vault/record/version1"
+	"pvault/vault/data"
+	v1 "pvault/vault/index/version1"
+	v2 "pvault/vault/index/version2"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -15,30 +14,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestInitializeSucceedsAndSavesIndex(t *testing.T) {
-	//-- arrange
-	db := version1.NewDatabase(file.NewPath(t, ""))
-
-	INDEX := index.IndexMap{
-		"name1": uuid.New(),
-		"name2": uuid.New(),
-	}
-
-	//-- act
-	res := db.Initialize(INDEX)
-
-	//-- assert
-	require.NoError(t, res)
-
-	idx, err := db.LoadIndex()
-	require.NoError(t, err)
-	assert.Equal(t, INDEX, idx)
-}
-
 func TestUpgradeValidUpgradesVault(t *testing.T) {
 	//-- arrange
-	db := version1.NewDatabase(file.NewPath(t, ""))
-	TARGET := version2.NewDatabase(db.Path)
+	db := v1.NewIndex(file.NewPath(t, ""))
+	TARGET := v2.NewIndex(db.Path)
 
 	file, err := os.Create(db.IndexPath())
 	require.NoError(t, err)
@@ -48,7 +27,7 @@ func TestUpgradeValidUpgradesVault(t *testing.T) {
 	PASSWORD := rand.ASCII(30)
 
 	LEGACY := map[uuid.UUID]v1.Record{}
-	INDEX := index.IndexMap{}
+	INDEX := data.NameMap{}
 
 	const NUM_LEGACY_FILES = 5
 	for range NUM_LEGACY_FILES {

@@ -1,4 +1,4 @@
-package index
+package data
 
 import (
 	"strings"
@@ -6,10 +6,10 @@ import (
 	"github.com/google/uuid"
 )
 
-type IndexMap map[string]uuid.UUID
+type NameMap map[string]uuid.UUID
 
-func (idx IndexMap) FindName(id uuid.UUID) (string, bool) {
-	for name, val := range idx {
+func (m NameMap) FindName(id uuid.UUID) (string, bool) {
+	for name, val := range m {
 		if val == id {
 			return name, true
 		}
@@ -17,11 +17,11 @@ func (idx IndexMap) FindName(id uuid.UUID) (string, bool) {
 	return "", false
 }
 
-func (idx IndexMap) GetNames() []string {
-	names := make([]string, len(idx))
+func (m NameMap) GetNames() []string {
+	names := make([]string, len(m))
 	i := 0
 
-	for name := range idx {
+	for name := range m {
 		names[i] = name
 		i++
 	}
@@ -29,10 +29,10 @@ func (idx IndexMap) GetNames() []string {
 	return names
 }
 
-func (idx IndexMap) SearchNames(subStr string) []string {
+func (m NameMap) SearchNames(subStr string) []string {
 	matches := []string{}
 
-	for name := range idx {
+	for name := range m {
 		if strings.Contains(strings.ToLower(name), strings.ToLower(subStr)) {
 			matches = append(matches, name)
 		}

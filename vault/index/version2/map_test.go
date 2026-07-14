@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"pvault/vault"
-	"pvault/vault/database/version2"
-	"pvault/vault/index"
+	"pvault/vault/data"
+	"pvault/vault/index/version2"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -20,7 +20,7 @@ func TestSaveIndexWithInvalidPathReturnsError(t *testing.T) {
 	db := version2.NewDatabase("invalid/index.bin")
 
 	//-- act
-	res := db.SaveIndex(index.IndexMap{})
+	res := db.SaveIndex(data.NameMap{})
 
 	//-- assert
 	require.ErrorContains(t, res, "error creating index file")
@@ -33,7 +33,7 @@ func TestSaveIndexValidSavesIndex(t *testing.T) {
 	db := version2.NewDatabase(PATH)
 
 	//-- act
-	res := db.SaveIndex(index.IndexMap{})
+	res := db.SaveIndex(data.NameMap{})
 
 	//-- assert
 	require.NoError(t, res)
@@ -73,7 +73,7 @@ func TestLoadIndexValidReturnIndex(t *testing.T) {
 	db := version2.NewDatabase(file.NewPath(t, ""))
 
 	rand := rand.New(0)
-	INDEX := index.IndexMap{
+	INDEX := data.NameMap{
 		rand.ASCII(10): uuid.New(),
 		rand.ASCII(15): uuid.New(),
 		rand.ASCII(20): uuid.New(),

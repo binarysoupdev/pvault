@@ -4,9 +4,9 @@ import (
 	"errors"
 	"path/filepath"
 	"pvault/vault"
+	"pvault/vault/data"
 	"pvault/vault/database"
-	"pvault/vault/database/version2"
-	"pvault/vault/index"
+	"pvault/vault/index/version2"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -59,7 +59,7 @@ func TestReloadIndexWhereDatabaseLoadIndexFailsReturnsError(t *testing.T) {
 func TestReloadIndexValidUpdatesVaultIndex(t *testing.T) {
 	//-- arrange
 	rand := rand.New(0)
-	INDEX := index.IndexMap{
+	INDEX := data.NameMap{
 		rand.ASCII(10): uuid.New(),
 	}
 

@@ -3,7 +3,7 @@ package vault_test
 import (
 	"fmt"
 	"pvault/vault"
-	"pvault/vault/index"
+	"pvault/vault/data"
 	record "pvault/vault/record/version2"
 	"testing"
 
@@ -31,7 +31,7 @@ func TestValidateRecordNameAlreadyExists(t *testing.T) {
 	RECORD := record.NewEmptyRecord(NAME)
 
 	v := vault.Vault{
-		Index: index.IndexMap{
+		Index: data.NameMap{
 			NAME: uuid.Nil,
 		},
 	}

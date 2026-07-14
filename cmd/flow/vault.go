@@ -13,10 +13,10 @@ import (
 	"github.com/binarysoupdev/got-style/style"
 )
 
-func OpenVault(path string) (vault.Vault, error) {
-	v, err := vault.Open(path)
+func LoadVault(path string) (vault.Vault, error) {
+	v, err := vault.Load(path)
 	if err != nil {
-		return vault.Vault{}, errors.New("error opening vault (run \"vault -init\" to repair)")
+		return vault.Vault{}, errors.New("error loading vault (run \"vault -init\" to repair)")
 	}
 
 	if v.IsOutOfDate() {

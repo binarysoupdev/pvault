@@ -2,7 +2,7 @@ package vault_test
 
 import (
 	"pvault/vault"
-	"pvault/vault/index"
+	"pvault/vault/data"
 	"testing"
 
 	"github.com/google/uuid"
@@ -14,7 +14,7 @@ func TestSearchEmptyTermReturnsAllNamesSorted(t *testing.T) {
 	NAMES := []string{"Foo2", "Bar1", "Foo1"}
 
 	v := vault.Vault{
-		Index: index.IndexMap{
+		Index: data.NameMap{
 			NAMES[0]: uuid.New(),
 			NAMES[1]: uuid.New(),
 			NAMES[2]: uuid.New(),
@@ -33,7 +33,7 @@ func TestSearchReturnsOnlyMatchesSorted(t *testing.T) {
 	NAMES := []string{"Foo2", "Bar1", "Foo1"}
 
 	v := vault.Vault{
-		Index: index.IndexMap{
+		Index: data.NameMap{
 			NAMES[0]: uuid.New(),
 			NAMES[1]: uuid.New(),
 			NAMES[2]: uuid.New(),

@@ -3,7 +3,7 @@ package vault_test
 import (
 	"pvault/vault"
 	"pvault/vault/database"
-	"pvault/vault/database/version2"
+	"pvault/vault/index/version2"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/errors"

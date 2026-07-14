@@ -9,6 +9,11 @@ import (
 	"github.com/google/uuid"
 )
 
+func (r Record) Validate() error {
+	// TODO: implement
+	return nil
+}
+
 func Decode(r io.Reader, password string, id uuid.UUID) (Record, error) {
 	length := make([]byte, 2)
 	r.Read(length)
