@@ -10,14 +10,14 @@ import (
 )
 
 func (idx Index) LoadIndex() (index.IndexMap, error) {
-	raw, err := os.ReadFile(idx.filepath())
+	raw, err := os.ReadFile(idx.Filepath())
 	if err != nil {
 		return index.IndexMap{}, errors.Chain(err, "error reading index file")
 	}
 	header := raw[:4]
 
 	version := binary.BigEndian.Uint16(header)
-	if version != idx.GetVersion() {
+	if int(version) != idx.GetVersion() {
 		return index.IndexMap{}, errors.Format("incorrect version \"%d\"", version)
 	}
 

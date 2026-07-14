@@ -1,4 +1,4 @@
-package version2_test
+package v2_test
 
 import (
 	"pvault/vault/database/version2"

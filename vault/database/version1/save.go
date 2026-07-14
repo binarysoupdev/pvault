@@ -9,7 +9,7 @@ import (
 )
 
 func (idx Index) SaveIndex(m index.IndexMap) error {
-	file, err := os.Create(idx.filepath())
+	file, err := os.Create(idx.Filepath())
 	if err != nil {
 		return errors.Chain(err, "error creating index file")
 	}

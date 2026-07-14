@@ -1,24 +1,36 @@
 package database
 
 import (
+	v2 "pvault/vault/database/version2"
 	"pvault/vault/index"
-	record "pvault/vault/record"
 
-	"github.com/google/uuid"
+	"github.com/binarysoupdev/go-commando/errors"
 )
 
-type Database interface {
-	GetVersion() uint16
+type Database struct{ Index }
 
-	Initialize(idx index.IndexMap) error
-	Upgrade(idx index.IndexMap) error
+func New(path string) Database {
+	return Database{
+		Index: v2.NewIndex(path),
+	}
+}
 
-	IndexPath() string
-	SaveIndex(idx index.IndexMap) error
-	LoadIndex() (index.IndexMap, error)
+func Open(path string) (Database, error) {
+	idx, err := detectIndex(path)
+	if err != nil {
+		return Database{}, errors.Chain(err, "error detecting index")
+	}
 
-	RecordPath(id uuid.UUID) string
-	SaveRecord(r record.Record, password string) error
-	LoadRecord(id uuid.UUID, password string) (record.Record, error)
-	DeleteRecord(id uuid.UUID) error
+	return Database{
+		Index: idx,
+	}, nil
+}
+
+func (db Database) Initialize(idx index.IndexMap) error {
+	err := db.SaveIndex(idx)
+	if err != nil {
+		return errors.Chain(err, "error saving index file")
+	}
+
+	return nil
 }

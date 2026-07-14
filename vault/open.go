@@ -7,9 +7,9 @@ import (
 )
 
 func Open(path string) (Vault, error) {
-	db, err := database.Find(path)
+	db, err := database.Open(path)
 	if err != nil {
-		return Vault{}, err
+		return Vault{}, errors.Chain(err, "error opening database")
 	}
 
 	idx, err := db.LoadIndex()

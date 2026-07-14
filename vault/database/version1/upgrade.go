@@ -2,8 +2,8 @@ package v1
 
 import (
 	"os"
+	v2 "pvault/vault/database/version2"
 	"pvault/vault/index"
-	v2 "pvault/vault/index/version2"
 	v1 "pvault/vault/record/version1"
 
 	"github.com/binarysoupdev/go-commando/errors"
@@ -30,6 +30,6 @@ func (idx Index) Upgrade(m index.IndexMap) error {
 		_ = os.Remove(legacyFile)
 	}
 
-	_ = os.Remove(idx.filepath())
+	_ = os.Remove(idx.Filepath())
 	return nil
 }

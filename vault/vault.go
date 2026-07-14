@@ -5,7 +5,7 @@ import (
 	"pvault/vault/index"
 )
 
-const CURRENT_VERSION uint16 = 2
+const CURRENT_VERSION int = 2
 
 type Vault struct {
 	Path     string
@@ -13,6 +13,6 @@ type Vault struct {
 	Database database.Database
 }
 
-func (v Vault) Version() uint16 {
+func (v Vault) Version() int {
 	return v.Database.GetVersion()
 }

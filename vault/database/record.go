@@ -1,19 +1,12 @@
-package version2
+package database
 
 import (
 	"os"
-	"path/filepath"
 	"pvault/vault/record"
 
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/google/uuid"
 )
-
-const RECORD_VERSION uint16 = 2
-
-func (db Database) RecordPath(id uuid.UUID) string {
-	return filepath.Join(db.Path, id.String())
-}
 
 func (db Database) SaveRecord(r record.Record, password string) error {
 	file, err := os.Create(db.RecordPath(r.GetID()))

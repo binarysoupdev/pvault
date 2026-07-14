@@ -10,7 +10,7 @@ import (
 )
 
 func (idx Index) SaveIndex(m index.IndexMap) error {
-	file, err := os.Create(idx.filepath())
+	file, err := os.Create(idx.Filepath())
 	if err != nil {
 		return errors.Chain(err, "error creating index file")
 	}
@@ -33,7 +33,7 @@ func (idx Index) SaveIndex(m index.IndexMap) error {
 
 func (idx Index) writeHeader(file *os.File, numRecords int) error {
 	header := make([]byte, 4)
-	binary.BigEndian.PutUint16(header, idx.GetVersion())
+	binary.BigEndian.PutUint16(header, uint16(idx.GetVersion()))
 	binary.BigEndian.PutUint16(header[2:], uint16(numRecords))
 
 	_, err := file.Write(header)

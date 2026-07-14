@@ -11,7 +11,7 @@ import (
 )
 
 func (idx Index) LoadIndex() (index.IndexMap, error) {
-	file, err := os.Open(idx.filepath())
+	file, err := os.Open(idx.Filepath())
 	if err != nil {
 		return nil, errors.Chain(err, "error opening index file")
 	}
