@@ -3,9 +3,9 @@ package vault_test
 import (
 	"errors"
 	"fmt"
-	"pvault/app/vault"
 	"pvault/app/vault/data"
 	"pvault/app/vault/database"
+	vault "pvault/app/vault/local"
 	record "pvault/app/vault/record/version2"
 	"testing"
 

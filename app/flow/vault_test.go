@@ -3,9 +3,9 @@ package flow_test
 import (
 	"fmt"
 	"pvault/app/flow"
-	"pvault/app/vault"
 	"pvault/app/vault/data"
 	dbv1 "pvault/app/vault/index/version1"
+	vault "pvault/app/vault/local"
 	"pvault/config"
 
 	"regexp"

@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"pvault/app/flow"
-	"pvault/app/vault"
+	vault "pvault/app/vault/local"
 	"pvault/config"
 
 	"github.com/binarysoupdev/go-commando/command"

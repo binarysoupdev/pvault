@@ -3,7 +3,7 @@ package flow
 import (
 	"errors"
 	"flag"
-	"pvault/app/vault"
+	vault "pvault/app/vault/local"
 	"strings"
 
 	"github.com/binarysoupdev/got-style/style"

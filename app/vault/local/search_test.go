@@ -1,8 +1,8 @@
 package vault_test
 
 import (
-	"pvault/app/vault"
 	"pvault/app/vault/data"
+	vault "pvault/app/vault/local"
 	"testing"
 
 	"github.com/google/uuid"

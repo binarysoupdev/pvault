@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"pvault/app/vault"
 	v1 "pvault/app/vault/index/version1"
 	"pvault/cmd"
 	"pvault/config"

@@ -3,10 +3,10 @@ package vault_test
 import (
 	"errors"
 	"path/filepath"
-	"pvault/app/vault"
 	"pvault/app/vault/data"
 	"pvault/app/vault/database"
 	"pvault/app/vault/index/version2"
+	vault "pvault/app/vault/local"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"

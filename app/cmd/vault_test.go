@@ -3,9 +3,9 @@ package cmd_test
 import (
 	"fmt"
 	"os"
-	"pvault/app/vault"
 	"pvault/app/vault/data"
 	v1 "pvault/app/vault/index/version1"
+	vault "pvault/app/vault/local"
 	record "pvault/app/vault/record/version2"
 	"pvault/cmd"
 	"pvault/config"

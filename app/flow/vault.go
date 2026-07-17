@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"pvault/app/vault"
+	vault "pvault/app/vault/local"
 	"pvault/config"
 	"time"
 

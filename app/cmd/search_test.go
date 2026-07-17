@@ -2,7 +2,7 @@ package cmd_test
 
 import (
 	"os"
-	"pvault/app/vault"
+	vault "pvault/app/vault/local"
 	record "pvault/app/vault/record/version2"
 	"pvault/cmd"
 	"pvault/config"

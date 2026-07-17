@@ -2,7 +2,6 @@ package vault_test
 
 import (
 	"fmt"
-	"pvault/app/vault"
 	record "pvault/app/vault/record/version2"
 	"testing"
 

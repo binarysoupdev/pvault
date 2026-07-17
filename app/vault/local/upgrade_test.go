@@ -1,7 +1,6 @@
 package vault_test
 
 import (
-	"pvault/app/vault"
 	"pvault/app/vault/database"
 	"pvault/app/vault/index/version2"
 	"testing"

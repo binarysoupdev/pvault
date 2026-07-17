@@ -3,8 +3,8 @@ package flow_test
 import (
 	"flag"
 	"pvault/app/flow"
-	"pvault/app/vault"
 	"pvault/app/vault/data"
+	vault "pvault/app/vault/local"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/pipe"

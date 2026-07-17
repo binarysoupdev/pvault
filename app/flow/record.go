@@ -2,7 +2,7 @@ package flow
 
 import (
 	"path/filepath"
-	"pvault/app/vault"
+	vault "pvault/app/vault/local"
 	v2 "pvault/app/vault/record/version2"
 	"pvault/config"
 
