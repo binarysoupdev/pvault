@@ -1,75 +1,65 @@
 package v1_test
 
 import (
-	"os"
 	"pvault/vault/data"
-	v1 "pvault/vault/index/version1"
-	v2 "pvault/vault/index/version2"
+	index_v1 "pvault/vault/index/version1"
+	"pvault/vault/record"
+	record_v1 "pvault/vault/record/version1"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
-	"github.com/binarysoupdev/tinsel/rand"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestUpgradeValidUpgradesVault(t *testing.T) {
+func TestUpgradeReturnsNewIndexAndNoErrorAndUpgradesVault(t *testing.T) {
 	//-- arrange
-	db := v1.NewIndex(file.NewPath(t, ""))
-	TARGET := v2.NewIndex(db.Path)
+	idx := index_v1.NewIndex(file.NewPath(t, ""))
+	const PASSWORD = "Password123!"
 
-	file, err := os.Create(db.IndexPath())
-	require.NoError(t, err)
-	file.Close()
-
-	rand := rand.New(0)
-	PASSWORD := rand.ASCII(30)
-
-	LEGACY := map[uuid.UUID]v1.Record{}
-	INDEX := data.NameMap{}
-
-	const NUM_LEGACY_FILES = 5
-	for range NUM_LEGACY_FILES {
-		id := uuid.New()
-
-		INDEX[rand.ASCII(10)] = id
-		LEGACY[id] = v1.Record{
-			Password:      rand.ASCII(30),
-			Username:      rand.ASCII(15),
-			URL:           rand.ASCII(15),
-			RecoveryCodes: []string{rand.ASCII(10), rand.ASCII(10)},
-		}
-
-		file, err := os.Create(db.RecordPath(id))
-		require.NoError(t, err)
-		defer file.Close()
-
-		LEGACY[id].EncodeToLegacy(file, PASSWORD)
+	r1 := record_v1.Record{
+		Password:      "password1",
+		Username:      "username1",
+		URL:           "url1",
+		RecoveryCodes: []string{"code1-1", "code1-2"},
+		ID:            uuid.New(),
+		Name:          "name1",
 	}
+	require.NoError(t, r1.MarshalToLegacy(idx.RecordPath(r1.ID), PASSWORD))
+
+	r2 := record_v1.Record{
+		Password:      "password2",
+		Username:      "username2",
+		URL:           "url2",
+		RecoveryCodes: []string{"code2-1", "code2-2"},
+		ID:            uuid.New(),
+		Name:          "name2",
+	}
+	require.NoError(t, r2.MarshalToLegacy(idx.RecordPath(r2.ID), PASSWORD))
+
+	MAP := data.NameMap{
+		r1.Name: r1.ID,
+		r2.Name: r2.ID,
+	}
+	require.NoError(t, idx.SaveMap(MAP))
 
 	//-- act
-	res := db.Upgrade(INDEX)
+	newIdx, err := idx.Upgrade()
 
 	//-- assert
-	require.NoError(t, res)
-	assert.NoFileExists(t, db.IndexPath())
+	require.NoError(t, err)
+	assert.NoFileExists(t, idx.Filepath())
 
-	for name, id := range INDEX {
-		assert.NoFileExists(t, db.RecordPath(id))
+	m, err := newIdx.LoadMap()
+	require.NoError(t, err)
+	assert.Equal(t, m, MAP)
 
-		r, err := TARGET.LoadRecord(id, PASSWORD)
-		require.NoError(t, err)
+	newR1, err := record.Load(newIdx.RecordPath(r1.ID), PASSWORD, r1.ID)
+	require.NoError(t, err)
+	assert.Equal(t, r1, newR1.(record_v1.Record))
 
-		r2 := r.Upgrade()
-
-		assert.Equal(t, id, r2.ID)
-		assert.Equal(t, name, r2.Name)
-
-		file := LEGACY[id]
-		assert.Equal(t, file.Password, r2.Password)
-		assert.Equal(t, file.Username, r2.Username)
-		assert.Equal(t, file.URL, r2.Other["url"])
-		assert.Equal(t, file.RecoveryCodes, r2.Other["recovery_codes"])
-	}
+	newR2, err := record.Load(newIdx.RecordPath(r2.ID), PASSWORD, r2.ID)
+	require.NoError(t, err)
+	assert.Equal(t, r2, newR2.(record_v1.Record))
 }

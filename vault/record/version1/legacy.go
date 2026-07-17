@@ -2,6 +2,7 @@ package v1
 
 import (
 	"io"
+	"os"
 	"pvault/crypt"
 )
 
@@ -12,10 +13,16 @@ func EncodeFromLegacy(w io.Writer, name string, bytes []byte) {
 	w.Write(bytes[LEGACY_HASH_SIZE:])
 }
 
-func (r Record) EncodeToLegacy(w io.Writer, password string) error {
-	hash := make([]byte, LEGACY_HASH_SIZE)
-	w.Write(hash)
+func (r Record) MarshalToLegacy(path string, password string) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
 
-	_, err := crypt.Encode(w, password, r)
+	hash := make([]byte, LEGACY_HASH_SIZE)
+	file.Write(hash)
+
+	_, err = crypt.Encode(file, password, r)
 	return err
 }

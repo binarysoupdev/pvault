@@ -119,7 +119,7 @@ func TestLoadVaultRecordReturnsErrorWhenDatabaseLoadRecordFails(t *testing.T) {
 		Database: &database.DatabaseMock{
 			LoadRecordError: errors.New(""),
 		},
-		Index: data.NameMap{
+		Map: data.NameMap{
 			NAME: uuid.Nil,
 		},
 	}

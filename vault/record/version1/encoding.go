@@ -9,27 +9,29 @@ import (
 	"github.com/google/uuid"
 )
 
-func (r Record) Validate() error {
-	// TODO: implement
-	return nil
-}
+func Unmarshal(bytes []byte, password string, id uuid.UUID) (Record, error) {
+	version := binary.BigEndian.Uint16(bytes)
+	if version != VERSION {
+		return Record{}, errors.Format("incorrect version \"%d\"", version)
+	}
 
-func Decode(r io.Reader, password string, id uuid.UUID) (Record, error) {
-	length := make([]byte, 2)
-	r.Read(length)
+	length := binary.BigEndian.Uint16(bytes[2:])
+	name := string(bytes[2+2 : 2+2+length])
 
-	name := make([]byte, binary.BigEndian.Uint16(length))
-	r.Read(name)
-
-	record, err := crypt.Decode[Record](r, password)
+	record, err := crypt.Unmarshal[Record](password, bytes[2+2+length:])
 	if err != nil {
 		return Record{}, errors.Chain(err, "error decrypting record")
 	}
 
 	record.ID = id
-	record.Name = string(name)
+	record.Name = name
 
 	return record, nil
+}
+
+func (r Record) Validate() error {
+	// TODO: implement
+	return nil
 }
 
 func (r Record) Encode(w io.Writer, password string) error {

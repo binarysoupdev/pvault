@@ -9,6 +9,14 @@ import (
 	"github.com/google/uuid"
 )
 
+func Unmarshal(bytes []byte, password string) (Record, error) {
+	record, err := crypt.Unmarshal[Record](password, bytes)
+	if err != nil {
+		return Record{}, errors.Chain(err, "error decrypting record")
+	}
+	return record, nil
+}
+
 func (r Record) Validate() error {
 	errs := errors.Errors{}
 
@@ -20,14 +28,6 @@ func (r Record) Validate() error {
 	}
 
 	return errs.Collapse(", ")
-}
-
-func Decode(r io.Reader, password string) (Record, error) {
-	record, err := crypt.Decode[Record](r, password)
-	if err != nil {
-		return Record{}, errors.Chain(err, "error decrypting record")
-	}
-	return record, nil
 }
 
 func (r Record) Encode(w io.Writer, password string) error {

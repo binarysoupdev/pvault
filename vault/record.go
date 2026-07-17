@@ -59,13 +59,7 @@ func (v Vault) LoadRecord(name string, password string) (record.Record, error) {
 		return nil, errors.Format("name \"%s\" not found", name)
 	}
 
-	file, err := os.Open(v.Index.RecordPath(id))
-	if err != nil {
-		return nil, errors.Chain(err, "error opening record file")
-	}
-	defer file.Close()
-
-	r, err := record.Decode(file, password, id)
+	r, err := record.Load(v.Index.RecordPath(id), password, id)
 	if err != nil {
 		return nil, errors.Chain(err, "error decoding record")
 	}

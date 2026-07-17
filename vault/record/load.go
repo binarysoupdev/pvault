@@ -2,7 +2,7 @@ package record
 
 import (
 	"encoding/binary"
-	"io"
+	"os"
 	v1 "pvault/vault/record/version1"
 	v2 "pvault/vault/record/version2"
 
@@ -10,17 +10,19 @@ import (
 	"github.com/google/uuid"
 )
 
-func Decode(r io.Reader, password string, id uuid.UUID) (Record, error) {
-	header := make([]byte, 2)
-	r.Read(header)
+func Load(path string, password string, id uuid.UUID) (Record, error) {
+	bytes, err := os.ReadFile(path)
+	if err != nil {
+		return nil, errors.Chain(err, "error reading record file")
+	}
 
-	version := binary.BigEndian.Uint16(header)
+	version := binary.BigEndian.Uint16(bytes)
 
 	switch version {
 	case 1:
-		return v1.Decode(r, password, id)
+		return v1.Unmarshal(bytes, password, id)
 	case 2:
-		return v2.Decode(r, password)
+		return v2.Unmarshal(bytes, password)
 	default:
 		return nil, errors.Format("unsupported record version \"%d\"", version)
 	}

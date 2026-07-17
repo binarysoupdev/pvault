@@ -3,93 +3,90 @@ package v2_test
 import (
 	"fmt"
 	"path/filepath"
-	"pvault/vault"
 	"pvault/vault/data"
-	"pvault/vault/index/version2"
+	v2 "pvault/vault/index/version2"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
-	"github.com/binarysoupdev/tinsel/rand"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestSaveIndexWithInvalidPathReturnsError(t *testing.T) {
+func TestSaveMapWithInvalidPathReturnsError(t *testing.T) {
 	//-- arrange
-	db := version2.NewDatabase("invalid/index.bin")
+	idx := v2.NewIndex("invalid/index.bin")
 
 	//-- act
-	res := db.SaveIndex(data.NameMap{})
+	res := idx.SaveMap(data.NameMap{})
 
 	//-- assert
 	require.ErrorContains(t, res, "error creating index file")
 }
 
-func TestSaveIndexValidSavesIndex(t *testing.T) {
+func TestSaveMapReturnsNoErrorAndSavesMap(t *testing.T) {
 	//-- arrange
 	PATH := file.NewPath(t, "")
 
-	db := version2.NewDatabase(PATH)
+	idx := v2.NewIndex(PATH)
 
 	//-- act
-	res := db.SaveIndex(data.NameMap{})
+	res := idx.SaveMap(data.NameMap{})
 
 	//-- assert
 	require.NoError(t, res)
-	assert.FileExists(t, db.IndexPath())
+	assert.FileExists(t, idx.Filepath())
 }
 
-func TestLoadIndexWithFileNotFoundReturnsError(t *testing.T) {
+func TestLoadMapWithFileNotFoundReturnsError(t *testing.T) {
 	//-- arrange
-	db := version2.NewDatabase("invalid")
+	idx := v2.NewIndex("invalid")
 
 	//-- act
-	_, res := db.LoadIndex()
+	_, res := idx.LoadMap()
 
 	//-- assert
 	require.ErrorContains(t, res, "error reading index file")
 }
 
-func TestLoadIndexWithIncorrectVersionReturnError(t *testing.T) {
+func TestLoadMapWithIncorrectVersionReturnError(t *testing.T) {
 	//-- arrange
-	VERSION := vault.CURRENT_VERSION + 1
+	VERSION := v2.VERSION + 1
 
-	file, PATH := file.Create(t, version2.INDEX_FILE)
+	file, PATH := file.Create(t, v2.FILENAME)
 	file.Write([]byte{0, byte(VERSION), 0, 0})
 	file.Close()
 
-	db := version2.NewDatabase(filepath.Dir(PATH))
+	idx := v2.NewIndex(filepath.Dir(PATH))
 
 	//-- act
-	_, res := db.LoadIndex()
+	_, res := idx.LoadMap()
 
 	//-- assert
 	require.ErrorContains(t, res, fmt.Sprintf("incorrect version \"%d\"", VERSION))
 }
 
-func TestLoadIndexValidReturnIndex(t *testing.T) {
+func TestLoadMapReturnsMapAndNoError(t *testing.T) {
 	//-- arrange
-	db := version2.NewDatabase(file.NewPath(t, ""))
+	idx := v2.NewIndex(file.NewPath(t, ""))
 
-	rand := rand.New(0)
-	INDEX := data.NameMap{
-		rand.ASCII(10): uuid.New(),
-		rand.ASCII(15): uuid.New(),
-		rand.ASCII(20): uuid.New(),
+	MAP := data.NameMap{
+		"name1": uuid.New(),
+		"name2": uuid.New(),
+		"name3": uuid.New(),
 	}
 
-	err := db.SaveIndex(INDEX)
+	err := idx.SaveMap(MAP)
 	require.NoError(t, err)
 
 	//-- act
-	res, err := db.LoadIndex()
+	res, err := idx.LoadMap()
 	require.NoError(t, err)
 
 	//-- assert
-	require.Len(t, res, len(INDEX))
+	require.Len(t, res, len(MAP))
 
-	for key, val := range INDEX {
+	for key, val := range MAP {
 		assert.Contains(t, res, key)
 		assert.Equal(t, val, res[key])
 	}
