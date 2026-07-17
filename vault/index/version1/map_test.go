@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSaveMapLoadMapReturnMapAndNoError(t *testing.T) {
+func TestSaveMapLoadMapReturnsMapAndNoError(t *testing.T) {
 	//-- arrange
 	db := v1.NewIndex(file.NewPath(t, ""))
 

@@ -13,7 +13,7 @@ func EncodeFromLegacy(w io.Writer, name string, bytes []byte) {
 	w.Write(bytes[LEGACY_HASH_SIZE:])
 }
 
-func (r Record) MarshalToLegacy(path string, password string) error {
+func (r Record) SaveLegacy(path string, password string) error {
 	file, err := os.Create(path)
 	if err != nil {
 		return err

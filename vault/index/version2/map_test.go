@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSaveMapWithInvalidPathReturnsError(t *testing.T) {
+func TestSaveMapReturnsErrorWhenPathInvalid(t *testing.T) {
 	//-- arrange
 	idx := v2.NewIndex("invalid/index.bin")
 
@@ -38,7 +38,7 @@ func TestSaveMapReturnsNoErrorAndSavesMap(t *testing.T) {
 	assert.FileExists(t, idx.Filepath())
 }
 
-func TestLoadMapWithFileNotFoundReturnsError(t *testing.T) {
+func TestLoadMapReturnsErrorWhenFileNotFound(t *testing.T) {
 	//-- arrange
 	idx := v2.NewIndex("invalid")
 
@@ -49,7 +49,7 @@ func TestLoadMapWithFileNotFoundReturnsError(t *testing.T) {
 	require.ErrorContains(t, res, "error reading index file")
 }
 
-func TestLoadMapWithIncorrectVersionReturnError(t *testing.T) {
+func TestLoadMapReturnsErrorWhenVersionIncorrect(t *testing.T) {
 	//-- arrange
 	VERSION := v2.VERSION + 1
 

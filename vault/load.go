@@ -12,7 +12,7 @@ func Load(path string) (Vault, error) {
 	}
 	var err error
 
-	v.Index, err = index.Find(path)
+	v.Index, err = index.Load(path)
 	if err != nil {
 		return Vault{}, errors.Chain(err, "error finding index")
 	}

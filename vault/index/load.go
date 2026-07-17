@@ -10,7 +10,7 @@ import (
 	"github.com/binarysoupdev/go-commando/errors"
 )
 
-func Find(path string) (Index, error) {
+func Load(path string) (Index, error) {
 	_, err := os.Stat(filepath.Join(path, v2.FILENAME))
 	if err == nil {
 		return detectFromVersionHeader(path, v2.FILENAME)
@@ -25,25 +25,17 @@ func Find(path string) (Index, error) {
 }
 
 func detectFromVersionHeader(path, filename string) (Index, error) {
-	header := make([]byte, 2)
-
-	file, err := os.Open(filepath.Join(path, filename))
+	bytes, err := os.ReadFile(filepath.Join(path, filename))
 	if err != nil {
-		return nil, errors.Chain(err, "error opening index file")
-	}
-	defer file.Close()
-
-	_, err = file.Read(header)
-	if err != nil {
-		return nil, errors.Chain(err, "error reading version header")
+		return nil, errors.Chain(err, "error reading index file")
 	}
 
-	version := binary.BigEndian.Uint16(header)
+	version := binary.BigEndian.Uint16(bytes)
 
 	switch version {
 	case 2:
 		return v2.NewIndex(path), nil
 	default:
-		return nil, errors.Format("unsupported version \"%d\"", version)
+		return nil, errors.Format("unsupported index version \"%d\"", version)
 	}
 }

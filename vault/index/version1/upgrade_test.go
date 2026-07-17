@@ -26,7 +26,7 @@ func TestUpgradeReturnsNewIndexAndNoErrorAndUpgradesVault(t *testing.T) {
 		ID:            uuid.New(),
 		Name:          "name1",
 	}
-	require.NoError(t, r1.MarshalToLegacy(idx.RecordPath(r1.ID), PASSWORD))
+	require.NoError(t, r1.SaveLegacy(idx.RecordPath(r1.ID), PASSWORD))
 
 	r2 := record_v1.Record{
 		Password:      "password2",
@@ -36,7 +36,7 @@ func TestUpgradeReturnsNewIndexAndNoErrorAndUpgradesVault(t *testing.T) {
 		ID:            uuid.New(),
 		Name:          "name2",
 	}
-	require.NoError(t, r2.MarshalToLegacy(idx.RecordPath(r2.ID), PASSWORD))
+	require.NoError(t, r2.SaveLegacy(idx.RecordPath(r2.ID), PASSWORD))
 
 	MAP := data.NameMap{
 		r1.Name: r1.ID,

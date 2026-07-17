@@ -28,13 +28,7 @@ func (v Vault) SaveRecord(r record.Record, password string) error {
 		return errors.Chain(err, "error validating record")
 	}
 
-	file, err := os.Create(v.Index.RecordPath(r.GetID()))
-	if err != nil {
-		return errors.Chain(err, "error creating record file")
-	}
-	defer file.Close()
-
-	err = r.Encode(file, password)
+	err = r.SaveFile(v.Index.RecordPath(r.GetID()), password)
 	if err != nil {
 		return errors.Chain(err, "error encoding record")
 	}

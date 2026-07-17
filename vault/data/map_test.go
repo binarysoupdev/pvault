@@ -4,33 +4,31 @@ import (
 	"pvault/vault/data"
 	"testing"
 
-	"github.com/binarysoupdev/tinsel/rand"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestFindNameNameNotFoundReturnsNotFound(t *testing.T) {
+func TestFindNameReturnsNotFoundWhenNameNotFound(t *testing.T) {
 	//-- arrange
-	idx := data.NameMap{}
+	m := data.NameMap{}
 
 	//-- act
-	_, found := idx.FindName(uuid.Nil)
+	_, found := m.FindName(uuid.Nil)
 
 	//-- assert
 	assert.False(t, found)
 }
 
-func TestFindNameNameFoundReturnsName(t *testing.T) {
+func TestFindNameReturnsNameWhenNameFound(t *testing.T) {
 	//-- arrange
-	rand := rand.New(0)
-	NAME := rand.ASCII(15)
+	NAME := "name"
 	ID := uuid.New()
 
-	idx := data.NameMap{NAME: ID}
+	m := data.NameMap{NAME: ID}
 
 	//-- act
-	res, found := idx.FindName(ID)
+	res, found := m.FindName(ID)
 
 	//-- assert
 	assert.True(t, found)
@@ -39,22 +37,18 @@ func TestFindNameNameFoundReturnsName(t *testing.T) {
 
 func TestGetNamesReturnsAllNames(t *testing.T) {
 	//-- arrange
-	rand := rand.New(0)
-
-	idx := data.NameMap{
-		rand.ASCII(15): uuid.Nil,
-		rand.ASCII(15): uuid.Nil,
-		rand.ASCII(15): uuid.Nil,
-		rand.ASCII(15): uuid.Nil,
-		rand.ASCII(15): uuid.Nil,
+	m := data.NameMap{
+		"name1": uuid.Nil,
+		"name2": uuid.Nil,
+		"name3": uuid.Nil,
 	}
 
 	//-- act
-	res := idx.GetNames()
+	res := m.GetNames()
 
 	//-- assert
-	require.Len(t, res, len(idx))
-	for name := range idx {
+	require.Len(t, res, len(m))
+	for name := range m {
 		assert.Contains(t, res, name)
 	}
 }
@@ -63,14 +57,14 @@ func TestSearchNamesReturnsMatches(t *testing.T) {
 	//-- arrange
 	NAMES := []string{"Foo2", "Bar1", "Foo1"}
 
-	idx := data.NameMap{
+	m := data.NameMap{
 		NAMES[0]: uuid.Nil,
 		NAMES[1]: uuid.Nil,
 		NAMES[2]: uuid.Nil,
 	}
 
 	//-- act
-	res := idx.SearchNames("foo")
+	res := m.SearchNames("foo")
 
 	//-- assert
 	require.Len(t, res, 2)
