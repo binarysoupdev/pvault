@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"pvault/cmd"
+	"pvault/app/cmd"
 	"pvault/config"
 	"pvault/tools/clipboard"
 	"pvault/tools/qrcode"
