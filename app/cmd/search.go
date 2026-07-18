@@ -11,13 +11,13 @@ import (
 type SearchCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	flow.ConfigCommand
+	ConfigCommandBase
 }
 
 func NewSearchCommand(configLoader json.Loader[config.Config]) *SearchCommand {
 	return &SearchCommand{
-		CommandBase:   command.NewCommandBase("search", "search records in the vault"),
-		ConfigCommand: flow.NewConfigCommand(configLoader),
+		CommandBase:       command.NewCommandBase("search", "search records in the vault"),
+		ConfigCommandBase: NewConfigCommandBase(configLoader),
 	}
 }
 
@@ -34,7 +34,7 @@ func (cmd SearchCommand) Run(args []string) error {
 	search := flow.NewSearchFlow(cmd.Flags)
 	cmd.ParseFlags(args)
 
-	v, err := flow.LoadVault(cmd.Config.VaultPath)
+	v, err := flow.LoadLocalVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
 	}

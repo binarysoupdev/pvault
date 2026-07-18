@@ -1,4 +1,4 @@
-package vault_test
+package local_test
 
 import (
 	"pvault/app/vault/database"

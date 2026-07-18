@@ -13,13 +13,13 @@ import (
 type CreateCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	flow.ConfigCommand
+	ConfigCommandBase
 }
 
 func NewCreateCommand(configLoader json.Loader[config.Config]) *CreateCommand {
 	return &CreateCommand{
-		CommandBase:   command.NewCommandBase("create", "create a new vault record"),
-		ConfigCommand: flow.NewConfigCommand(configLoader),
+		CommandBase:       command.NewCommandBase("create", "create a new vault record"),
+		ConfigCommandBase: NewConfigCommandBase(configLoader),
 	}
 }
 
@@ -40,7 +40,7 @@ func (cmd CreateCommand) Run(args []string) error {
 		return errors.New("\"name\" cannot be empty")
 	}
 
-	v, err := flow.LoadVault(cmd.Config.VaultPath)
+	v, err := flow.LoadLocalVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-package flow_test
+package cmd_test
 
 import (
 	"fmt"

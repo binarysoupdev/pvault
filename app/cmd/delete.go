@@ -11,13 +11,13 @@ import (
 type DeleteCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	flow.ConfigCommand
+	ConfigCommandBase
 }
 
 func NewDeleteCommand(configLoader json.Loader[config.Config]) *DeleteCommand {
 	return &DeleteCommand{
-		CommandBase:   command.NewCommandBase("delete", "delete a record from the vault"),
-		ConfigCommand: flow.NewConfigCommand(configLoader),
+		CommandBase:       command.NewCommandBase("delete", "delete a record from the vault"),
+		ConfigCommandBase: NewConfigCommandBase(configLoader),
 	}
 }
 
@@ -34,7 +34,7 @@ func (cmd DeleteCommand) Run(args []string) error {
 	search := flow.NewSearchFlow(cmd.Flags)
 	cmd.ParseFlags(args)
 
-	v, err := flow.LoadVault(cmd.Config.VaultPath)
+	v, err := flow.LoadLocalVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
 	}

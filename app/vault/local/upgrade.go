@@ -1,4 +1,4 @@
-package vault
+package local
 
 import (
 	"github.com/binarysoupdev/go-commando/errors"

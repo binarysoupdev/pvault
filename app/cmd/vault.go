@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"pvault/app/flow"
+	"pvault/app/vault/local"
 	vault "pvault/app/vault/local"
 	"pvault/config"
 
@@ -14,13 +15,13 @@ import (
 type VaultCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	flow.ConfigCommand
+	ConfigCommandBase
 }
 
 func NewVaultCommand(configLoader json.Loader[config.Config]) *VaultCommand {
 	return &VaultCommand{
-		CommandBase:   command.NewCommandBase("vault", "configure the vault"),
-		ConfigCommand: flow.NewConfigCommand(configLoader),
+		CommandBase:       command.NewCommandBase("vault", "configure the vault"),
+		ConfigCommandBase: NewConfigCommandBase(configLoader),
 	}
 }
 
@@ -61,7 +62,9 @@ func (cmd VaultCommand) initialize() error {
 }
 
 func (cmd VaultCommand) backup() error {
-	v, err := vault.Load(cmd.Config.VaultPath)
+	v := local.NewVault(cmd.Config.VaultPath)
+
+	err := v.Load()
 	if err != nil {
 		return errors.Chain(err, "error loading vault")
 	}
@@ -70,7 +73,9 @@ func (cmd VaultCommand) backup() error {
 }
 
 func (cmd VaultCommand) upgrade() error {
-	v, err := vault.Load(cmd.Config.VaultPath)
+	v := local.NewVault(cmd.Config.VaultPath)
+
+	err := v.Load()
 	if err != nil {
 		return errors.Chain(err, "error loading vault")
 	}
@@ -78,7 +83,7 @@ func (cmd VaultCommand) upgrade() error {
 	if !v.IsOutOfDate() {
 		return errors.New("vault is up-to-date")
 	}
-	oldVersion := v.Version()
+	oldVersion := v.GetVersion()
 
 	err = flow.BackupVault(v, cmd.Config)
 	if err != nil {
@@ -90,17 +95,17 @@ func (cmd VaultCommand) upgrade() error {
 		return errors.Chain(err, "error upgrading vault")
 	}
 
-	style.BoldCreate.Printf("[+] Vault Upgraded (@v%d -> @v%d)\n", oldVersion, v.Version())
+	style.BoldCreate.Printf("[+] Vault Upgraded (@v%d -> @v%d)\n", oldVersion, v.GetVersion())
 	return nil
 }
 
 func (cmd VaultCommand) validate() error {
-	v, err := flow.LoadVault(cmd.Config.VaultPath)
+	v, err := flow.LoadLocalVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
 	}
 
-	style.BoldInfo.Printf("[=] Vault verified at \"%s\" (@v%d)\n", v.Path, v.Version())
+	style.BoldInfo.Printf("[=] Vault verified at \"%s\" (@v%d)\n", v.Path, v.GetVersion())
 	style.Info.Printf("[%d] records found\n", len(v.Map))
 
 	return nil

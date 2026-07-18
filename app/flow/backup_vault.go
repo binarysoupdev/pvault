@@ -4,35 +4,21 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	vault "pvault/app/vault/local"
+	"pvault/app/vault/local"
 	"pvault/config"
 	"time"
 
 	"github.com/binarysoupdev/go-commando/errors"
-
 	"github.com/binarysoupdev/got-style/style"
 )
 
-func LoadVault(path string) (vault.Vault, error) {
-	v, err := vault.Load(path)
-	if err != nil {
-		return vault.Vault{}, errors.New("error loading vault (run \"vault -init\" to repair)")
-	}
-
-	if v.IsOutOfDate() {
-		return vault.Vault{}, errors.Format("vault (@v%d) out-of-date (run \"vault -upgrade\" to repair)", v.Version())
-	}
-
-	return v, nil
-}
-
-func BackupVault(v vault.Vault, cfg config.Config) error {
+func BackupVault(v local.Vault, cfg config.Config) error {
 	err := cfg.ValidateBackupPath()
 	if err != nil {
 		return errors.Chain(err, "error validating backup path")
 	}
 
-	path := filepath.Join(cfg.BackupPath, fmt.Sprintf("%s (v%d)", time.Now().Format(time.DateTime), v.Version()))
+	path := filepath.Join(cfg.BackupPath, fmt.Sprintf("%s (v%d)", time.Now().Format(time.DateTime), v.GetVersion()))
 
 	err = os.MkdirAll(path, 0755)
 	if err != nil {

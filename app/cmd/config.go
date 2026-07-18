@@ -16,13 +16,13 @@ import (
 type ConfigCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	flow.ConfigCommand
+	ConfigCommandBase
 }
 
 func NewConfigCommand(configLoader json.Loader[config.Config]) *ConfigCommand {
 	return &ConfigCommand{
-		CommandBase:   command.NewCommandBase("config", "configure the application"),
-		ConfigCommand: flow.NewConfigCommand(configLoader),
+		CommandBase:       command.NewCommandBase("config", "configure the application"),
+		ConfigCommandBase: NewConfigCommandBase(configLoader),
 	}
 }
 
@@ -89,11 +89,11 @@ func (cmd ConfigCommand) validate() error {
 func (cmd ConfigCommand) validateVaultPath() {
 	fmt.Printf("%s \"%s\" ", style.Bold.Sprint("Vault Path:"), cmd.Config.VaultPath)
 
-	v, err := flow.LoadVault(cmd.Config.VaultPath)
+	v, err := flow.LoadLocalVault(cmd.Config.VaultPath)
 	if err != nil {
 		style.Error.Printf("-> %s\n", err)
 	} else {
-		style.Success.Printf("-> verified (@v%d)\n", v.Version())
+		style.Success.Printf("-> verified (@v%d)\n", v.GetVersion())
 	}
 }
 

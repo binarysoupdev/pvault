@@ -1,8 +1,8 @@
-package vault
+package local
 
 import "slices"
 
-func (v Vault) Search(term string) []string {
+func (v Vault) SearchNames(term string) []string {
 	var matches []string
 
 	if term == "" {

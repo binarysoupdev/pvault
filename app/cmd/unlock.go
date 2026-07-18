@@ -12,13 +12,13 @@ import (
 type UnlockCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	flow.ConfigCommand
+	ConfigCommandBase
 }
 
 func NewUnlockCommand(configLoader json.Loader[config.Config]) *UnlockCommand {
 	return &UnlockCommand{
-		CommandBase:   command.NewCommandBase("unlock", "unlock a record from the vault"),
-		ConfigCommand: flow.NewConfigCommand(configLoader),
+		CommandBase:       command.NewCommandBase("unlock", "unlock a record from the vault"),
+		ConfigCommandBase: NewConfigCommandBase(configLoader),
 	}
 }
 
@@ -35,7 +35,7 @@ func (cmd UnlockCommand) Run(args []string) error {
 	search := flow.NewSearchFlow(cmd.Flags)
 	cmd.ParseFlags(args)
 
-	v, err := flow.LoadVault(cmd.Config.VaultPath)
+	v, err := flow.LoadLocalVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
 	}

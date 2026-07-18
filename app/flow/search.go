@@ -3,7 +3,7 @@ package flow
 import (
 	"errors"
 	"flag"
-	vault "pvault/app/vault/local"
+	"pvault/app/vault"
 	"strings"
 
 	"github.com/binarysoupdev/got-style/style"
@@ -25,7 +25,7 @@ func NewSearchFlow(flags *flag.FlagSet) SearchFlow {
 }
 
 func (f SearchFlow) Display(v vault.Vault) error {
-	matches := v.Search(*f.term)
+	matches := v.SearchNames(*f.term)
 
 	if len(matches) == 0 {
 		return errors.New("no matches found")
@@ -36,7 +36,7 @@ func (f SearchFlow) Display(v vault.Vault) error {
 }
 
 func (f SearchFlow) Select(v vault.Vault) (string, error) {
-	matches := v.Search(*f.term)
+	matches := v.SearchNames(*f.term)
 
 	if len(matches) == 0 {
 		return "", errors.New("no matches found")

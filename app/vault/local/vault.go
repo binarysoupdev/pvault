@@ -1,4 +1,4 @@
-package vault
+package local
 
 import (
 	"os"
@@ -15,12 +15,18 @@ type Vault struct {
 	Map   data.NameMap
 }
 
-func (v Vault) Version() int {
+func NewVault(path string) Vault {
+	return Vault{
+		Path: path,
+	}
+}
+
+func (v Vault) GetVersion() int {
 	return v.Index.GetVersion()
 }
 
 func (v Vault) IsOutOfDate() bool {
-	return v.Version() < v2.VERSION
+	return v.GetVersion() < v2.VERSION
 }
 
 func InitializeNew(path string) (Vault, error) {

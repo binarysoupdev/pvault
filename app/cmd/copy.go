@@ -15,7 +15,7 @@ import (
 type CopyCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	flow.ConfigCommand
+	ConfigCommandBase
 
 	clipboard clipboard.Clipboard
 	qrcode    qrcode.Renderer
@@ -23,10 +23,10 @@ type CopyCommand struct {
 
 func NewCopyCommand(configLoader json.Loader[config.Config], clipboard clipboard.Clipboard, qrcode qrcode.Renderer) *CopyCommand {
 	return &CopyCommand{
-		CommandBase:   command.NewCommandBase("copy", "copy password/username of a record"),
-		ConfigCommand: flow.NewConfigCommand(configLoader),
-		clipboard:     clipboard,
-		qrcode:        qrcode,
+		CommandBase:       command.NewCommandBase("copy", "copy password/username of a record"),
+		ConfigCommandBase: NewConfigCommandBase(configLoader),
+		clipboard:         clipboard,
+		qrcode:            qrcode,
 	}
 }
 
@@ -50,7 +50,7 @@ func (cmd CopyCommand) Run(args []string) error {
 	qr := cmd.Flags.Bool("qr", false, "render as a qrcode")
 	cmd.ParseFlags(args)
 
-	v, err := flow.LoadVault(cmd.Config.VaultPath)
+	v, err := flow.LoadLocalVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
 	}

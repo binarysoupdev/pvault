@@ -15,13 +15,13 @@ import (
 type LockCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	flow.ConfigCommand
+	ConfigCommandBase
 }
 
 func NewLockCommand(configLoader json.Loader[config.Config]) *LockCommand {
 	return &LockCommand{
-		CommandBase:   command.NewCommandBase("lock", "lock a record in the vault"),
-		ConfigCommand: flow.NewConfigCommand(configLoader),
+		CommandBase:       command.NewCommandBase("lock", "lock a record in the vault"),
+		ConfigCommandBase: NewConfigCommandBase(configLoader),
 	}
 }
 
@@ -42,7 +42,7 @@ func (cmd LockCommand) Run(args []string) error {
 		return errors.New("\"path\" cannot be empty")
 	}
 
-	v, err := flow.LoadVault(cmd.Config.VaultPath)
+	v, err := flow.LoadLocalVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-package vault
+package local
 
 import (
 	"pvault/app/vault/index"
@@ -6,21 +6,18 @@ import (
 	"github.com/binarysoupdev/go-commando/errors"
 )
 
-func Load(path string) (Vault, error) {
-	v := Vault{
-		Path: path,
-	}
+func (v *Vault) Load() error {
 	var err error
 
-	v.Index, err = index.Load(path)
+	v.Index, err = index.Load(v.Path)
 	if err != nil {
-		return Vault{}, errors.Chain(err, "error finding index")
+		return errors.Chain(err, "error finding index")
 	}
 
 	v.Map, err = v.Index.LoadMap()
 	if err != nil {
-		return Vault{}, errors.Chain(err, "error loading index")
+		return errors.Chain(err, "error loading index")
 	}
 
-	return v, nil
+	return nil
 }
