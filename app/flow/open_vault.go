@@ -6,10 +6,8 @@ import (
 	"github.com/binarysoupdev/go-commando/errors"
 )
 
-func LoadLocalVault(path string) (*local.Vault, error) {
-	v := local.NewVault(path)
-
-	err := v.Load()
+func OpenLocalVault(path string) (*local.Vault, error) {
+	v, err := local.OpenVault(path)
 	if err != nil {
 		return nil, errors.New("error loading vault (run \"vault -init\" to repair)")
 	}

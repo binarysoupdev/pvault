@@ -50,7 +50,7 @@ func (cmd CopyCommand) Run(args []string) error {
 	qr := cmd.Flags.Bool("qr", false, "render as a qrcode")
 	cmd.ParseFlags(args)
 
-	v, err := flow.LoadLocalVault(cmd.Config.VaultPath)
+	v, err := flow.OpenLocalVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
 	}

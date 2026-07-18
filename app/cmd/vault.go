@@ -52,7 +52,7 @@ func (cmd VaultCommand) Run(args []string) error {
 }
 
 func (cmd VaultCommand) initialize() error {
-	_, err := vault.InitializeNew(cmd.Config.VaultPath)
+	_, err := vault.CreateNewVault(cmd.Config.VaultPath)
 	if err != nil {
 		return errors.Chain(err, "error initializing new vault")
 	}
@@ -62,9 +62,7 @@ func (cmd VaultCommand) initialize() error {
 }
 
 func (cmd VaultCommand) backup() error {
-	v := local.NewVault(cmd.Config.VaultPath)
-
-	err := v.Load()
+	v, err := local.OpenVault(cmd.Config.VaultPath)
 	if err != nil {
 		return errors.Chain(err, "error loading vault")
 	}
@@ -73,9 +71,7 @@ func (cmd VaultCommand) backup() error {
 }
 
 func (cmd VaultCommand) upgrade() error {
-	v := local.NewVault(cmd.Config.VaultPath)
-
-	err := v.Load()
+	v, err := local.OpenVault(cmd.Config.VaultPath)
 	if err != nil {
 		return errors.Chain(err, "error loading vault")
 	}
@@ -100,7 +96,7 @@ func (cmd VaultCommand) upgrade() error {
 }
 
 func (cmd VaultCommand) validate() error {
-	v, err := flow.LoadLocalVault(cmd.Config.VaultPath)
+	v, err := flow.OpenLocalVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
 	}

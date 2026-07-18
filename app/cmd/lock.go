@@ -42,7 +42,7 @@ func (cmd LockCommand) Run(args []string) error {
 		return errors.New("\"path\" cannot be empty")
 	}
 
-	v, err := flow.LoadLocalVault(cmd.Config.VaultPath)
+	v, err := flow.OpenLocalVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
 	}

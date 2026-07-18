@@ -16,7 +16,6 @@ type Mock struct {
 	NameParam       string
 	SearchTermParam string
 
-	LoadError           error
 	ValidateRecordError error
 	SaveRecordError     error
 	LoadRecordError     error
@@ -25,10 +24,6 @@ type Mock struct {
 
 func (m Mock) GetVersion() int {
 	return m.Version
-}
-
-func (m Mock) Load() error {
-	return m.LoadError
 }
 
 func (m *Mock) SearchNames(term string) []string {

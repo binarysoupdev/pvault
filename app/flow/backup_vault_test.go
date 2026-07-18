@@ -35,7 +35,7 @@ func TestBackupVaultReturnsNoErrorAndBacksUpVault(t *testing.T) {
 		BackupPath: file.NewPath(t, ""),
 	}
 
-	v, err := local.InitializeNewVault(CONFIG.VaultPath)
+	v, err := local.CreateNewVault(CONFIG.VaultPath)
 	require.NoError(t, err)
 
 	out := pipe.OpenStdout(1)
