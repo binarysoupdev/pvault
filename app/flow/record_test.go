@@ -4,36 +4,34 @@ import (
 	"errors"
 	"path/filepath"
 	"pvault/app/flow"
-	"pvault/app/vault/data"
-	vault "pvault/app/vault/local"
-	record "pvault/app/vault/record/version2"
+	"pvault/app/vault"
+	v2 "pvault/app/vault/record/version2"
 	"pvault/config"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestSaveVaultRecordReturnsErrorWithInvalidRecord(t *testing.T) {
 	//-- arrange
-	VAULT := vault.Vault{}
-	RECORD := record.Record{}
+	RECORD := v2.NewEmptyRecord("name")
+	v := &vault.Mock{
+		ValidateRecordError: errors.New(""),
+	}
 
 	//-- act
-	res := flow.SaveVaultRecord(VAULT, RECORD)
+	res := flow.SaveVaultRecord(v, RECORD)
 
 	//-- arrange
 	require.ErrorContains(t, res, "error validating record")
+	assert.Equal(t, RECORD, v.Record)
 }
 
 func TestSaveVaultRecordReturnsErrorWhenVerifyPasswordDoesNotMatch(t *testing.T) {
 	//-- arrange
-	VAULT := vault.Vault{}
-	RECORD := record.NewEmptyRecord("name")
-
 	const PASSWORD = "Password123!"
 
 	io := pipe.OpenStdio(2, 2, false)
@@ -44,7 +42,7 @@ func TestSaveVaultRecordReturnsErrorWhenVerifyPasswordDoesNotMatch(t *testing.T)
 	io.Queue("PASSWORD: ", PASSWORD+"x")
 	io.EndQueue()
 
-	res := flow.SaveVaultRecord(VAULT, RECORD)
+	res := flow.SaveVaultRecord(&vault.Mock{}, v2.Record{})
 
 	//-- assert
 	require.ErrorContains(t, res, "passwords do not match")
@@ -52,14 +50,12 @@ func TestSaveVaultRecordReturnsErrorWhenVerifyPasswordDoesNotMatch(t *testing.T)
 	assert.Contains(t, io.ReadLine(), "Verify PASSWORD")
 }
 
-func TestSaveVaultRecordReturnsErrorWhenDatabaseSaveRecordFails(t *testing.T) {
+func TestSaveVaultRecordReturnsErrorWhenVaultSaveRecordReturnsError(t *testing.T) {
 	//-- arrange
-	VAULT := vault.Vault{
-		Database: &database.DatabaseMock{
-			SaveRecordError: errors.New(""),
-		},
+	RECORD := v2.NewEmptyRecord("name")
+	v := &vault.Mock{
+		SaveRecordError: errors.New(""),
 	}
-	RECORD := record.NewEmptyRecord("name")
 
 	const PASSWORD = "Password123!"
 
@@ -71,23 +67,21 @@ func TestSaveVaultRecordReturnsErrorWhenDatabaseSaveRecordFails(t *testing.T) {
 	io.Queue("PASSWORD: ", PASSWORD)
 	io.EndQueue()
 
-	res := flow.SaveVaultRecord(VAULT, RECORD)
+	res := flow.SaveVaultRecord(v, RECORD)
 
 	//-- assert
 	require.ErrorContains(t, res, "error saving vault record")
 	assert.Contains(t, io.ReadLine(), "New PASSWORD")
 	assert.Contains(t, io.ReadLine(), "Verify PASSWORD")
+
+	assert.Equal(t, RECORD, v.Record)
+	assert.Equal(t, PASSWORD, v.PasswordParam)
 }
 
-func TestSaveVaultRecordReturnsNoErrorAndSavesRecordWhenValid(t *testing.T) {
+func TestSaveVaultRecordReturnsNoErrorAndSavesRecord(t *testing.T) {
 	//-- arrange
-	mock := database.DatabaseMock{}
-
-	VAULT := vault.Vault{
-		Database: &mock,
-		Index:    data.NameMap{},
-	}
-	RECORD := record.NewEmptyRecord("name")
+	RECORD := v2.NewEmptyRecord("name")
+	v := &vault.Mock{}
 
 	const PASSWORD = "Password123!"
 
@@ -99,7 +93,7 @@ func TestSaveVaultRecordReturnsNoErrorAndSavesRecordWhenValid(t *testing.T) {
 	io.Queue("PASSWORD: ", PASSWORD)
 	io.EndQueue()
 
-	res := flow.SaveVaultRecord(VAULT, RECORD)
+	res := flow.SaveVaultRecord(v, RECORD)
 
 	//-- assert
 	require.NoError(t, res)
@@ -108,20 +102,15 @@ func TestSaveVaultRecordReturnsNoErrorAndSavesRecordWhenValid(t *testing.T) {
 	assert.Contains(t, io.ReadLine(), "Verify PASSWORD")
 	assert.Contains(t, io.ReadLine(), "[+] Saved Record")
 
-	assert.Equal(t, RECORD, mock.Record)
-	assert.Contains(t, mock.Index, RECORD.Name)
+	assert.Equal(t, RECORD, v.Record)
+	assert.Equal(t, PASSWORD, v.PasswordParam)
 }
 
-func TestLoadVaultRecordReturnsErrorWhenDatabaseLoadRecordFails(t *testing.T) {
+func TestLoadVaultRecordReturnsErrorWhenVaultLoadRecordReturnsError(t *testing.T) {
 	//-- arrange
 	const NAME = "name"
-	VAULT := vault.Vault{
-		Database: &database.DatabaseMock{
-			LoadRecordError: errors.New(""),
-		},
-		Map: data.NameMap{
-			NAME: uuid.Nil,
-		},
+	v := &vault.Mock{
+		LoadRecordError: errors.New(""),
 	}
 
 	const PASSWORD = "Password123!"
@@ -133,26 +122,23 @@ func TestLoadVaultRecordReturnsErrorWhenDatabaseLoadRecordFails(t *testing.T) {
 	io.Queue("PASSWORD: ", PASSWORD)
 	io.EndQueue()
 
-	_, res := flow.LoadVaultRecord(VAULT, NAME)
+	_, res := flow.LoadVaultRecord(v, NAME)
 
 	//-- assert
 	require.ErrorContains(t, res, "error loading vault record")
 	assert.Contains(t, io.ReadLine(), "Enter PASSWORD")
+
+	assert.Equal(t, NAME, v.NameParam)
+	assert.Equal(t, PASSWORD, v.PasswordParam)
 }
 
-func TestLoadVaultRecordReturnsRecordAndNoErrorWhenValid(t *testing.T) {
+func TestLoadVaultRecordReturnsRecordAndNoError(t *testing.T) {
 	//-- arrange
 	const NAME = "name"
-	mock := database.DatabaseMock{
-		Record: record.NewEmptyRecord(NAME),
+	v := &vault.Mock{
+		Record: v2.NewEmptyRecord(NAME),
 	}
 
-	VAULT := vault.Vault{
-		Database: &mock,
-		Index: data.NameMap{
-			NAME: uuid.Nil,
-		},
-	}
 	const PASSWORD = "Password123!"
 
 	io := pipe.OpenStdio(1, 2, false)
@@ -162,7 +148,7 @@ func TestLoadVaultRecordReturnsRecordAndNoErrorWhenValid(t *testing.T) {
 	io.Queue("PASSWORD: ", PASSWORD)
 	io.EndQueue()
 
-	res, err := flow.LoadVaultRecord(VAULT, NAME)
+	res, err := flow.LoadVaultRecord(v, NAME)
 
 	//-- assert
 	require.NoError(t, err)
@@ -170,12 +156,13 @@ func TestLoadVaultRecordReturnsRecordAndNoErrorWhenValid(t *testing.T) {
 	assert.Contains(t, io.ReadLine(), "Enter PASSWORD")
 	assert.Contains(t, io.ReadLine(), "[=] Loaded Record")
 
-	assert.Equal(t, res, mock.Record)
+	assert.Equal(t, v.Record, res)
+	assert.Equal(t, NAME, v.NameParam)
+	assert.Equal(t, PASSWORD, v.PasswordParam)
 }
 
 func TestDeleteVaultRecordReturnsErrorWhenVerifyNameDoesNotMatch(t *testing.T) {
 	//-- arrange
-	VAULT := vault.Vault{}
 	const NAME = "name"
 
 	io := pipe.OpenStdio(1, 1, false)
@@ -185,23 +172,19 @@ func TestDeleteVaultRecordReturnsErrorWhenVerifyNameDoesNotMatch(t *testing.T) {
 	io.Queue("NAME: ", NAME+"x")
 	io.EndQueue()
 
-	res := flow.DeleteVaultRecord(VAULT, NAME)
+	res := flow.DeleteVaultRecord(&vault.Mock{}, NAME)
 
 	//-- assert
 	require.ErrorContains(t, res, "names do not match")
 	assert.Contains(t, io.ReadLine(), "Confirm NAME")
 }
 
-func TestDeleteVaultRecordReturnsErrorWhenDatabaseDeleteRecordFails(t *testing.T) {
+func TestDeleteVaultRecordReturnsErrorWhenVaultDeleteRecordReturnsError(t *testing.T) {
 	//-- arrange
 	const NAME = "name"
-	VAULT := vault.Vault{
-		Database: &database.DatabaseMock{
-			DeleteRecordError: errors.New(""),
-		},
-		Index: data.NameMap{
-			NAME: uuid.Nil,
-		},
+	v := &vault.Mock{
+		Record:            v2.NewEmptyRecord(NAME),
+		DeleteRecordError: errors.New(""),
 	}
 
 	io := pipe.OpenStdio(1, 1, false)
@@ -211,25 +194,20 @@ func TestDeleteVaultRecordReturnsErrorWhenDatabaseDeleteRecordFails(t *testing.T
 	io.Queue("NAME: ", NAME)
 	io.EndQueue()
 
-	res := flow.DeleteVaultRecord(VAULT, NAME)
+	res := flow.DeleteVaultRecord(v, NAME)
 
 	//-- assert
 	require.ErrorContains(t, res, "error deleting vault record")
 	assert.Contains(t, io.ReadLine(), "Confirm NAME")
+
+	assert.Equal(t, NAME, v.NameParam)
 }
 
-func TestDeleteVaultRecordReturnsNoErrorAndDeletesRecordWhenValid(t *testing.T) {
+func TestDeleteVaultRecordReturnsNoErrorAndDeletesRecord(t *testing.T) {
 	//-- arrange
 	const NAME = "name"
-	mock := database.DatabaseMock{
-		Record: record.NewEmptyRecord(NAME),
-	}
-
-	VAULT := vault.Vault{
-		Database: &mock,
-		Index: data.NameMap{
-			NAME: uuid.Nil,
-		},
+	v := &vault.Mock{
+		Record: v2.NewEmptyRecord(NAME),
 	}
 
 	io := pipe.OpenStdio(1, 2, false)
@@ -239,15 +217,15 @@ func TestDeleteVaultRecordReturnsNoErrorAndDeletesRecordWhenValid(t *testing.T) 
 	io.Queue("NAME: ", NAME)
 	io.EndQueue()
 
-	err := flow.DeleteVaultRecord(VAULT, NAME)
+	err := flow.DeleteVaultRecord(v, NAME)
 
 	//-- assert
 	require.NoError(t, err)
 
 	assert.Contains(t, io.ReadLine(), "Confirm NAME")
-	assert.Contains(t, io.ReadLine(), "[-] Deleted Record")
+	assert.Contains(t, io.ReadLine(), "[-] Deleted Record: "+v.Record.GetID().String())
 
-	assert.NotContains(t, mock.Index, NAME)
+	assert.Equal(t, NAME, v.NameParam)
 }
 
 func TestSaveOutputRecordReturnsErrorWhenOutputPathInvalid(t *testing.T) {
@@ -255,7 +233,7 @@ func TestSaveOutputRecordReturnsErrorWhenOutputPathInvalid(t *testing.T) {
 	CONFIG := config.Config{
 		OutputPath: "invalid",
 	}
-	RECORD := record.Record{}
+	RECORD := v2.Record{}
 
 	//-- act
 	res := flow.SaveOutputRecord(CONFIG, RECORD)
@@ -264,12 +242,12 @@ func TestSaveOutputRecordReturnsErrorWhenOutputPathInvalid(t *testing.T) {
 	require.ErrorContains(t, res, "error validating output path")
 }
 
-func TestSaveOutputRecordReturnsNoErrorAndSavesJsonWhenValid(t *testing.T) {
+func TestSaveOutputRecordReturnsNoErrorAndSavesJson(t *testing.T) {
 	//-- arrange
 	CONFIG := config.Config{
 		OutputPath: file.NewPath(t, ""),
 	}
-	RECORD := record.NewEmptyRecord("name")
+	RECORD := v2.NewEmptyRecord("name")
 
 	out := pipe.OpenStdout(1)
 	defer out.Close()
