@@ -29,7 +29,7 @@ func (v Vault) IsOutOfDate() bool {
 	return v.GetVersion() < v2.VERSION
 }
 
-func InitializeNew(path string) (Vault, error) {
+func InitializeNewVault(path string) (Vault, error) {
 	_, err := os.Stat(path)
 	if err == nil || !os.IsNotExist(err) {
 		return Vault{}, errors.New("vault path already exists")
