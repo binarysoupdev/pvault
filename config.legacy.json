@@ -1,6 +1,0 @@
-{
-    "version": 1,
-    "vault_path": "tmp/legacy",
-    "backup_path": "tmp/backups",
-    "output_path": "tmp/output"
-}
