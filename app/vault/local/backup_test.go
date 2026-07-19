@@ -2,17 +2,20 @@ package local_test
 
 import (
 	"fmt"
-	record "pvault/app/vault/record/version2"
+	"os"
+	"pvault/app/vault/data"
+	"pvault/app/vault/index"
+	"pvault/app/vault/local"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
-	"github.com/binarysoupdev/tinsel/rand"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 )
 
 type BackupTestSuite struct {
 	suite.Suite
-	Vault vault.Vault
+	Vault local.Vault
 }
 
 func TestBackupTestSuite(t *testing.T) {
@@ -20,12 +23,17 @@ func TestBackupTestSuite(t *testing.T) {
 }
 
 func (s *BackupTestSuite) SetupTest() {
-	var err error
-	s.Vault, err = vault.InitializeNew(file.NewPath(s.T(), "vault"))
-	s.Require().NoError(err)
+	s.Vault = local.Vault{
+		Index: &index.Mock{
+			Path: file.NewPath(s.T(), ""),
+		},
+		Map: data.NameMap{},
+	}
 }
 
-func (s *BackupTestSuite) TestBackupWherePathNotFoundReturnsError() {
+//===================================
+
+func (s *BackupTestSuite) TestBackupReturnsErrorWhenPathNotFound() {
 	//-- act
 	res := s.Vault.Backup("invalid")
 
@@ -33,7 +41,7 @@ func (s *BackupTestSuite) TestBackupWherePathNotFoundReturnsError() {
 	s.Require().ErrorContains(res, "error reading backup directory")
 }
 
-func (s *BackupTestSuite) TestBackupWherePathIsNotADirReturnsError() {
+func (s *BackupTestSuite) TestBackupReturnsErrorWhenPathIsNotADir() {
 	//-- arrange
 	PATH := file.CreateEmpty(s.T(), "backups.txt")
 
@@ -44,15 +52,19 @@ func (s *BackupTestSuite) TestBackupWherePathIsNotADirReturnsError() {
 	s.Require().ErrorContains(res, fmt.Sprintf("\"%s\" is not a directory", PATH))
 }
 
-func (s *BackupTestSuite) TestBackupValidBacksUpIndexFileAndRecord() {
+func (s *BackupTestSuite) TestBackupReturnsNoErrorAndBacksUpIndexFileAndRecords() {
 	//-- arrange
 	BACKUP := file.NewPath(s.T(), "")
+	IDS := uuid.UUIDs{uuid.New(), uuid.New()}
+	DATA := [][]byte{{0, 0, 0}, {1, 1, 1}, {2, 2, 2}}
 
-	rand := rand.New(0)
-	const NUM_RECORDS = 5
-	for range NUM_RECORDS {
-		err := s.Vault.SaveRecord(record.NewEmptyRecord(rand.ASCII(10)), rand.ASCII(30))
-		s.Require().NoError(err)
+	s.Require().NoError(os.WriteFile(s.Vault.Index.Filepath(), DATA[0], 0666))
+	s.Require().NoError(os.WriteFile(s.Vault.Index.RecordPath(IDS[0]), DATA[1], 0666))
+	s.Require().NoError(os.WriteFile(s.Vault.Index.RecordPath(IDS[1]), DATA[2], 0666))
+
+	s.Vault.Map = data.NameMap{
+		"foo1": IDS[0],
+		"foo2": IDS[1],
 	}
 
 	//-- act
@@ -60,9 +72,19 @@ func (s *BackupTestSuite) TestBackupValidBacksUpIndexFileAndRecord() {
 
 	//-- arrange
 	s.Require().NoError(res)
+	idx := index.Mock{
+		Path: BACKUP,
+	}
 
-	v, err := vault.Open(BACKUP)
+	data0, err := os.ReadFile(idx.Filepath())
 	s.Require().NoError(err)
+	s.Assert().Equal(DATA[0], data0)
 
-	s.Assert().Equal(s.Vault.Index, v.Index)
+	data1, err := os.ReadFile(idx.RecordPath(IDS[0]))
+	s.Require().NoError(err)
+	s.Assert().Equal(DATA[1], data1)
+
+	data2, err := os.ReadFile(idx.RecordPath(IDS[1]))
+	s.Require().NoError(err)
+	s.Assert().Equal(DATA[2], data2)
 }

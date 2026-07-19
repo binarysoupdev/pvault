@@ -1,74 +1,61 @@
 package local_test
 
 import (
-	"pvault/app/vault/database"
-	"pvault/app/vault/index/version2"
+	"pvault/app/vault/index"
+	v2 "pvault/app/vault/index/version2"
+	"pvault/app/vault/local"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/errors"
-
-	"github.com/binarysoupdev/tinsel/file"
-	"github.com/stretchr/testify/suite"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-type UpgradeTestSuite struct {
-	suite.Suite
-	DatabaseMock database.DatabaseMock
-	Vault        vault.Vault
-}
-
-func TestUpgradeTestSuite(t *testing.T) {
-	suite.Run(t, &UpgradeTestSuite{})
-}
-
-func (s *UpgradeTestSuite) SetupTest() {
-	s.DatabaseMock = database.DatabaseMock{
-		Version: vault.CURRENT_VERSION - 1,
+func TestUpgradeReturnsErrorWhenVaultIsNotOutOfDate(t *testing.T) {
+	//-- arrange
+	v := local.Vault{
+		Index: &index.Mock{
+			Version: local.CURRENT_VERSION,
+		},
 	}
 
-	s.Vault = vault.Vault{
-		Path:     file.NewPath(s.T(), ""),
-		Database: &s.DatabaseMock,
+	//-- act
+	res := v.Upgrade()
+
+	//-- arrange
+	require.ErrorContains(t, res, "vault is up-to-date")
+}
+
+func TestUpgradeReturnsErrorWhenIndexUpgradeReturnsError(t *testing.T) {
+	//-- arrange
+	v := local.Vault{
+		Index: &index.Mock{
+			Version:      local.CURRENT_VERSION - 1,
+			UpgradeError: errors.New(""),
+		},
 	}
-}
-
-func (s *UpgradeTestSuite) TestIsOutOfDateWhereVersionLessThanCurrentReturnsTrue() {
-	//-- act
-	res := s.Vault.IsOutOfDate()
-
-	//-- arrange
-	s.Require().True(res)
-}
-
-func (s *UpgradeTestSuite) TestUpgradeWhereVaultIsNotOutOfDateReturnsError() {
-	//-- arrange
-	s.DatabaseMock.Version = vault.CURRENT_VERSION
 
 	//-- act
-	res := s.Vault.Upgrade()
+	res := v.Upgrade()
 
 	//-- arrange
-	s.Require().ErrorContains(res, "vault is up-to-date")
+	require.ErrorContains(t, res, "error upgrading index")
 }
 
-func (s *UpgradeTestSuite) TestUpgradeWhereDatabaseUpgradeFailsReturnsError() {
+func TestUpgradeReturnsNoErrorAndSetsNewIndex(t *testing.T) {
 	//-- arrange
-	s.DatabaseMock.UpgradeError = errors.New("")
+	INDEX := v2.NewIndex("path")
+	v := local.Vault{
+		Index: &index.Mock{
+			Version:      local.CURRENT_VERSION - 1,
+			UpgradeIndex: INDEX,
+		},
+	}
 
 	//-- act
-	res := s.Vault.Upgrade()
+	res := v.Upgrade()
 
 	//-- arrange
-	s.Require().ErrorContains(res, "error upgrading database")
-}
-
-func (s *UpgradeTestSuite) TestUpgradeValidRunsUpgrade() {
-	//-- act
-	res := s.Vault.Upgrade()
-
-	//-- arrange
-	s.Require().NoError(res)
-
-	s.Require().IsType(version2.Database{}, s.Vault.Database)
-	s.Assert().FileExists(s.Vault.Database.(version2.Database).IndexPath())
+	require.NoError(t, res)
+	assert.Equal(t, INDEX, v.Index)
 }

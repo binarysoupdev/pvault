@@ -18,7 +18,7 @@ func TestUpgradeReturnsNewIndexAndNoErrorAndUpgradesVault(t *testing.T) {
 	idx := index_v1.NewIndex(file.NewPath(t, ""))
 	const PASSWORD = "Password123!"
 
-	r1 := record_v1.Record{
+	R1 := record_v1.Record{
 		Password:      "password1",
 		Username:      "username1",
 		URL:           "url1",
@@ -26,9 +26,9 @@ func TestUpgradeReturnsNewIndexAndNoErrorAndUpgradesVault(t *testing.T) {
 		ID:            uuid.New(),
 		Name:          "name1",
 	}
-	require.NoError(t, r1.SaveLegacy(idx.RecordPath(r1.ID), PASSWORD))
+	require.NoError(t, R1.SaveLegacy(idx.RecordPath(R1.ID), PASSWORD))
 
-	r2 := record_v1.Record{
+	R2 := record_v1.Record{
 		Password:      "password2",
 		Username:      "username2",
 		URL:           "url2",
@@ -36,11 +36,11 @@ func TestUpgradeReturnsNewIndexAndNoErrorAndUpgradesVault(t *testing.T) {
 		ID:            uuid.New(),
 		Name:          "name2",
 	}
-	require.NoError(t, r2.SaveLegacy(idx.RecordPath(r2.ID), PASSWORD))
+	require.NoError(t, R2.SaveLegacy(idx.RecordPath(R2.ID), PASSWORD))
 
 	MAP := data.NameMap{
-		r1.Name: r1.ID,
-		r2.Name: r2.ID,
+		R1.Name: R1.ID,
+		R2.Name: R2.ID,
 	}
 	require.NoError(t, idx.SaveMap(MAP))
 
@@ -55,11 +55,11 @@ func TestUpgradeReturnsNewIndexAndNoErrorAndUpgradesVault(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, m, MAP)
 
-	newR1, err := record.Load(newIdx.RecordPath(r1.ID), PASSWORD, r1.ID)
+	r1, err := record.Load(newIdx.RecordPath(R1.ID), PASSWORD, R1.ID)
 	require.NoError(t, err)
-	assert.Equal(t, r1, newR1.(record_v1.Record))
+	assert.Equal(t, R1, r1.(record_v1.Record))
 
-	newR2, err := record.Load(newIdx.RecordPath(r2.ID), PASSWORD, r2.ID)
+	r2, err := record.Load(newIdx.RecordPath(R2.ID), PASSWORD, R2.ID)
 	require.NoError(t, err)
-	assert.Equal(t, r2, newR2.(record_v1.Record))
+	assert.Equal(t, R2, r2.(record_v1.Record))
 }

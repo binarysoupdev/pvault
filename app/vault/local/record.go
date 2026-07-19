@@ -9,9 +9,9 @@ import (
 )
 
 func (v Vault) ValidateRecord(r record.Record) error {
-	err := r.Validate()
+	err := record.Validate(r)
 	if err != nil {
-		return err
+		return errors.Chain(err, "record invalid")
 	}
 
 	existingId, ok := v.Map[r.GetName()]
@@ -30,7 +30,7 @@ func (v Vault) SaveRecord(r record.Record, password string) error {
 
 	err = r.SaveFile(v.Index.RecordPath(r.GetID()), password)
 	if err != nil {
-		return errors.Chain(err, "error encoding record")
+		return errors.Chain(err, "error saving record")
 	}
 
 	existingName, ok := v.Map.FindName(r.GetID())
@@ -41,7 +41,7 @@ func (v Vault) SaveRecord(r record.Record, password string) error {
 
 	err = v.Index.SaveMap(v.Map)
 	if err != nil {
-		return errors.Chain(err, "error saving index to database")
+		return errors.Chain(err, "error saving index map")
 	}
 
 	return nil
@@ -55,7 +55,7 @@ func (v Vault) LoadRecord(name string, password string) (record.Record, error) {
 
 	r, err := record.Load(v.Index.RecordPath(id), password, id)
 	if err != nil {
-		return nil, errors.Chain(err, "error decoding record")
+		return nil, errors.Chain(err, "error loading record")
 	}
 
 	return r, nil
@@ -69,14 +69,14 @@ func (v Vault) DeleteRecord(name string) (uuid.UUID, error) {
 
 	err := os.Remove(v.Index.RecordPath(id))
 	if err != nil {
-		return uuid.Nil, errors.Chain(err, "error deleting record file")
+		return uuid.Nil, errors.Chain(err, "error deleting record")
 	}
 
 	delete(v.Map, name)
 
 	err = v.Index.SaveMap(v.Map)
 	if err != nil {
-		return id, errors.Chain(err, "error saving index to database")
+		return id, errors.Chain(err, "error saving index map")
 	}
 
 	return id, nil

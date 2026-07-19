@@ -26,7 +26,7 @@ func (v Vault) Backup(path string) error {
 	for _, id := range v.Map {
 		err := v.backupFile(path, v.Index.RecordPath(id))
 		if err != nil {
-			return errors.Chain(err, "error backing record")
+			continue
 		}
 	}
 
@@ -38,19 +38,19 @@ func (Vault) backupFile(dir string, src string) error {
 
 	s, err := os.Open(src)
 	if err != nil {
-		return errors.Chain(err, "error opening source file")
+		return err
 	}
 	defer s.Close()
 
 	d, err := os.Create(dest)
 	if err != nil {
-		return errors.Chain(err, "error creating destination file")
+		return err
 	}
 	defer d.Close()
 
 	_, err = io.Copy(d, s)
 	if err != nil {
-		return errors.Chain(err, "error copying data")
+		return err
 	}
 
 	return nil

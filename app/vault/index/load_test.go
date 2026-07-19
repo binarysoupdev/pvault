@@ -22,7 +22,7 @@ func TestLoadReturnsErrorWhenFileNotFound(t *testing.T) {
 	_, res := index.Load(PATH)
 
 	//-- assert
-	require.ErrorContains(t, res, "index file not found")
+	require.ErrorContains(t, res, fmt.Sprintf("index file not found at \"%s\"", PATH))
 }
 
 func TestLoadReturnsErrorWhenVersionUnsupported(t *testing.T) {

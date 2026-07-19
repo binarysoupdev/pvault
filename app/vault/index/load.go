@@ -21,7 +21,7 @@ func Load(path string) (Index, error) {
 		return v1.NewIndex(path), nil
 	}
 
-	return nil, errors.New("index file not found")
+	return nil, errors.Format("index file not found at \"%s\"", path)
 }
 
 func detectFromVersionHeader(path, filename string) (Index, error) {

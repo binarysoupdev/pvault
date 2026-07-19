@@ -23,10 +23,6 @@ func (r Record) GetName() string {
 	return r.Name
 }
 
-func (r Record) Validate() error {
-	return nil
-}
-
 func (r Record) SaveFile(path string, password string) error {
 	file, err := os.Create(path)
 	if err != nil {

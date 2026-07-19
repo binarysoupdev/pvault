@@ -25,19 +25,6 @@ func (r Record) Upgrade() Record {
 	return r
 }
 
-func (r Record) Validate() error {
-	errs := errors.Errors{}
-
-	if r.ID == uuid.Nil {
-		errs.AddNew("id cannot be nil (all zeroes)")
-	}
-	if r.Name == "" {
-		errs.AddNew("name cannot be empty")
-	}
-
-	return errs.Collapse(", ")
-}
-
 func (r Record) SaveFile(path string, password string) error {
 	file, err := os.Create(path)
 	if err != nil {

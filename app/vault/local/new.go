@@ -42,12 +42,12 @@ func OpenVault(path string) (Vault, error) {
 
 	v.Index, err = index.Load(v.Path)
 	if err != nil {
-		return Vault{}, errors.Chain(err, "error finding index")
+		return Vault{}, errors.Chain(err, "error loading index")
 	}
 
 	v.Map, err = v.Index.LoadMap()
 	if err != nil {
-		return Vault{}, errors.Chain(err, "error loading index")
+		return Vault{}, errors.Chain(err, "error loading index map")
 	}
 
 	return v, nil

@@ -3,8 +3,10 @@ package local
 import (
 	"pvault/app/vault/data"
 	"pvault/app/vault/index"
-	v2 "pvault/app/vault/index/version2"
+	index_v2 "pvault/app/vault/index/version2"
 )
+
+const CURRENT_VERSION = index_v2.VERSION
 
 type Vault struct {
 	Path  string
@@ -14,8 +16,4 @@ type Vault struct {
 
 func (v Vault) GetVersion() int {
 	return v.Index.GetVersion()
-}
-
-func (v Vault) IsOutOfDate() bool {
-	return v.GetVersion() < v2.VERSION
 }

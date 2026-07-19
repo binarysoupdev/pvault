@@ -26,32 +26,10 @@ func (s *RecordSuite) SetupTest() {
 		Name:     "name",
 		Username: "username",
 		Password: "password",
-		//Other:    map[string]any{},
 	}
 }
 
 //=====================================
-
-func (s *RecordSuite) TestValidateReturnsErrorWhenInvalid() {
-	//-- arrange
-	s.Record.ID = uuid.Nil
-	s.Record.Name = ""
-
-	//-- act
-	res := s.Record.Validate()
-
-	//-- assert
-	s.Assert().ErrorContains(res, "id cannot be nil (all zeroes)")
-	s.Assert().ErrorContains(res, "name cannot be empty")
-}
-
-func (s *RecordSuite) TestValidateReturnsNoErrorWhenValid() {
-	//-- act
-	res := s.Record.Validate()
-
-	//-- assert
-	s.Require().NoError(res)
-}
 
 func (s *RecordSuite) TestSaveFileReturnsNoErrorAndEncodesRecordToFile() {
 	//-- arrange
