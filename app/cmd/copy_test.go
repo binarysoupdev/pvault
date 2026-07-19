@@ -3,9 +3,10 @@ package cmd_test
 import (
 	"errors"
 	"os"
+	"pvault/app/cmd"
+	"pvault/app/vault/local"
 	vault "pvault/app/vault/local"
 	v2 "pvault/app/vault/record/version2"
-	"pvault/cmd"
 	"pvault/config"
 	"pvault/tools/clipboard"
 	"pvault/tools/qrcode"
@@ -61,7 +62,7 @@ func (s *CopyTestSuite) SetupTest() {
 
 	s.Password = rand.ASCII(30)
 
-	s.Vault, err = vault.InitializeNew(s.Config.VaultPath)
+	s.Vault, err = local.CreateNewVault(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	err = s.Vault.SaveRecord(s.Record, s.Password)

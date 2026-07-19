@@ -18,7 +18,7 @@ func TestLoadLocalVaultReturnsErrorWithInvalidPath(t *testing.T) {
 	_, res := flow.OpenLocalVault("invalid")
 
 	//-- assert
-	require.ErrorContains(t, res, "error loading vault")
+	require.ErrorContains(t, res, "error opening vault")
 }
 
 func TestLoadLocalVaultReturnsErrorWhenVaultOutOfDate(t *testing.T) {

@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"pvault/app/cmd"
 	v1 "pvault/app/vault/index/version1"
-	"pvault/cmd"
+	"pvault/app/vault/local"
 	"pvault/config"
 	"testing"
 
@@ -174,7 +175,7 @@ func (s *ConfigTestSuite) TestRunValidateWithInvalidOutputPathPrintsError() {
 
 func (s *ConfigTestSuite) TestRunValidatePassConfigPrintsConfig() {
 	//-- arrange
-	_, err := vault.InitializeNew(s.Config.VaultPath)
+	_, err := local.CreateNewVault(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(4)
@@ -189,7 +190,7 @@ func (s *ConfigTestSuite) TestRunValidatePassConfigPrintsConfig() {
 
 	vaultPath := out.ReadLine()
 	s.Assert().Contains(vaultPath, s.Config.VaultPath)
-	s.Assert().Contains(vaultPath, fmt.Sprintf("verified (@v%d)", vault.CURRENT_VERSION))
+	s.Assert().Contains(vaultPath, fmt.Sprintf("verified (@v%d)", local.CURRENT_VERSION))
 
 	backupPath := out.ReadLine()
 	s.Assert().Contains(backupPath, s.Config.BackupPath)

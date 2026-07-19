@@ -2,9 +2,9 @@ package cmd_test
 
 import (
 	"os"
-	vault "pvault/app/vault/local"
+	"pvault/app/cmd"
+	"pvault/app/vault/local"
 	v2 "pvault/app/vault/record/version2"
-	"pvault/cmd"
 	"pvault/config"
 	"testing"
 
@@ -43,7 +43,7 @@ func (s *LockTestSuite) SetupTest() {
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
-	_, err = vault.InitializeNew(s.Config.VaultPath)
+	_, err = local.CreateNewVault(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
@@ -113,7 +113,7 @@ func (s *LockTestSuite) TestRunInvalidRecord() {
 
 func (s *LockTestSuite) TestRunInvalidNameAlreadyExists() {
 	//-- arrange
-	v, err := vault.Open(s.Config.VaultPath)
+	v, err := local.OpenVault(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
@@ -172,7 +172,7 @@ func (s *LockTestSuite) TestRunValidSaveNew() {
 	s.Assert().Contains(io.ReadLine(), "[-] "+s.RecordPath)
 	s.Assert().NoFileExists(s.RecordPath)
 
-	v, err := vault.Open(s.Config.VaultPath)
+	v, err := local.OpenVault(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	res, err := v.LoadRecord(s.Record.Name, PASSWORD)
@@ -188,7 +188,7 @@ func (s *LockTestSuite) TestRunValidUpdateExisting() {
 	rand := rand.New(0)
 	PASSWORD := rand.ASCII(30)
 
-	v, err := vault.Open(s.Config.VaultPath)
+	v, err := local.OpenVault(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	err = v.SaveRecord(OLD_RECORD, PASSWORD+"x")
@@ -213,7 +213,7 @@ func (s *LockTestSuite) TestRunValidUpdateExisting() {
 	s.Assert().Contains(io.ReadLine(), "[-] "+s.RecordPath)
 	s.Assert().NoFileExists(s.RecordPath)
 
-	v, err = vault.Open(v.Path)
+	v, err = local.OpenVault(v.Path)
 	s.Require().NoError(err)
 
 	res, err := v.LoadRecord(s.Record.Name, PASSWORD)

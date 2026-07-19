@@ -9,7 +9,7 @@ import (
 func OpenLocalVault(path string) (*local.Vault, error) {
 	v, err := local.OpenVault(path)
 	if err != nil {
-		return nil, errors.New("error loading vault (run \"vault -init\" to repair)")
+		return nil, errors.New("error opening vault (run \"vault -init\" to repair)")
 	}
 
 	if v.IsOutOfDate() {

@@ -2,7 +2,7 @@ package cmd_test
 
 import (
 	"fmt"
-	"pvault/app/flow"
+	"pvault/app/cmd"
 	"pvault/config"
 	"testing"
 
@@ -12,9 +12,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestConfigCommandLoadConfigReturnsErrorWhenConfigNotFound(t *testing.T) {
+func TestConfigCommandBaseLoadConfigReturnsErrorWhenConfigNotFound(t *testing.T) {
 	//-- arrange
-	cmd := flow.NewConfigCommand(
+	cmd := cmd.NewConfigCommandBase(
 		json.NewLoader[config.Config]("invalid"),
 	)
 
@@ -25,9 +25,9 @@ func TestConfigCommandLoadConfigReturnsErrorWhenConfigNotFound(t *testing.T) {
 	require.ErrorContains(t, res, "invalid config path")
 }
 
-func TestConfigCommandLoadConfigReturnsErrorWhenConfigIsInvalidJson(t *testing.T) {
+func TestConfigCommandBaseLoadConfigReturnsErrorWhenConfigIsInvalidJson(t *testing.T) {
 	//-- arrange
-	cmd := flow.NewConfigCommand(
+	cmd := cmd.NewConfigCommandBase(
 		json.NewLoader[config.Config](file.CreateEmpty(t, "invalid.json")),
 	)
 
@@ -38,9 +38,9 @@ func TestConfigCommandLoadConfigReturnsErrorWhenConfigIsInvalidJson(t *testing.T
 	require.ErrorContains(t, res, "error loading config")
 }
 
-func TestConfigCommandLoadConfigReturnsErrorWhenUsingInvalidVersion(t *testing.T) {
+func TestConfigCommandBaseLoadConfigReturnsErrorWhenUsingInvalidVersion(t *testing.T) {
 	//-- arrange
-	cmd := flow.NewConfigCommand(
+	cmd := cmd.NewConfigCommandBase(
 		json.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	)
 
@@ -57,9 +57,9 @@ func TestConfigCommandLoadConfigReturnsErrorWhenUsingInvalidVersion(t *testing.T
 	require.ErrorContains(t, res, fmt.Sprintf("unsupported config version \"%d\"", CONFIG.Version))
 }
 
-func TestConfigCommandLoadConfigReturnsNoErrorAndLoadsConfigWhenValid(t *testing.T) {
+func TestConfigCommandBaseLoadConfigReturnsNoErrorAndLoadsConfigWhenValid(t *testing.T) {
 	//-- arrange
-	cmd := flow.NewConfigCommand(
+	cmd := cmd.NewConfigCommandBase(
 		json.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	)
 

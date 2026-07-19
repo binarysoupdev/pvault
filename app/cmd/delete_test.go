@@ -3,9 +3,10 @@ package cmd_test
 import (
 	"fmt"
 	"os"
+	"pvault/app/cmd"
+	"pvault/app/vault/local"
 	vault "pvault/app/vault/local"
 	v2 "pvault/app/vault/record/version2"
-	"pvault/cmd"
 	"pvault/config"
 	"testing"
 
@@ -47,7 +48,7 @@ func (s *DeleteTestSuite) SetupTest() {
 	rand := rand.New(0)
 	s.Record = v2.NewEmptyRecord(rand.ASCII(15))
 
-	s.Vault, err = vault.InitializeNew(s.Config.VaultPath)
+	s.Vault, err = local.CreateNewVault(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	err = s.Vault.SaveRecord(s.Record, rand.ASCII(30))
@@ -91,9 +92,6 @@ func (s *DeleteTestSuite) TestRunInvalidNoResults() {
 
 func (s *DeleteTestSuite) TestRunIncorrectConfirmName() {
 	//-- arrange
-	err := s.Vault.Database.DeleteRecord(s.Record.ID)
-	s.Require().NoError(err)
-
 	io := pipe.OpenStdio(1, 2, true)
 	defer io.Close()
 
@@ -128,7 +126,8 @@ func (s *DeleteTestSuite) TestRunValid() {
 	s.Assert().Contains(io.ReadLine(), "Confirm NAME: "+s.Record.Name)
 	s.Assert().Contains(io.ReadLine(), "[-] Deleted Record: "+s.Record.ID.String())
 
-	err := s.Vault.ReloadIndex()
+	var err error
+	s.Vault.Map, err = s.Vault.Index.LoadMap()
 	s.Require().NoError(err)
 
 	_, err = s.Vault.LoadRecord(s.Record.Name, "")

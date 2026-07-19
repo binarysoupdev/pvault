@@ -64,7 +64,7 @@ func (cmd VaultCommand) initialize() error {
 func (cmd VaultCommand) backup() error {
 	v, err := local.OpenVault(cmd.Config.VaultPath)
 	if err != nil {
-		return errors.Chain(err, "error loading vault")
+		return errors.Chain(err, "error opening vault")
 	}
 
 	return flow.BackupVault(v, cmd.Config)
@@ -73,7 +73,7 @@ func (cmd VaultCommand) backup() error {
 func (cmd VaultCommand) upgrade() error {
 	v, err := local.OpenVault(cmd.Config.VaultPath)
 	if err != nil {
-		return errors.Chain(err, "error loading vault")
+		return errors.Chain(err, "error opening vault")
 	}
 
 	if !v.IsOutOfDate() {

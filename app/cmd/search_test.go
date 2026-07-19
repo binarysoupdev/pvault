@@ -2,9 +2,9 @@ package cmd_test
 
 import (
 	"os"
-	vault "pvault/app/vault/local"
+	"pvault/app/cmd"
+	"pvault/app/vault/local"
 	record "pvault/app/vault/record/version2"
-	"pvault/cmd"
 	"pvault/config"
 	"testing"
 
@@ -40,7 +40,7 @@ func (s *SearchTestSuite) SetupTest() {
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
-	_, err = vault.InitializeNew(s.Config.VaultPath)
+	_, err = local.CreateNewVault(s.Config.VaultPath)
 	s.Require().NoError(err)
 }
 
@@ -87,7 +87,7 @@ func (s *SearchTestSuite) TestRunValidDisplaySearchResults() {
 	rand := rand.New(0)
 	NAME := rand.ASCII(15)
 
-	v, err := vault.Open(s.Config.VaultPath)
+	v, err := local.OpenVault(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	err = v.SaveRecord(record.NewEmptyRecord(NAME), rand.ASCII(30))

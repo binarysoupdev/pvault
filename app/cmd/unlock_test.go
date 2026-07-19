@@ -3,10 +3,11 @@ package cmd_test
 import (
 	"os"
 	"path/filepath"
+	"pvault/app/cmd"
+	"pvault/app/vault/local"
 	vault "pvault/app/vault/local"
 	v1 "pvault/app/vault/record/version1"
 	v2 "pvault/app/vault/record/version2"
-	"pvault/cmd"
 	"pvault/config"
 	"testing"
 
@@ -51,7 +52,7 @@ func (s *UnlockTestSuite) SetupTest() {
 	s.Record = v2.NewEmptyRecord(rand.ASCII(15))
 	s.Password = rand.ASCII(30)
 
-	s.Vault, err = vault.InitializeNew(s.Config.VaultPath)
+	s.Vault, err = local.CreateNewVault(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	err = s.Vault.SaveRecord(s.Record, s.Password)

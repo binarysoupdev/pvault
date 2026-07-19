@@ -3,9 +3,9 @@ package cmd_test
 import (
 	"os"
 	"path/filepath"
-	vault "pvault/app/vault/local"
+	"pvault/app/cmd"
+	"pvault/app/vault/local"
 	v2 "pvault/app/vault/record/version2"
-	"pvault/cmd"
 	"pvault/config"
 	"testing"
 
@@ -23,7 +23,7 @@ type CreateTestSuite struct {
 	ConfigLoader json.Loader[config.Config]
 	Config       config.Config
 
-	Vault vault.Vault
+	Vault local.Vault
 }
 
 func TestCreateCommandSuite(t *testing.T) {
@@ -44,7 +44,7 @@ func (s *CreateTestSuite) SetupTest() {
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
-	s.Vault, err = vault.InitializeNew(s.Config.VaultPath)
+	s.Vault, err = local.CreateNewVault(s.Config.VaultPath)
 	s.Require().NoError(err)
 }
 
@@ -106,7 +106,7 @@ func (s *CreateTestSuite) TestRunInvalidNameAlreadyExists() {
 	rand := rand.New(0)
 	NAME := rand.ASCII(15)
 
-	v, err := vault.Open(s.Config.VaultPath)
+	v, err := local.OpenVault(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	err = v.SaveRecord(v2.NewEmptyRecord(NAME), rand.ASCII(30))
@@ -171,7 +171,7 @@ func (s *CreateTestSuite) TestRunValid() {
 	OUTPUT_FILE := filepath.Join(s.Config.OutputPath, ID.String()+".json")
 	s.Assert().Contains(io.ReadLine(), "[+] "+OUTPUT_FILE)
 
-	err = s.Vault.ReloadIndex()
+	s.Vault.Map, err = s.Vault.Index.LoadMap()
 	s.Require().NoError(err)
 
 	r1, err := json.UnmarshalFile[v2.Record](OUTPUT_FILE)

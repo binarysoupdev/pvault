@@ -3,11 +3,11 @@ package cmd_test
 import (
 	"fmt"
 	"os"
+	"pvault/app/cmd"
 	"pvault/app/vault/data"
 	v1 "pvault/app/vault/index/version1"
-	vault "pvault/app/vault/local"
+	"pvault/app/vault/local"
 	record "pvault/app/vault/record/version2"
-	"pvault/cmd"
 	"pvault/config"
 	"regexp"
 	"testing"
@@ -108,7 +108,7 @@ func (s *VaultTestSuite) TestRunBackupFailsWithInvalidBackupPath() {
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
-	_, err = vault.InitializeNew(s.Config.VaultPath)
+	_, err = local.CreateNewVault(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	//-- act
@@ -122,7 +122,7 @@ func (s *VaultTestSuite) TestRunBackupPassesAndBacksUpVault() {
 	//-- arrange
 	DIR_REGEX := regexp.MustCompile(`"([^"]*)"`)
 
-	_, err := vault.InitializeNew(s.Config.VaultPath)
+	_, err := local.CreateNewVault(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(1)
@@ -157,7 +157,7 @@ func (s *VaultTestSuite) TestRunUpgradeFailsWithInvalidVault() {
 
 func (s *VaultTestSuite) TestRunUpgradeFailsWhenVaultIsUpToDate() {
 	//-- arrange
-	_, err := vault.InitializeNew(s.Config.VaultPath)
+	_, err := local.CreateNewVault(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	//-- act
@@ -175,7 +175,7 @@ func (s *VaultTestSuite) TestRunUpgradeFailsWithInvalidBackupPath() {
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
-	err = v1.NewIndex(s.Config.VaultPath).Initialize(data.NameMap{})
+	err = v1.NewIndex(s.Config.VaultPath).SaveMap(data.NameMap{})
 	s.Require().NoError(err)
 
 	//-- act
@@ -194,7 +194,7 @@ func (s *VaultTestSuite) TestRunUpgradePassesAndCreatesBackupAndUpgradesDatabase
 	s.Require().NoError(err)
 
 	v1 := v1.NewIndex(s.Config.VaultPath)
-	err = v1.Initialize(data.NameMap{})
+	err = v1.SaveMap(data.NameMap{})
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(2)
@@ -213,10 +213,10 @@ func (s *VaultTestSuite) TestRunUpgradePassesAndCreatesBackupAndUpgradesDatabase
 	require.Len(s.T(), match, 2)
 	assert.DirExists(s.T(), match[1])
 
-	v, err := vault.Open(s.Config.VaultPath)
+	v, err := local.OpenVault(s.Config.VaultPath)
 	s.Require().NoError(err)
 
-	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("[+] Vault Upgraded (@v%d -> @v%d)", v1.GetVersion(), v.Version()))
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("[+] Vault Upgraded (@v%d -> @v%d)", v1.GetVersion(), v.GetVersion()))
 }
 
 func (s *VaultTestSuite) TestRunValidateWithInvalidVaultFails() {
@@ -234,7 +234,7 @@ func (s *VaultTestSuite) TestRunValidateWithInvalidVaultFails() {
 
 func (s *VaultTestSuite) TestRunValidatePassPrintsVaultPathAndRecordCount() {
 	//-- arrange
-	v, err := vault.InitializeNew(s.Config.VaultPath)
+	v, err := local.CreateNewVault(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
@@ -253,6 +253,6 @@ func (s *VaultTestSuite) TestRunValidatePassPrintsVaultPathAndRecordCount() {
 
 	//-- assert
 	s.RequireResultPass()
-	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault verified at \"%s\" (@v%d)", v.Path, v.Version()))
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault verified at \"%s\" (@v%d)", v.Path, v.GetVersion()))
 	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("[%d] records found", NUM_RECORDS))
 }
