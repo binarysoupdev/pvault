@@ -1,7 +1,7 @@
 package local
 
 import (
-	"os"
+	"pvault/app/vault/database"
 	"pvault/app/vault/record"
 
 	"github.com/binarysoupdev/go-commando/errors"
@@ -28,7 +28,7 @@ func (v Vault) SaveRecord(r record.Record, password string) error {
 		return errors.Chain(err, "error validating record")
 	}
 
-	err = r.SaveFile(v.Index.RecordPath(r.GetID()), password)
+	err = database.SaveRecord(v.Database, r, password)
 	if err != nil {
 		return errors.Chain(err, "error saving record")
 	}
@@ -39,9 +39,9 @@ func (v Vault) SaveRecord(r record.Record, password string) error {
 	}
 	v.Map[r.GetName()] = r.GetID()
 
-	err = v.Index.SaveMap(v.Map)
+	err = database.SaveIndex(v.Database, v.Map)
 	if err != nil {
-		return errors.Chain(err, "error saving index map")
+		return errors.Chain(err, "error saving index")
 	}
 
 	return nil
@@ -53,7 +53,7 @@ func (v Vault) LoadRecord(name string, password string) (record.Record, error) {
 		return nil, errors.Format("name \"%s\" not found", name)
 	}
 
-	r, err := record.Load(v.Index.RecordPath(id), password, id)
+	r, err := database.LoadRecord(v.Database, id, password)
 	if err != nil {
 		return nil, errors.Chain(err, "error loading record")
 	}
@@ -67,14 +67,14 @@ func (v Vault) DeleteRecord(name string) (uuid.UUID, error) {
 		return uuid.Nil, errors.Format("name \"%s\" not found", name)
 	}
 
-	err := os.Remove(v.Index.RecordPath(id))
+	err := database.DeleteRecord(v.Database, id)
 	if err != nil {
 		return uuid.Nil, errors.Chain(err, "error deleting record")
 	}
 
 	delete(v.Map, name)
 
-	err = v.Index.SaveMap(v.Map)
+	err = database.SaveIndex(v.Database, v.Map)
 	if err != nil {
 		return id, errors.Chain(err, "error saving index map")
 	}

@@ -25,7 +25,7 @@ func CreateNewVault(path string) (Vault, error) {
 		Map:      index.IndexMap{},
 	}
 
-	err = v.Database.EncodeIndex(v.Map)
+	err = database.SaveIndex(v.Database, v.Map)
 	if err != nil {
 		return Vault{}, errors.Chain(err, "error saving initial index")
 	}
@@ -39,9 +39,9 @@ func OpenVault(path string) (Vault, error) {
 		return Vault{}, errors.Chain(err, "error opening database")
 	}
 
-	idx, err := db.DecodeIndex()
+	idx, err := database.LoadIndex(db)
 	if err != nil {
-		return Vault{}, errors.Chain(err, "error loading index map")
+		return Vault{}, errors.Chain(err, "error loading index")
 	}
 
 	return Vault{
