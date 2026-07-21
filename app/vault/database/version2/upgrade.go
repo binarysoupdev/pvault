@@ -46,7 +46,7 @@ func (db Database) upgradeIndex(target v3.Database) error {
 	defer file.Close()
 
 	version := make([]byte, 2)
-	binary.BigEndian.PutUint16(version, uint16(target.GetVersion()))
+	binary.BigEndian.PutUint16(version, uint16(index.VERSION))
 	file.Write(version)
 
 	return nil
