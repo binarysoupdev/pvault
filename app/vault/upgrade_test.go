@@ -1,9 +1,8 @@
-package local_test
+package vault_test
 
 import (
 	"pvault/app/vault/index"
 	v2 "pvault/app/vault/index/version2"
-	"pvault/app/vault/local"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/errors"

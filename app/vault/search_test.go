@@ -1,8 +1,8 @@
-package local_test
+package vault_test
 
 import (
+	vault "pvault/app/vault"
 	"pvault/app/vault/index"
-	vault "pvault/app/vault/local"
 	"testing"
 
 	"github.com/google/uuid"

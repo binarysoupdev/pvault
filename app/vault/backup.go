@@ -1,4 +1,4 @@
-package local
+package vault
 
 import (
 	"io"

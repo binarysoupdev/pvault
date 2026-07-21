@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"pvault/app/vault/local"
+	"pvault/app/vault"
 	"pvault/config"
 	"time"
 
@@ -12,7 +12,20 @@ import (
 	"github.com/binarysoupdev/got-style/style"
 )
 
-func BackupVault(v local.Vault, cfg config.Config) error {
+func OpenVault(path string) (vault.Vault, error) {
+	v, err := vault.Open(path)
+	if err != nil {
+		return vault.Vault{}, errors.New("error opening vault (run \"vault -init\" to repair)")
+	}
+
+	if v.IsOutOfDate() {
+		return vault.Vault{}, errors.Format("vault (@v%d) out-of-date (run \"vault -upgrade\" to repair)", v.GetVersion())
+	}
+
+	return v, nil
+}
+
+func BackupVault(v vault.Vault, cfg config.Config) error {
 	err := cfg.ValidateBackupPath()
 	if err != nil {
 		return errors.Chain(err, "error validating backup path")

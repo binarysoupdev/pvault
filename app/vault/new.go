@@ -1,4 +1,4 @@
-package local
+package vault
 
 import (
 	"os"
@@ -9,7 +9,7 @@ import (
 	"github.com/binarysoupdev/go-commando/errors"
 )
 
-func CreateNewVault(path string) (Vault, error) {
+func CreateNew(path string) (Vault, error) {
 	_, err := os.Stat(path)
 	if err == nil || !os.IsNotExist(err) {
 		return Vault{}, errors.New("vault path already exists")
@@ -33,7 +33,7 @@ func CreateNewVault(path string) (Vault, error) {
 	return v, nil
 }
 
-func OpenVault(path string) (Vault, error) {
+func Open(path string) (Vault, error) {
 	db, err := database.Open(path)
 	if err != nil {
 		return Vault{}, errors.Chain(err, "error opening database")

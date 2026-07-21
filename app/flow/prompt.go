@@ -8,12 +8,12 @@ import (
 	"golang.org/x/term"
 )
 
-func Prompt(prompt string) string {
+func prompt(prompt string) string {
 	fmt.Print(prompt)
 	return readStdin()
 }
 
-func PromptPassword(prompt string) string {
+func promptPassword(prompt string) string {
 	fmt.Print(prompt)
 
 	password, err := term.ReadPassword(int(os.Stdin.Fd()))

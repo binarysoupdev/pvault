@@ -1,9 +1,9 @@
-package local_test
+package vault_test
 
 import (
 	"path/filepath"
+	vault "pvault/app/vault"
 	index_v2 "pvault/app/vault/index/version2"
-	vault "pvault/app/vault/local"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"

@@ -89,7 +89,7 @@ func (cmd ConfigCommand) validate() error {
 func (cmd ConfigCommand) validateVaultPath() {
 	fmt.Printf("%s \"%s\" ", style.Bold.Sprint("Vault Path:"), cmd.Config.VaultPath)
 
-	v, err := flow.OpenLocalVault(cmd.Config.VaultPath)
+	v, err := flow.OpenVault(cmd.Config.VaultPath)
 	if err != nil {
 		style.Error.Printf("-> %s\n", err)
 	} else {

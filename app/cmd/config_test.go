@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"pvault/app/cmd"
 	v1 "pvault/app/vault/index/version1"
-	"pvault/app/vault/local"
 	"pvault/config"
 	"testing"
 

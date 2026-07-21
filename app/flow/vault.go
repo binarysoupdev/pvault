@@ -1,21 +1,33 @@
 package flow
 
 import (
-	"pvault/app/vault"
+	"pvault/app/vault/record"
 	v2 "pvault/app/vault/record/version2"
 
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/binarysoupdev/got-style/style"
+	"github.com/google/uuid"
 )
 
-func SaveVaultRecord(v vault.Vault, r v2.Record) error {
+type Vault interface {
+	GetVersion() int
+
+	SearchNames(term string) []string
+
+	ValidateRecord(r record.Record) error
+	SaveRecord(r record.Record, password string) error
+	LoadRecord(name string, password string) (record.Record, error)
+	DeleteRecord(name string) (uuid.UUID, error)
+}
+
+func SaveVaultRecord(v Vault, r v2.Record) error {
 	err := v.ValidateRecord(r)
 	if err != nil {
 		return errors.Chain(err, "error validating record")
 	}
 
-	password := PromptPassword("New PASSWORD: ")
-	if PromptPassword("Verify PASSWORD: ") != password {
+	password := promptPassword("New PASSWORD: ")
+	if promptPassword("Verify PASSWORD: ") != password {
 		return errors.New("passwords do not match")
 	}
 
@@ -28,8 +40,8 @@ func SaveVaultRecord(v vault.Vault, r v2.Record) error {
 	return nil
 }
 
-func LoadVaultRecord(v vault.Vault, name string) (v2.Record, error) {
-	password := PromptPassword("Enter PASSWORD: ")
+func LoadVaultRecord(v Vault, name string) (v2.Record, error) {
+	password := promptPassword("Enter PASSWORD: ")
 
 	r, err := v.LoadRecord(name, password)
 	if err != nil {
@@ -40,8 +52,8 @@ func LoadVaultRecord(v vault.Vault, name string) (v2.Record, error) {
 	return r.Upgrade(), nil
 }
 
-func DeleteVaultRecord(v vault.Vault, name string) error {
-	if Prompt("Confirm NAME: ") != name {
+func DeleteVaultRecord(v Vault, name string) error {
+	if prompt("Confirm NAME: ") != name {
 		return errors.New("names do not match")
 	}
 

@@ -2,8 +2,7 @@ package cmd
 
 import (
 	"pvault/app/flow"
-	"pvault/app/vault/local"
-	vault "pvault/app/vault/local"
+	"pvault/app/vault"
 	"pvault/config"
 
 	"github.com/binarysoupdev/go-commando/command"
@@ -52,7 +51,7 @@ func (cmd VaultCommand) Run(args []string) error {
 }
 
 func (cmd VaultCommand) initialize() error {
-	_, err := vault.CreateNewVault(cmd.Config.VaultPath)
+	_, err := vault.CreateNew(cmd.Config.VaultPath)
 	if err != nil {
 		return errors.Chain(err, "error initializing new vault")
 	}
@@ -62,7 +61,7 @@ func (cmd VaultCommand) initialize() error {
 }
 
 func (cmd VaultCommand) backup() error {
-	v, err := local.OpenVault(cmd.Config.VaultPath)
+	v, err := vault.Open(cmd.Config.VaultPath)
 	if err != nil {
 		return errors.Chain(err, "error opening vault")
 	}
@@ -71,7 +70,7 @@ func (cmd VaultCommand) backup() error {
 }
 
 func (cmd VaultCommand) upgrade() error {
-	v, err := local.OpenVault(cmd.Config.VaultPath)
+	v, err := vault.Open(cmd.Config.VaultPath)
 	if err != nil {
 		return errors.Chain(err, "error opening vault")
 	}
@@ -96,7 +95,7 @@ func (cmd VaultCommand) upgrade() error {
 }
 
 func (cmd VaultCommand) validate() error {
-	v, err := flow.OpenLocalVault(cmd.Config.VaultPath)
+	v, err := flow.OpenVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
 	}

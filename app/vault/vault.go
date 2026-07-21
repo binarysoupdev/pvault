@@ -1,18 +1,22 @@
 package vault
 
 import (
-	"pvault/app/vault/record"
-
-	"github.com/google/uuid"
+	"pvault/app/vault/database"
+	db_v3 "pvault/app/vault/database/version3"
+	"pvault/app/vault/index"
 )
 
-type Vault interface {
-	GetVersion() int
+const CURRENT_VERSION = db_v3.VERSION
 
-	SearchNames(term string) []string
+type Vault struct {
+	Database database.Database
+	Map      index.IndexMap
+}
 
-	ValidateRecord(r record.Record) error
-	SaveRecord(r record.Record, password string) error
-	LoadRecord(name string, password string) (record.Record, error)
-	DeleteRecord(name string) (uuid.UUID, error)
+func (v Vault) GetVersion() int {
+	return v.Database.GetVersion()
+}
+
+func (v Vault) GetPath() string {
+	return v.Database.GetPath()
 }
