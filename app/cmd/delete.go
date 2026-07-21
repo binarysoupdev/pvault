@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"pvault/app/cmd/base"
 	"pvault/app/flow"
 	"pvault/config"
 
@@ -11,13 +12,13 @@ import (
 type DeleteCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	ConfigCommandBase
+	base.ConfigCommand
 }
 
 func NewDeleteCommand(configLoader json.Loader[config.Config]) *DeleteCommand {
 	return &DeleteCommand{
-		CommandBase:       command.NewCommandBase("delete", "delete a record from the vault"),
-		ConfigCommandBase: NewConfigCommandBase(configLoader),
+		CommandBase:   command.NewCommandBase("delete", "delete a record from the vault"),
+		ConfigCommand: base.NewConfigCommand(configLoader),
 	}
 }
 

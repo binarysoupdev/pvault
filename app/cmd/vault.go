@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"pvault/app/cmd/base"
 	"pvault/app/flow"
 	"pvault/app/vault"
 	"pvault/config"
@@ -14,13 +15,13 @@ import (
 type VaultCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	ConfigCommandBase
+	base.ConfigCommand
 }
 
 func NewVaultCommand(configLoader json.Loader[config.Config]) *VaultCommand {
 	return &VaultCommand{
-		CommandBase:       command.NewCommandBase("vault", "configure the vault"),
-		ConfigCommandBase: NewConfigCommandBase(configLoader),
+		CommandBase:   command.NewCommandBase("vault", "configure the vault"),
+		ConfigCommand: base.NewConfigCommand(configLoader),
 	}
 }
 

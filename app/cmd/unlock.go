@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"pvault/app/cmd/base"
 	"pvault/app/flow"
 	"pvault/config"
 
@@ -12,13 +13,13 @@ import (
 type UnlockCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	ConfigCommandBase
+	base.ConfigCommand
 }
 
 func NewUnlockCommand(configLoader json.Loader[config.Config]) *UnlockCommand {
 	return &UnlockCommand{
-		CommandBase:       command.NewCommandBase("unlock", "unlock a record from the vault"),
-		ConfigCommandBase: NewConfigCommandBase(configLoader),
+		CommandBase:   command.NewCommandBase("unlock", "unlock a record from the vault"),
+		ConfigCommand: base.NewConfigCommand(configLoader),
 	}
 }
 

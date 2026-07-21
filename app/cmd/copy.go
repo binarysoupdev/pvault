@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"pvault/app/cmd/base"
 	"pvault/app/flow"
 	"pvault/config"
 	"pvault/tools/clipboard"
@@ -15,7 +16,7 @@ import (
 type CopyCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	ConfigCommandBase
+	base.ConfigCommand
 
 	clipboard clipboard.Clipboard
 	qrcode    qrcode.Renderer
@@ -23,10 +24,10 @@ type CopyCommand struct {
 
 func NewCopyCommand(configLoader json.Loader[config.Config], clipboard clipboard.Clipboard, qrcode qrcode.Renderer) *CopyCommand {
 	return &CopyCommand{
-		CommandBase:       command.NewCommandBase("copy", "copy password/username of a record"),
-		ConfigCommandBase: NewConfigCommandBase(configLoader),
-		clipboard:         clipboard,
-		qrcode:            qrcode,
+		CommandBase:   command.NewCommandBase("copy", "copy password/username of a record"),
+		ConfigCommand: base.NewConfigCommand(configLoader),
+		clipboard:     clipboard,
+		qrcode:        qrcode,
 	}
 }
 

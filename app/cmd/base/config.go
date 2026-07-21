@@ -1,4 +1,4 @@
-package cmd
+package base
 
 import (
 	"pvault/config"
@@ -8,17 +8,17 @@ import (
 	"github.com/binarysoupdev/go-commando/json"
 )
 
-type ConfigCommandBase struct {
+type ConfigCommand struct {
 	command.ConfigCommand[config.Config]
 }
 
-func NewConfigCommandBase(loader json.Loader[config.Config]) ConfigCommandBase {
-	return ConfigCommandBase{
+func NewConfigCommand(loader json.Loader[config.Config]) ConfigCommand {
+	return ConfigCommand{
 		ConfigCommand: command.NewConfigCommand(loader),
 	}
 }
 
-func (cmd *ConfigCommandBase) LoadConfig() error {
+func (cmd *ConfigCommand) LoadConfig() error {
 	err := cmd.ConfigLoader.ValidatePath()
 	if err != nil {
 		return errors.Chain(err, "invalid config path (run \"config -new\" to generate)")

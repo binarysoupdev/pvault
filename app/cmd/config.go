@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"pvault/app/cmd/base"
 	"pvault/app/flow"
 	"pvault/config"
 
@@ -16,13 +17,13 @@ import (
 type ConfigCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	ConfigCommandBase
+	base.ConfigCommand
 }
 
 func NewConfigCommand(configLoader json.Loader[config.Config]) *ConfigCommand {
 	return &ConfigCommand{
-		CommandBase:       command.NewCommandBase("config", "configure the application"),
-		ConfigCommandBase: NewConfigCommandBase(configLoader),
+		CommandBase:   command.NewCommandBase("config", "configure the application"),
+		ConfigCommand: base.NewConfigCommand(configLoader),
 	}
 }
 

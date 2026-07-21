@@ -1,8 +1,8 @@
-package cmd_test
+package base_test
 
 import (
 	"fmt"
-	"pvault/app/cmd"
+	"pvault/app/cmd/base"
 	"pvault/config"
 	"testing"
 
@@ -14,7 +14,7 @@ import (
 
 func TestConfigCommandBaseLoadConfigReturnsErrorWhenConfigNotFound(t *testing.T) {
 	//-- arrange
-	cmd := cmd.NewConfigCommandBase(
+	cmd := base.NewConfigCommand(
 		json.NewLoader[config.Config]("invalid"),
 	)
 
@@ -27,7 +27,7 @@ func TestConfigCommandBaseLoadConfigReturnsErrorWhenConfigNotFound(t *testing.T)
 
 func TestConfigCommandBaseLoadConfigReturnsErrorWhenConfigIsInvalidJson(t *testing.T) {
 	//-- arrange
-	cmd := cmd.NewConfigCommandBase(
+	cmd := base.NewConfigCommand(
 		json.NewLoader[config.Config](file.CreateEmpty(t, "invalid.json")),
 	)
 
@@ -40,7 +40,7 @@ func TestConfigCommandBaseLoadConfigReturnsErrorWhenConfigIsInvalidJson(t *testi
 
 func TestConfigCommandBaseLoadConfigReturnsErrorWhenUsingInvalidVersion(t *testing.T) {
 	//-- arrange
-	cmd := cmd.NewConfigCommandBase(
+	cmd := base.NewConfigCommand(
 		json.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	)
 
@@ -59,7 +59,7 @@ func TestConfigCommandBaseLoadConfigReturnsErrorWhenUsingInvalidVersion(t *testi
 
 func TestConfigCommandBaseLoadConfigReturnsNoErrorAndLoadsConfigWhenValid(t *testing.T) {
 	//-- arrange
-	cmd := cmd.NewConfigCommandBase(
+	cmd := base.NewConfigCommand(
 		json.NewLoader[config.Config](file.NewPath(t, "config.json")),
 	)
 
