@@ -30,7 +30,8 @@ func (e Encoder) EncodeIndex(w io.Writer, idx index.IndexMap) error {
 }
 
 func (e Encoder) writeHeader(w io.Writer, numRecords int) error {
-	header := make([]byte, 2)
+	header := make([]byte, 2+2)
+	binary.BigEndian.PutUint16(header, uint16(index.VERSION))
 	binary.BigEndian.PutUint16(header[2:], uint16(numRecords))
 
 	_, err := w.Write(header)
@@ -49,8 +50,13 @@ func (e Encoder) writeEntry(w io.Writer, id uuid.UUID, name string) error {
 }
 
 func (e Encoder) DecodeIndex(r io.Reader) (index.IndexMap, error) {
-	header := make([]byte, 2)
+	header := make([]byte, 4)
 	r.Read(header)
+
+	version := binary.BigEndian.Uint16(header)
+	if version != index.VERSION {
+		return nil, errors.Format("unsupported index version \"%d\"", version)
+	}
 
 	entryCount := binary.BigEndian.Uint16(header[2:])
 	idx := index.IndexMap{}
