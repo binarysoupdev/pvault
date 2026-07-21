@@ -14,7 +14,7 @@ func (v *Vault) Upgrade() error {
 	}
 	var err error
 
-	v.Index, err = v.Index.Upgrade()
+	v.Database, err = v.Database.Upgrade(v.Map)
 	if err != nil {
 		return errors.Chain(err, "error upgrading index")
 	}

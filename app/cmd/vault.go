@@ -101,7 +101,7 @@ func (cmd VaultCommand) validate() error {
 		return err
 	}
 
-	style.BoldInfo.Printf("[=] Vault verified at \"%s\" (@v%d)\n", v.Path, v.GetVersion())
+	style.BoldInfo.Printf("[=] Vault verified at \"%s\" (@v%d)\n", v.GetPath(), v.GetVersion())
 	style.Info.Printf("[%d] records found\n", len(v.Map))
 
 	return nil

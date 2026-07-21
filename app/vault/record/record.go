@@ -9,11 +9,8 @@ import (
 
 type Record interface {
 	GetVersion() int
-
 	GetID() uuid.UUID
 	GetName() string
-
-	SaveFile(path string, password string) error
 	Upgrade() v2.Record
 }
 

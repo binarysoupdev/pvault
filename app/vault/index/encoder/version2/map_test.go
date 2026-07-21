@@ -3,7 +3,7 @@ package v2_test
 import (
 	"fmt"
 	"path/filepath"
-	"pvault/app/vault/data"
+	"pvault/app/vault/index"
 	v2 "pvault/app/vault/index/version2"
 	"testing"
 
@@ -18,7 +18,7 @@ func TestSaveMapReturnsErrorWhenPathInvalid(t *testing.T) {
 	idx := v2.NewIndex("invalid/index.bin")
 
 	//-- act
-	res := idx.SaveMap(data.NameMap{})
+	res := idx.SaveMap(index.IndexMap{})
 
 	//-- assert
 	require.ErrorContains(t, res, "error creating index file")
@@ -31,7 +31,7 @@ func TestSaveMapReturnsNoErrorAndSavesMap(t *testing.T) {
 	idx := v2.NewIndex(PATH)
 
 	//-- act
-	res := idx.SaveMap(data.NameMap{})
+	res := idx.SaveMap(index.IndexMap{})
 
 	//-- assert
 	require.NoError(t, res)
@@ -70,7 +70,7 @@ func TestLoadMapReturnsMapAndNoError(t *testing.T) {
 	//-- arrange
 	idx := v2.NewIndex(file.NewPath(t, ""))
 
-	MAP := data.NameMap{
+	MAP := index.IndexMap{
 		"name1": uuid.New(),
 		"name2": uuid.New(),
 		"name3": uuid.New(),

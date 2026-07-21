@@ -2,9 +2,9 @@ package local
 
 import (
 	"os"
-	"pvault/app/vault/data"
+	"pvault/app/vault/database"
+	db_v3 "pvault/app/vault/database/version3"
 	"pvault/app/vault/index"
-	v2 "pvault/app/vault/index/version2"
 
 	"github.com/binarysoupdev/go-commando/errors"
 )
@@ -21,12 +21,11 @@ func CreateNewVault(path string) (Vault, error) {
 	}
 
 	v := Vault{
-		Path:  path,
-		Index: v2.NewIndex(path),
-		Map:   data.NameMap{},
+		Database: db_v3.NewDatabase(path),
+		Map:      index.IndexMap{},
 	}
 
-	err = v.Index.SaveMap(v.Map)
+	err = v.Database.EncodeIndex(v.Map)
 	if err != nil {
 		return Vault{}, errors.Chain(err, "error saving initial index")
 	}
@@ -35,20 +34,18 @@ func CreateNewVault(path string) (Vault, error) {
 }
 
 func OpenVault(path string) (Vault, error) {
-	var err error
-	v := Vault{
-		Path: path,
-	}
-
-	v.Index, err = index.Load(v.Path)
+	db, err := database.Open(path)
 	if err != nil {
-		return Vault{}, errors.Chain(err, "error loading index")
+		return Vault{}, errors.Chain(err, "error opening database")
 	}
 
-	v.Map, err = v.Index.LoadMap()
+	idx, err := db.DecodeIndex()
 	if err != nil {
 		return Vault{}, errors.Chain(err, "error loading index map")
 	}
 
-	return v, nil
+	return Vault{
+		Database: db,
+		Map:      idx,
+	}, nil
 }

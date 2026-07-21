@@ -1,19 +1,22 @@
 package local
 
 import (
-	"pvault/app/vault/data"
+	"pvault/app/vault/database"
+	db_v3 "pvault/app/vault/database/version3"
 	"pvault/app/vault/index"
-	index_v2 "pvault/app/vault/index/version2"
 )
 
-const CURRENT_VERSION = index_v2.VERSION
+const CURRENT_VERSION = db_v3.VERSION
 
 type Vault struct {
-	Path  string
-	Index index.Index
-	Map   data.NameMap
+	Database database.Database
+	Map      index.IndexMap
 }
 
 func (v Vault) GetVersion() int {
-	return v.Index.GetVersion()
+	return v.Database.GetVersion()
+}
+
+func (v Vault) GetPath() string {
+	return v.Database.GetPath()
 }

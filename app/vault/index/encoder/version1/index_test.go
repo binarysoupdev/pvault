@@ -1,7 +1,7 @@
 package v1_test
 
 import (
-	"pvault/app/vault/data"
+	"pvault/app/vault/index"
 	v1 "pvault/app/vault/index/version1"
 	"testing"
 
@@ -15,7 +15,7 @@ func TestSaveMapLoadMapReturnsMapAndNoError(t *testing.T) {
 	//-- arrange
 	db := v1.NewIndex(file.NewPath(t, ""))
 
-	MAP := data.NameMap{
+	MAP := index.IndexMap{
 		"name1": uuid.New(),
 		"name2": uuid.New(),
 		"name3": uuid.New(),

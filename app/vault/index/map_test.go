@@ -1,7 +1,7 @@
-package data_test
+package index_test
 
 import (
-	"pvault/app/vault/data"
+	"pvault/app/vault/index"
 	"testing"
 
 	"github.com/google/uuid"
@@ -11,7 +11,7 @@ import (
 
 func TestFindNameReturnsNotFoundWhenNameNotFound(t *testing.T) {
 	//-- arrange
-	m := data.NameMap{}
+	m := index.IndexMap{}
 
 	//-- act
 	_, found := m.FindName(uuid.Nil)
@@ -25,7 +25,7 @@ func TestFindNameReturnsNameWhenNameFound(t *testing.T) {
 	NAME := "name"
 	ID := uuid.New()
 
-	m := data.NameMap{NAME: ID}
+	m := index.IndexMap{NAME: ID}
 
 	//-- act
 	res, found := m.FindName(ID)
@@ -37,7 +37,7 @@ func TestFindNameReturnsNameWhenNameFound(t *testing.T) {
 
 func TestGetNamesReturnsAllNames(t *testing.T) {
 	//-- arrange
-	m := data.NameMap{
+	m := index.IndexMap{
 		"name1": uuid.Nil,
 		"name2": uuid.Nil,
 		"name3": uuid.Nil,
@@ -57,7 +57,7 @@ func TestSearchNamesReturnsMatches(t *testing.T) {
 	//-- arrange
 	NAMES := []string{"Foo2", "Bar1", "Foo1"}
 
-	m := data.NameMap{
+	m := index.IndexMap{
 		NAMES[0]: uuid.Nil,
 		NAMES[1]: uuid.Nil,
 		NAMES[2]: uuid.Nil,

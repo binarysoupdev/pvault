@@ -1,9 +1,8 @@
-package index_test
+package database_test
 
 import (
 	"fmt"
 	"path/filepath"
-	"pvault/app/vault/data"
 	"pvault/app/vault/index"
 	v1 "pvault/app/vault/index/version1"
 	v2 "pvault/app/vault/index/version2"
@@ -43,7 +42,7 @@ func TestLoadReturnsErrorWhenVersionUnsupported(t *testing.T) {
 func TestLoadReturnsV2IndexAndNoErrorWhenV2Detected(t *testing.T) {
 	//-- arrange
 	INDEX := v2.NewIndex(file.NewPath(t, ""))
-	require.NoError(t, INDEX.SaveMap(data.NameMap{}))
+	require.NoError(t, INDEX.SaveMap(index.IndexMap{}))
 
 	//-- act
 	idx, err := index.Load(INDEX.Path)
@@ -56,7 +55,7 @@ func TestLoadReturnsV2IndexAndNoErrorWhenV2Detected(t *testing.T) {
 func TestLoadReturnsV1IndexAndNoErrorWhenLegacyFileDetected(t *testing.T) {
 	//-- arrange
 	INDEX := v1.NewIndex(file.NewPath(t, ""))
-	require.NoError(t, INDEX.SaveMap(data.NameMap{}))
+	require.NoError(t, INDEX.SaveMap(index.IndexMap{}))
 
 	//-- act
 	idx, err := index.Load(INDEX.Path)

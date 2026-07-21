@@ -1,10 +1,8 @@
 package v1
 
 import (
-	"encoding/binary"
-	"pvault/crypt"
+	v2 "pvault/app/vault/record/version2"
 
-	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/google/uuid"
 )
 
@@ -20,22 +18,33 @@ type Record struct {
 	Name string
 }
 
-func Unmarshal(bytes []byte, password string, id uuid.UUID) (Record, error) {
-	version := binary.BigEndian.Uint16(bytes)
-	if version != VERSION {
-		return Record{}, errors.Format("incorrect version \"%d\"", version)
+func (r Record) GetVersion() int {
+	return VERSION
+}
+
+func (r Record) GetID() uuid.UUID {
+	return r.ID
+}
+
+func (r Record) GetName() string {
+	return r.Name
+}
+
+func (r Record) Upgrade() v2.Record {
+	other := map[string]any{}
+
+	if r.URL != "" {
+		other["url"] = r.URL
+	}
+	if len(r.RecoveryCodes) > 0 {
+		other["recovery_codes"] = r.RecoveryCodes
 	}
 
-	length := binary.BigEndian.Uint16(bytes[2:])
-	name := string(bytes[2+2 : 2+2+length])
-
-	record, err := crypt.Unmarshal[Record](password, bytes[2+2+length:])
-	if err != nil {
-		return Record{}, errors.Chain(err, "error decrypting record")
+	return v2.Record{
+		ID:       r.ID,
+		Name:     r.Name,
+		Username: r.Username,
+		Password: r.Password,
+		Other:    other,
 	}
-
-	record.ID = id
-	record.Name = name
-
-	return record, nil
 }

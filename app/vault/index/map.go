@@ -1,4 +1,4 @@
-package data
+package index
 
 import (
 	"strings"
@@ -6,9 +6,9 @@ import (
 	"github.com/google/uuid"
 )
 
-type NameMap map[string]uuid.UUID
+type IndexMap map[string]uuid.UUID
 
-func (m NameMap) FindName(id uuid.UUID) (string, bool) {
+func (m IndexMap) FindName(id uuid.UUID) (string, bool) {
 	for name, val := range m {
 		if val == id {
 			return name, true
@@ -17,7 +17,7 @@ func (m NameMap) FindName(id uuid.UUID) (string, bool) {
 	return "", false
 }
 
-func (m NameMap) GetNames() []string {
+func (m IndexMap) GetNames() []string {
 	names := make([]string, len(m))
 	i := 0
 
@@ -29,7 +29,7 @@ func (m NameMap) GetNames() []string {
 	return names
 }
 
-func (m NameMap) SearchNames(subStr string) []string {
+func (m IndexMap) SearchNames(subStr string) []string {
 	matches := []string{}
 
 	for name := range m {

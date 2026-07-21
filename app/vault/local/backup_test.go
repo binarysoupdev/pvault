@@ -3,7 +3,6 @@ package local_test
 import (
 	"fmt"
 	"os"
-	"pvault/app/vault/data"
 	"pvault/app/vault/index"
 	"pvault/app/vault/local"
 	"testing"
@@ -27,7 +26,7 @@ func (s *BackupTestSuite) SetupTest() {
 		Index: &index.Mock{
 			Path: file.NewPath(s.T(), ""),
 		},
-		Map: data.NameMap{},
+		Map: index.IndexMap{},
 	}
 }
 
@@ -62,7 +61,7 @@ func (s *BackupTestSuite) TestBackupReturnsNoErrorAndBacksUpIndexFileAndRecords(
 	s.Require().NoError(os.WriteFile(s.Vault.Index.RecordPath(IDS[0]), DATA[1], 0666))
 	s.Require().NoError(os.WriteFile(s.Vault.Index.RecordPath(IDS[1]), DATA[2], 0666))
 
-	s.Vault.Map = data.NameMap{
+	s.Vault.Map = index.IndexMap{
 		"foo1": IDS[0],
 		"foo2": IDS[1],
 	}

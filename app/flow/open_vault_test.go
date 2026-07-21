@@ -3,7 +3,7 @@ package flow_test
 import (
 	"fmt"
 	"pvault/app/flow"
-	"pvault/app/vault/data"
+	"pvault/app/vault/index"
 	index_v1 "pvault/app/vault/index/version1"
 	"pvault/app/vault/local"
 
@@ -25,7 +25,7 @@ func TestLoadLocalVaultReturnsErrorWhenVaultOutOfDate(t *testing.T) {
 	//-- arrange
 	PATH := file.NewPath(t, "")
 
-	err := index_v1.NewIndex(PATH).SaveMap(data.NameMap{})
+	err := index_v1.NewIndex(PATH).SaveMap(index.IndexMap{})
 	require.NoError(t, err)
 
 	//-- act

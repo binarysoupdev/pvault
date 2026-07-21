@@ -1,10 +1,6 @@
 package v2
 
 import (
-	"encoding/binary"
-	"pvault/crypt"
-
-	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/google/uuid"
 )
 
@@ -28,15 +24,18 @@ func NewEmptyRecord(name string) Record {
 	}
 }
 
-func Unmarshal(bytes []byte, password string) (Record, error) {
-	version := binary.BigEndian.Uint16(bytes)
-	if version != VERSION {
-		return Record{}, errors.Format("incorrect version \"%d\"", version)
-	}
+func (r Record) GetVersion() int {
+	return VERSION
+}
 
-	record, err := crypt.Unmarshal[Record](password, bytes[2:])
-	if err != nil {
-		return Record{}, errors.Chain(err, "error decrypting record")
-	}
-	return record, nil
+func (r Record) GetID() uuid.UUID {
+	return r.ID
+}
+
+func (r Record) GetName() string {
+	return r.Name
+}
+
+func (r Record) Upgrade() Record {
+	return r
 }

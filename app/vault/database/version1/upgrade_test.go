@@ -1,7 +1,7 @@
 package v1_test
 
 import (
-	"pvault/app/vault/data"
+	"pvault/app/vault/index"
 	index_v1 "pvault/app/vault/index/version1"
 	"pvault/app/vault/record"
 	record_v1 "pvault/app/vault/record/version1"
@@ -38,7 +38,7 @@ func TestUpgradeReturnsNewIndexAndNoErrorAndUpgradesVault(t *testing.T) {
 	}
 	require.NoError(t, R2.SaveLegacy(idx.RecordPath(R2.ID), PASSWORD))
 
-	MAP := data.NameMap{
+	MAP := index.IndexMap{
 		R1.Name: R1.ID,
 		R2.Name: R2.ID,
 	}

@@ -1,7 +1,7 @@
 package local_test
 
 import (
-	"pvault/app/vault/data"
+	"pvault/app/vault/index"
 	vault "pvault/app/vault/local"
 	"testing"
 
@@ -14,7 +14,7 @@ func TestSearchNamesReturnsAllNamesSortedWhenTermEmpty(t *testing.T) {
 	NAMES := []string{"Foo2", "Bar1", "Foo1"}
 
 	v := vault.Vault{
-		Map: data.NameMap{
+		Map: index.IndexMap{
 			NAMES[0]: uuid.New(),
 			NAMES[1]: uuid.New(),
 			NAMES[2]: uuid.New(),
@@ -33,7 +33,7 @@ func TestSearchNamesReturnsOnlyMatchesSortedWhenTermNotEmpty(t *testing.T) {
 	NAMES := []string{"Foo2", "Bar1", "Foo1"}
 
 	v := vault.Vault{
-		Map: data.NameMap{
+		Map: index.IndexMap{
 			NAMES[0]: uuid.New(),
 			NAMES[1]: uuid.New(),
 			NAMES[2]: uuid.New(),

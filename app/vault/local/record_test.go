@@ -2,7 +2,6 @@ package local_test
 
 import (
 	"fmt"
-	"pvault/app/vault/data"
 	"pvault/app/vault/index"
 	"pvault/app/vault/local"
 	"pvault/app/vault/record"
@@ -39,7 +38,7 @@ func (s *RecordTestSuite) SetupTest() {
 
 	s.Vault = local.Vault{
 		Index: &s.Index,
-		Map:   data.NameMap{},
+		Map:   index.IndexMap{},
 	}
 }
 
@@ -55,7 +54,7 @@ func (s *RecordTestSuite) TestValidateRecordReturnsErrorWhenRecordInvalid() {
 
 func (s *RecordTestSuite) TestValidateRecordReturnsErrorWhenNameAlreadyExistsForAnotherRecord() {
 	//-- arrange
-	s.Vault.Map = data.NameMap{
+	s.Vault.Map = index.IndexMap{
 		s.Record.Name: uuid.New(),
 	}
 
@@ -68,7 +67,7 @@ func (s *RecordTestSuite) TestValidateRecordReturnsErrorWhenNameAlreadyExistsFor
 
 func (s *RecordTestSuite) TestValidateRecordReturnsNoErrorWhenNameExistsForSameRecord() {
 	//-- arrange
-	s.Vault.Map = data.NameMap{
+	s.Vault.Map = index.IndexMap{
 		s.Record.Name: s.Record.ID,
 	}
 
