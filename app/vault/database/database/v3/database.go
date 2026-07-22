@@ -3,8 +3,8 @@ package v3
 import (
 	"path/filepath"
 	"pvault/app/vault/index"
-	index_v2 "pvault/app/vault/index/encoder/version2"
-	record_v3 "pvault/app/vault/record/encoder/version3"
+	index_v2 "pvault/app/vault/index/encoder/v2"
+	record_v3 "pvault/app/vault/record/encoder/v3"
 
 	"github.com/google/uuid"
 )
@@ -29,14 +29,6 @@ func NewDatabase(path string) Database {
 		IndexEncoder:  IndexEncoder{},
 		RecordEncoder: RecordEncoder{},
 	}
-}
-
-func (Database) GetVersion() int {
-	return VERSION
-}
-
-func (db Database) GetPath() string {
-	return db.Path
 }
 
 func (db Database) IndexPath() string {

@@ -2,7 +2,7 @@ package flow
 
 import (
 	"pvault/app/vault/record"
-	v2 "pvault/app/vault/record/version2"
+	v2 "pvault/app/vault/record/record/v2"
 
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/binarysoupdev/got-style/style"

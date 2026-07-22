@@ -4,7 +4,7 @@ import (
 	"os"
 	"pvault/app/cmd/base"
 	"pvault/app/flow"
-	v2 "pvault/app/vault/record/version2"
+	v2 "pvault/app/vault/record/record/v2"
 	"pvault/config"
 
 	"github.com/binarysoupdev/go-commando/command"

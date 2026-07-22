@@ -3,7 +3,7 @@ package v1
 import (
 	"encoding/binary"
 	"os"
-	v3 "pvault/app/vault/database/version3"
+	v3 "pvault/app/vault/database/database/v3"
 	"pvault/app/vault/index"
 
 	"github.com/binarysoupdev/go-commando/errors"
@@ -38,7 +38,7 @@ func (db Database) upgradeIndex(target v3.Database, idx index.IndexMap) error {
 	defer file.Close()
 
 	version := make([]byte, 2)
-	binary.BigEndian.PutUint16(version, uint16(target.GetVersion()))
+	binary.BigEndian.PutUint16(version, v3.VERSION)
 	file.Write(version)
 
 	err = target.EncodeIndex(file, idx)

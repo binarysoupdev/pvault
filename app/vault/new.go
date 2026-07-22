@@ -3,8 +3,9 @@ package vault
 import (
 	"os"
 	"pvault/app/vault/database"
-	db_v3 "pvault/app/vault/database/version3"
+	v3 "pvault/app/vault/database/database/v3"
 	"pvault/app/vault/index"
+	"pvault/app/vault/meta"
 
 	"github.com/binarysoupdev/go-commando/errors"
 )
@@ -21,8 +22,14 @@ func CreateNew(path string) (Vault, error) {
 	}
 
 	v := Vault{
-		Database: db_v3.NewDatabase(path),
+		Meta:     newMetadata(path, v3.VERSION),
+		Database: v3.NewDatabase(path),
 		Map:      index.IndexMap{},
+	}
+
+	err = meta.SaveMetadata(v.Meta)
+	if err != nil {
+		return Vault{}, errors.Chain(err, "error saving metadata")
 	}
 
 	err = database.SaveIndex(v.Database, v.Map)
@@ -31,21 +38,4 @@ func CreateNew(path string) (Vault, error) {
 	}
 
 	return v, nil
-}
-
-func Open(path string) (Vault, error) {
-	db, err := database.Open(path)
-	if err != nil {
-		return Vault{}, errors.Chain(err, "error opening database")
-	}
-
-	idx, err := database.LoadIndex(db)
-	if err != nil {
-		return Vault{}, errors.Chain(err, "error loading index")
-	}
-
-	return Vault{
-		Database: db,
-		Map:      idx,
-	}, nil
 }

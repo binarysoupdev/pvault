@@ -3,18 +3,39 @@ package database
 import (
 	"os"
 	"pvault/app/vault/record"
-	"pvault/app/vault/record/encoder"
 
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/google/uuid"
 )
 
 func SaveRecord(db Database, r record.Record, password string) error {
-	return encoder.SaveRecordFile(db, r, db.RecordPath(r.GetID()), password)
+	file, err := os.Create(db.RecordPath(r.GetID()))
+	if err != nil {
+		return errors.Chain(err, "error creating record file")
+	}
+	defer file.Close()
+
+	err = db.EncodeRecord(file, password, r)
+	if err != nil {
+		return errors.Chain(err, "error encoding record")
+	}
+
+	return nil
 }
 
 func LoadRecord(db Database, id uuid.UUID, password string) (record.Record, error) {
-	return encoder.LoadRecordFile(db, db.RecordPath(id), password)
+	file, err := os.Open(db.RecordPath(id))
+	if err != nil {
+		return nil, errors.Chain(err, "error opening record file")
+	}
+	defer file.Close()
+
+	r, err := db.DecodeRecord(file, password)
+	if err != nil {
+		return nil, errors.Chain(err, "error decoding record")
+	}
+
+	return r, nil
 }
 
 func DeleteRecord(db Database, id uuid.UUID) error {

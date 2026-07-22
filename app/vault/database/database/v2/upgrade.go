@@ -4,10 +4,10 @@ import (
 	"encoding/binary"
 	"io"
 	"os"
-	v3 "pvault/app/vault/database/version3"
+	v3 "pvault/app/vault/database/database/v3"
 	"pvault/app/vault/index"
-	record_v1 "pvault/app/vault/record/version1"
-	record_v2 "pvault/app/vault/record/version2"
+	record_v1 "pvault/app/vault/record/record/v1"
+	record_v2 "pvault/app/vault/record/record/v2"
 
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/google/uuid"

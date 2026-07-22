@@ -2,7 +2,7 @@ package record
 
 import (
 	"os"
-	v2 "pvault/app/vault/record/version2"
+	v2 "pvault/app/vault/record/record/v2"
 
 	"github.com/google/uuid"
 )

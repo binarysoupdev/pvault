@@ -1,22 +1,31 @@
 package vault
 
 import (
+	"path/filepath"
 	"pvault/app/vault/database"
-	db_v3 "pvault/app/vault/database/version3"
 	"pvault/app/vault/index"
+	"pvault/app/vault/meta"
 )
 
-const CURRENT_VERSION = db_v3.VERSION
+const META_FILE = "VAULT"
 
 type Vault struct {
+	Meta     meta.Metadata
 	Database database.Database
 	Map      index.IndexMap
 }
 
 func (v Vault) GetVersion() int {
-	return v.Database.GetVersion()
+	return v.Meta.DatabaseVersion
 }
 
 func (v Vault) GetPath() string {
-	return v.Database.GetPath()
+	return v.Meta.Path
+}
+
+func newMetadata(path string, dbVersion int) meta.Metadata {
+	return meta.Metadata{
+		Path:            filepath.Join(path, META_FILE),
+		DatabaseVersion: dbVersion,
+	}
 }

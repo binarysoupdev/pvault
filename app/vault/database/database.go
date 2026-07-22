@@ -1,23 +1,21 @@
 package database
 
 import (
-	v3 "pvault/app/vault/database/version3"
-	idx "pvault/app/vault/index"
-	index "pvault/app/vault/index/encoder"
-	record "pvault/app/vault/record/encoder"
+	v3 "pvault/app/vault/database/database/v3"
+	"pvault/app/vault/index"
+	"pvault/app/vault/record"
 
 	"github.com/google/uuid"
 )
 
+const CURRENT_VERSION = v3.VERSION
+
 type Database interface {
-	GetVersion() int
-
-	GetPath() string
 	IndexPath() string
-	RecordPath(id uuid.UUID) string
-
 	index.Encoder
+
+	RecordPath(id uuid.UUID) string
 	record.Encoder
 
-	Upgrade(idx idx.IndexMap) (v3.Database, error)
+	Upgrade(idx index.IndexMap) (v3.Database, error)
 }
