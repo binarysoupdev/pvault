@@ -13,7 +13,15 @@ import (
 )
 
 func Open(path string) (Vault, error) {
-	v, err := detectVault(path)
+	v := Vault{}
+	var err error
+
+	v.Meta, err = loadMetadata(path)
+	if err != nil {
+		return Vault{}, err
+	}
+
+	v.Database, err = loadDatabaseFromVersion(v.Meta.DatabaseVersion, path)
 	if err != nil {
 		return Vault{}, err
 	}
@@ -26,41 +34,29 @@ func Open(path string) (Vault, error) {
 	return v, nil
 }
 
-func detectVault(path string) (Vault, error) {
-	m, err := detectMetadata(path)
-	if err != nil {
-		return Vault{}, errors.Chain(err, "error loading vault")
-	}
+func loadMetadata(path string) (meta.Metadata, error) {
+	metaPath := metadataPath(path)
 
-	db, err := loadDatabaseFromVersion(m.DatabaseVersion, path)
-	if err != nil {
-		return Vault{}, err
-	}
-
-	return Vault{
-		Meta:     m,
-		Database: db,
-	}, nil
-}
-
-func detectMetadata(path string) (meta.Metadata, error) {
-	m := newMetadata(path, 0)
-
-	_, err := os.Stat(m.Path)
+	_, err := os.Stat(metaPath)
 	if err == nil {
-		return meta.LoadMetadata(m.Path)
+		return meta.LoadMetadata(metaPath)
 	}
 
-	version, ok := detectLegacyDatabaseVersion(path)
+	version, ok := detectLegacyDatabase(path)
 	if !ok {
 		return meta.Metadata{}, errors.Format("vault not found at \"%s\"", path)
 	}
+	m := createNewMetadata(version)
 
-	m.DatabaseVersion = version
+	err = meta.SaveMetadata(metaPath, m)
+	if err != nil {
+		return meta.Metadata{}, errors.Chain(err, "error saving new metadata")
+	}
+
 	return m, nil
 }
 
-func detectLegacyDatabaseVersion(path string) (int, bool) {
+func detectLegacyDatabase(path string) (int, bool) {
 	_, err := os.Stat(filepath.Join(path, v2.INDEX_FILE))
 	if err == nil {
 		return v2.VERSION, true

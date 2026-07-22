@@ -22,12 +22,12 @@ func CreateNew(path string) (Vault, error) {
 	}
 
 	v := Vault{
-		Meta:     newMetadata(path, v3.VERSION),
+		Meta:     createNewMetadata(v3.VERSION),
 		Database: v3.NewDatabase(path),
 		Map:      index.IndexMap{},
 	}
 
-	err = meta.SaveMetadata(v.Meta)
+	err = meta.SaveMetadata(metadataPath(path), v.Meta)
 	if err != nil {
 		return Vault{}, errors.Chain(err, "error saving metadata")
 	}

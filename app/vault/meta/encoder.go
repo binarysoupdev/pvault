@@ -9,8 +9,8 @@ import (
 	"github.com/binarysoupdev/go-commando/errors"
 )
 
-func SaveMetadata(m Metadata) error {
-	file, err := os.Create(m.Path)
+func SaveMetadata(path string, m Metadata) error {
+	file, err := os.Create(path)
 	if err != nil {
 		return errors.Chain(err, "error creating metadata file")
 	}
@@ -45,7 +45,6 @@ func LoadMetadata(path string) (Metadata, error) {
 		return Metadata{}, errors.Chain(err, "error decoding metadata")
 	}
 
-	m.Path = path
 	return m, nil
 }
 
