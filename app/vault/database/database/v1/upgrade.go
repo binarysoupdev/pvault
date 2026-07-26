@@ -10,17 +10,17 @@ import (
 	"github.com/google/uuid"
 )
 
-func (db Database) Upgrade(idx index.IndexMap) (v3.Database, error) {
-	target := v3.NewDatabase(db.Path)
+func (db Database) Upgrade(path string, idx index.IndexMap) (v3.Database, error) {
+	target := v3.Database{}
 
-	err := db.upgradeIndex(target, idx)
+	err := db.upgradeIndex(target, path, idx)
 	if err != nil {
 		return target, err
 	}
 	var errs errors.Errors
 
 	for name, id := range idx {
-		err := db.upgradeRecord(target, id, name)
+		err := db.upgradeRecord(target, path, id, name)
 		if err != nil {
 			errs.Add(err)
 			continue
@@ -30,8 +30,8 @@ func (db Database) Upgrade(idx index.IndexMap) (v3.Database, error) {
 	return target, errs.Collapse("\n")
 }
 
-func (db Database) upgradeIndex(target v3.Database, idx index.IndexMap) error {
-	file, err := os.Create(target.IndexPath())
+func (db Database) upgradeIndex(target v3.Database, path string, idx index.IndexMap) error {
+	file, err := os.Create(target.IndexPath(path))
 	if err != nil {
 		return errors.Chain(err, "error creating new index file")
 	}
@@ -46,7 +46,7 @@ func (db Database) upgradeIndex(target v3.Database, idx index.IndexMap) error {
 		return errors.Chain(err, "error encoding index")
 	}
 
-	err = os.Remove(db.IndexPath())
+	err = os.Remove(db.IndexPath(path))
 	if err != nil {
 		return errors.Chain(err, "error removing old index file")
 	}
@@ -54,8 +54,8 @@ func (db Database) upgradeIndex(target v3.Database, idx index.IndexMap) error {
 	return nil
 }
 
-func (db Database) upgradeRecord(target v3.Database, id uuid.UUID, name string) error {
-	old, err := os.Open(db.RecordPath(id))
+func (db Database) upgradeRecord(target v3.Database, path string, id uuid.UUID, name string) error {
+	old, err := os.Open(db.RecordPath(path, id))
 	if err != nil {
 		return errors.Chain(err, "error opening old record file")
 	}
@@ -66,7 +66,7 @@ func (db Database) upgradeRecord(target v3.Database, id uuid.UUID, name string) 
 		return errors.Chain(err, "error decoding old record")
 	}
 
-	new, err := os.Create(target.RecordPath(id))
+	new, err := os.Create(target.RecordPath(path, id))
 	if err != nil {
 		return errors.Chain(err, "error creating new record file")
 	}
@@ -77,7 +77,7 @@ func (db Database) upgradeRecord(target v3.Database, id uuid.UUID, name string) 
 		return errors.Chain(err, "error encoding new record")
 	}
 
-	err = os.Remove(db.RecordPath(id))
+	err = os.Remove(db.RecordPath(path, id))
 	if err != nil {
 		return errors.Chain(err, "error removing old record")
 	}

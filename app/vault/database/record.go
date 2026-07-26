@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 )
 
-func SaveRecord(db Database, r record.Record, password string) error {
-	file, err := os.Create(db.RecordPath(r.GetID()))
+func SaveRecord(db Database, path string, r record.Record, password string) error {
+	file, err := os.Create(db.RecordPath(path, r.GetID()))
 	if err != nil {
 		return errors.Chain(err, "error creating record file")
 	}
@@ -23,8 +23,8 @@ func SaveRecord(db Database, r record.Record, password string) error {
 	return nil
 }
 
-func LoadRecord(db Database, id uuid.UUID, password string) (record.Record, error) {
-	file, err := os.Open(db.RecordPath(id))
+func LoadRecord(db Database, path string, id uuid.UUID, password string) (record.Record, error) {
+	file, err := os.Open(db.RecordPath(path, id))
 	if err != nil {
 		return nil, errors.Chain(err, "error opening record file")
 	}
@@ -38,8 +38,8 @@ func LoadRecord(db Database, id uuid.UUID, password string) (record.Record, erro
 	return r, nil
 }
 
-func DeleteRecord(db Database, id uuid.UUID) error {
-	err := os.Remove(db.RecordPath(id))
+func DeleteRecord(db Database, path string, id uuid.UUID) error {
+	err := os.Remove(db.RecordPath(path, id))
 	if err != nil {
 		return errors.Chain(err, "error removing record file")
 	}

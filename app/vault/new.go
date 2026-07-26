@@ -22,8 +22,9 @@ func CreateNew(path string) (Vault, error) {
 	}
 
 	v := Vault{
+		Path:     path,
 		Meta:     createNewMetadata(v3.VERSION),
-		Database: v3.NewDatabase(path),
+		Database: v3.Database{},
 		Map:      index.IndexMap{},
 	}
 
@@ -32,7 +33,7 @@ func CreateNew(path string) (Vault, error) {
 		return Vault{}, errors.Chain(err, "error saving metadata")
 	}
 
-	err = database.SaveIndex(v.Database, v.Map)
+	err = database.SaveIndex(v.Database, v.Path, v.Map)
 	if err != nil {
 		return Vault{}, errors.Chain(err, "error saving initial index")
 	}

@@ -11,11 +11,11 @@ import (
 const CURRENT_VERSION = v3.VERSION
 
 type Database interface {
-	IndexPath() string
+	IndexPath(path string) string
 	index.Encoder
 
-	RecordPath(id uuid.UUID) string
+	RecordPath(path string, id uuid.UUID) string
 	record.Encoder
 
-	Upgrade(idx index.IndexMap) (v3.Database, error)
+	Upgrade(path string, idx index.IndexMap) (v3.Database, error)
 }

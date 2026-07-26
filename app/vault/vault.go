@@ -7,6 +7,7 @@ import (
 )
 
 type Vault struct {
+	Path     string
 	Meta     meta.Metadata
 	Database database.Database
 	Map      index.IndexMap

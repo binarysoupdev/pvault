@@ -26,7 +26,7 @@ func Open(path string) (Vault, error) {
 		return Vault{}, err
 	}
 
-	v.Map, err = database.LoadIndex(v.Database)
+	v.Map, err = database.LoadIndex(v.Database, v.Path)
 	if err != nil {
 		return Vault{}, err
 	}
@@ -73,11 +73,11 @@ func detectLegacyDatabase(path string) (int, bool) {
 func loadDatabaseFromVersion(version int, path string) (database.Database, error) {
 	switch version {
 	case v1.VERSION:
-		return v1.NewDatabase(path), nil
+		return v1.Database{}, nil
 	case v2.VERSION:
-		return v2.NewDatabase(path), nil
+		return v2.Database{}, nil
 	case v3.VERSION:
-		return v3.NewDatabase(path), nil
+		return v3.Database{}, nil
 	default:
 		return nil, errors.Format("unsupported vault version \"%d\"", version)
 	}

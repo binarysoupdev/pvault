@@ -13,17 +13,17 @@ import (
 	"github.com/google/uuid"
 )
 
-func (db Database) Upgrade(idx index.IndexMap) (v3.Database, error) {
-	target := v3.NewDatabase(db.Path)
+func (db Database) Upgrade(path string, idx index.IndexMap) (v3.Database, error) {
+	target := v3.Database{}
 
-	err := db.upgradeIndex(target)
+	err := db.upgradeIndex(target, path)
 	if err != nil {
 		return target, err
 	}
 	var errs errors.Errors
 
 	for _, id := range idx {
-		err := db.upgradeRecord(target, id)
+		err := db.upgradeRecord(target, path, id)
 		if err != nil {
 			errs.Add(err)
 			continue
@@ -33,13 +33,13 @@ func (db Database) Upgrade(idx index.IndexMap) (v3.Database, error) {
 	return target, errs.Collapse("\n")
 }
 
-func (db Database) upgradeIndex(target v3.Database) error {
-	err := os.Rename(db.IndexPath(), target.IndexPath())
+func (db Database) upgradeIndex(target v3.Database, path string) error {
+	err := os.Rename(db.IndexPath(path), target.IndexPath(path))
 	if err != nil {
 		return errors.Chain(err, "error renaming index file")
 	}
 
-	file, err := os.OpenFile(target.IndexPath(), os.O_WRONLY, 0)
+	file, err := os.OpenFile(target.IndexPath(path), os.O_WRONLY, 0)
 	if err != nil {
 		return errors.Chain(err, "error opening renamed index file")
 	}
@@ -52,8 +52,8 @@ func (db Database) upgradeIndex(target v3.Database) error {
 	return nil
 }
 
-func (db Database) upgradeRecord(target v3.Database, id uuid.UUID) error {
-	old, err := os.Open(db.RecordPath(id))
+func (db Database) upgradeRecord(target v3.Database, path string, id uuid.UUID) error {
+	old, err := os.Open(db.RecordPath(path, id))
 	if err != nil {
 		return errors.Chain(err, "error opening old record file")
 	}
@@ -66,7 +66,7 @@ func (db Database) upgradeRecord(target v3.Database, id uuid.UUID) error {
 
 	switch version {
 	case record_v1.VERSION:
-		return db.upgradeRecordV1(target, old, id)
+		return db.upgradeRecordV1(target, old, path, id)
 	case record_v2.VERSION:
 		return nil
 	default:
@@ -74,13 +74,13 @@ func (db Database) upgradeRecord(target v3.Database, id uuid.UUID) error {
 	}
 }
 
-func (db Database) upgradeRecordV1(target v3.Database, r io.Reader, id uuid.UUID) error {
+func (db Database) upgradeRecordV1(target v3.Database, r io.Reader, path string, id uuid.UUID) error {
 	raw, err := db.DecodeRawV1(r)
 	if err != nil {
 		return errors.Chain(err, "error decoding old record")
 	}
 
-	new, err := os.Create(target.RecordPath(id))
+	new, err := os.Create(target.RecordPath(path, id))
 	if err != nil {
 		return errors.Chain(err, "error creating new record file")
 	}
@@ -91,7 +91,7 @@ func (db Database) upgradeRecordV1(target v3.Database, r io.Reader, id uuid.UUID
 		return errors.Chain(err, "error encoding new record")
 	}
 
-	err = os.Remove(db.RecordPath(id))
+	err = os.Remove(db.RecordPath(path, id))
 	if err != nil {
 		return errors.Chain(err, "error removing old record")
 	}

@@ -18,27 +18,18 @@ type IndexEncoder = index_v2.Encoder
 type RecordEncoder = record_v3.Encoder
 
 type Database struct {
-	Path string
 	IndexEncoder
 	RecordEncoder
 }
 
-func NewDatabase(path string) Database {
-	return Database{
-		Path:          path,
-		IndexEncoder:  IndexEncoder{},
-		RecordEncoder: RecordEncoder{},
-	}
+func (db Database) IndexPath(path string) string {
+	return filepath.Join(path, INDEX_FILE)
 }
 
-func (db Database) IndexPath() string {
-	return filepath.Join(db.Path, INDEX_FILE)
+func (db Database) RecordPath(path string, id uuid.UUID) string {
+	return filepath.Join(path, id.String())
 }
 
-func (db Database) RecordPath(id uuid.UUID) string {
-	return filepath.Join(db.Path, id.String())
-}
-
-func (db Database) Upgrade(idx index.IndexMap) (Database, error) {
+func (db Database) Upgrade(_ string, _ index.IndexMap) (Database, error) {
 	return db, nil
 }

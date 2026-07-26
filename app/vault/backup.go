@@ -18,13 +18,13 @@ func (v Vault) Backup(path string) error {
 		return errors.Format("\"%s\" is not a directory", path)
 	}
 
-	err = v.backupFile(path, v.Database.IndexPath())
+	err = v.backupFile(path, v.Database.IndexPath(v.Path))
 	if err != nil {
 		return errors.Chain(err, "error backing index file")
 	}
 
 	for _, id := range v.Map {
-		err := v.backupFile(path, v.Database.RecordPath(id))
+		err := v.backupFile(path, v.Database.RecordPath(v.Path, id))
 		if err != nil {
 			continue
 		}
