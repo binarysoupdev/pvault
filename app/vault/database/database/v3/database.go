@@ -2,7 +2,6 @@ package v3
 
 import (
 	"path/filepath"
-	"pvault/app/vault/index"
 	index_v2 "pvault/app/vault/index/encoder/v2"
 	record_v3 "pvault/app/vault/record/encoder/v3"
 
@@ -30,6 +29,6 @@ func (db Database) RecordPath(path string, id uuid.UUID) string {
 	return filepath.Join(path, id.String())
 }
 
-func (db Database) Upgrade(_ string, _ index.IndexMap) (Database, error) {
+func (db Database) Upgrade(_ string) (Database, error) {
 	return db, nil
 }

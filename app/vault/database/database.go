@@ -17,5 +17,5 @@ type Database interface {
 	RecordPath(path string, id uuid.UUID) string
 	record.Encoder
 
-	Upgrade(path string, idx index.IndexMap) (v3.Database, error)
+	Upgrade(path string) (v3.Database, error)
 }

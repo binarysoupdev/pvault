@@ -42,6 +42,7 @@ func (e Encoder) writeEntry(w io.Writer, id uuid.UUID, name string) error {
 	length := make([]byte, 2)
 	binary.BigEndian.PutUint16(length, uint16(len(id)+len(name)))
 
+	// TODO: handle error
 	w.Write(length)
 	w.Write(id[:])
 	w.Write([]byte(name))
@@ -62,19 +63,31 @@ func (e Encoder) DecodeIndex(r io.Reader) (index.IndexMap, error) {
 	idx := index.IndexMap{}
 
 	for range entryCount {
-		length := make([]byte, 2)
-		e.decodeEntry(idx, r, int(binary.BigEndian.Uint16(length)))
+		err := e.decodeEntry(idx, r)
+		if err != nil {
+			return nil, errors.Chain(err, "error decoding entry")
+		}
 	}
 
 	return idx, nil
 }
 
-func (Encoder) decodeEntry(idx index.IndexMap, r io.Reader, length int) {
-	id := uuid.UUID{}
-	r.Read(id[:])
+func (Encoder) decodeEntry(idx index.IndexMap, r io.Reader) error {
+	length := make([]byte, 2)
+	if _, err := r.Read(length); err != nil {
+		return errors.Chain(err, "error reading length")
+	}
 
-	name := make([]byte, length-len(id))
-	r.Read(name)
+	id := uuid.UUID{}
+	if _, err := r.Read(id[:]); err != nil {
+		return errors.Chain(err, "error reading id")
+	}
+
+	name := make([]byte, int(binary.BigEndian.Uint16(length))-len(id))
+	if _, err := r.Read(name); err != nil {
+		return errors.Chain(err, "error reading name")
+	}
 
 	idx[string(name)] = id
+	return nil
 }

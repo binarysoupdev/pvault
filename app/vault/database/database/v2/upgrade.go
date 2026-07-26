@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"io"
 	"os"
+	"pvault/app/vault/database"
 	v3 "pvault/app/vault/database/database/v3"
 	"pvault/app/vault/index"
 	record_v1 "pvault/app/vault/record/record/v1"
@@ -13,10 +14,15 @@ import (
 	"github.com/google/uuid"
 )
 
-func (db Database) Upgrade(path string, idx index.IndexMap) (v3.Database, error) {
+func (db Database) Upgrade(path string) (v3.Database, error) {
 	target := v3.Database{}
 
-	err := db.upgradeIndex(target, path)
+	idx, err := database.LoadIndex(db, path)
+	if err != nil {
+		return target, errors.Chain(err, "error loading old index file")
+	}
+
+	err = db.upgradeIndex(target, path)
 	if err != nil {
 		return target, err
 	}
