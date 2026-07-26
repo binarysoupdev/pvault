@@ -6,7 +6,6 @@ import (
 	"os"
 	"pvault/app/vault/database"
 	v3 "pvault/app/vault/database/database/v3"
-	"pvault/app/vault/index"
 	record_v1 "pvault/app/vault/record/record/v1"
 	record_v2 "pvault/app/vault/record/record/v2"
 
@@ -44,16 +43,6 @@ func (db Database) upgradeIndex(target v3.Database, path string) error {
 	if err != nil {
 		return errors.Chain(err, "error renaming index file")
 	}
-
-	file, err := os.OpenFile(target.IndexPath(path), os.O_WRONLY, 0)
-	if err != nil {
-		return errors.Chain(err, "error opening renamed index file")
-	}
-	defer file.Close()
-
-	version := make([]byte, 2)
-	binary.BigEndian.PutUint16(version, uint16(index.VERSION))
-	file.Write(version)
 
 	return nil
 }
@@ -95,11 +84,6 @@ func (db Database) upgradeRecordV1(target v3.Database, r io.Reader, path string,
 	err = target.EncodeRawV1(new, raw.Data, id, raw.Name)
 	if err != nil {
 		return errors.Chain(err, "error encoding new record")
-	}
-
-	err = os.Remove(db.RecordPath(path, id))
-	if err != nil {
-		return errors.Chain(err, "error removing old record")
 	}
 
 	return nil

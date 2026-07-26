@@ -9,13 +9,13 @@ import (
 const VERSION = 1
 
 type Record struct {
+	ID   uuid.UUID
+	Name string
+
 	Password      string   `json:"password"`
 	Username      string   `json:"username"`
 	URL           string   `json:"url"`
 	RecoveryCodes []string `json:"recovery_codes"`
-
-	ID   uuid.UUID
-	Name string
 }
 
 func (r Record) GetVersion() int {

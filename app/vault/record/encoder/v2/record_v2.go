@@ -13,7 +13,9 @@ func (e Encoder) EncodeRawV2(w io.Writer, data []byte) error {
 	version := make([]byte, 2)
 	binary.BigEndian.PutUint16(version, v2.VERSION)
 
+	// TODO: handle errors
 	w.Write(version)
+	w.Write(data)
 
 	return nil
 }
