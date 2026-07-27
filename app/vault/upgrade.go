@@ -15,7 +15,7 @@ func (v *Vault) Upgrade() error {
 		return errors.New("vault is up-to-date")
 	}
 
-	new, err := v.Database.Upgrade(v.Path, v.Map)
+	new, err := v.Database.Upgrade(v.Path)
 	if err != nil {
 		return err
 	}

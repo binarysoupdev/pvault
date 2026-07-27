@@ -14,8 +14,14 @@ import (
 type Encoder struct{}
 
 func (e Encoder) EncodeIndex(w io.Writer, idx index.IndexMap) error {
+	entryNum := 0
+
 	for name, id := range idx {
-		fmt.Fprintf(w, "%s:%s\n", id.String(), name)
+		_, err := fmt.Fprintf(w, "%s:%s\n", id.String(), name)
+		if err != nil {
+			return errors.Chain(err, fmt.Sprintf("error encoding entry [%d]", entryNum))
+		}
+		entryNum++
 	}
 
 	return nil

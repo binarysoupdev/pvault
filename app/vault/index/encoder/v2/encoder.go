@@ -2,8 +2,10 @@ package v2
 
 import (
 	"encoding/binary"
+	"fmt"
 	"io"
 	"pvault/app/vault/index"
+	"pvault/util"
 
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/google/uuid"
@@ -14,80 +16,92 @@ const VERSION = 2
 type Encoder struct{}
 
 func (e Encoder) EncodeIndex(w io.Writer, idx index.IndexMap) error {
-	err := e.writeHeader(w, len(idx))
+	err := e.encodeIndexHeader(w, len(idx))
 	if err != nil {
-		return errors.Chain(err, "error writing header")
+		return errors.Chain(err, "error encoding header")
 	}
 
+	entryNum := 0
 	for name, id := range idx {
-		err = e.writeEntry(w, id, name)
+		err := e.encodeEntry(w, id, name)
 		if err != nil {
-			return errors.Chain(err, "error writing entry")
+			return errors.Chain(err, fmt.Sprintf("error encoding entry [%d]", entryNum))
 		}
+		entryNum++
 	}
 
 	return nil
 }
 
-func (e Encoder) writeHeader(w io.Writer, numRecords int) error {
+func (e Encoder) encodeIndexHeader(w io.Writer, numRecords int) error {
 	header := make([]byte, 2+2)
 	binary.BigEndian.PutUint16(header, uint16(index.VERSION))
 	binary.BigEndian.PutUint16(header[2:], uint16(numRecords))
 
-	_, err := w.Write(header)
-	return err
+	return util.WriteBytes(w, header)
 }
 
-func (e Encoder) writeEntry(w io.Writer, id uuid.UUID, name string) error {
+func (e Encoder) encodeEntry(w io.Writer, id uuid.UUID, name string) error {
 	length := make([]byte, 2)
 	binary.BigEndian.PutUint16(length, uint16(len(id)+len(name)))
 
-	// TODO: handle error
-	w.Write(length)
-	w.Write(id[:])
-	w.Write([]byte(name))
-
-	return nil
+	return util.WriteBytes(w, length, id[:], []byte(name))
 }
 
 func (e Encoder) DecodeIndex(r io.Reader) (index.IndexMap, error) {
-	header := make([]byte, 4)
-	r.Read(header)
-
-	version := binary.BigEndian.Uint16(header)
-	if version != index.VERSION {
-		return nil, errors.Format("unsupported index version \"%d\"", version)
+	header, err := e.decodeIndexHeader(r)
+	if err != nil {
+		return nil, errors.Chain(err, "error decoding header")
 	}
 
 	entryCount := binary.BigEndian.Uint16(header[2:])
 	idx := index.IndexMap{}
 
-	for range entryCount {
+	for i := range entryCount {
 		err := e.decodeEntry(idx, r)
 		if err != nil {
-			return nil, errors.Chain(err, "error decoding entry")
+			return nil, errors.Chain(err, fmt.Sprintf("error decoding entry [%d]", i))
 		}
 	}
 
 	return idx, nil
 }
 
+func (Encoder) decodeIndexHeader(r io.Reader) ([]byte, error) {
+	header, err := util.ReadBytes(r, 4)
+	if err != nil {
+		return nil, err
+	}
+
+	version := binary.BigEndian.Uint16(header)
+	if version != index.VERSION {
+		return nil, errors.Format("unsupported index version \"%d\"", version)
+	}
+
+	return header, nil
+}
+
 func (Encoder) decodeEntry(idx index.IndexMap, r io.Reader) error {
-	length := make([]byte, 2)
-	if _, err := r.Read(length); err != nil {
-		return errors.Chain(err, "error reading length")
+	header, err := util.ReadBytes(r, 2)
+	if err != nil {
+		return errors.Chain(err, "error decoding header")
 	}
 
-	id := uuid.UUID{}
-	if _, err := r.Read(id[:]); err != nil {
-		return errors.Chain(err, "error reading id")
+	length := int(binary.BigEndian.Uint16(header))
+	if length < 16 {
+		return errors.Format("length too short (%d)", length)
 	}
 
-	name := make([]byte, int(binary.BigEndian.Uint16(length))-len(id))
-	if _, err := r.Read(name); err != nil {
-		return errors.Chain(err, "error reading name")
+	entry, err := util.ReadBytes(r, length)
+	if err != nil {
+		return errors.Chain(err, "error decoding body")
 	}
 
-	idx[string(name)] = id
+	name := ""
+	if length > 16 {
+		name = string(entry[16:])
+	}
+
+	idx[name] = uuid.UUID(entry[:16])
 	return nil
 }
