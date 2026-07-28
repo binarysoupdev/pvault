@@ -10,7 +10,7 @@ import (
 func Encrypt(r Record, password string) ([]byte, error) {
 	plaintext, err := json.Marshal(r)
 	if err != nil {
-		return nil, err
+		return nil, errors.Chain(err, "error marshaling json")
 	}
 
 	if password == "" {
@@ -33,7 +33,7 @@ func Decrypt[T Record](bytes []byte, password string) (T, error) {
 
 	err = json.Unmarshal(plaintext, &r)
 	if err != nil {
-		return r, err
+		return r, errors.Chain(err, "error unmarshaling json")
 	}
 
 	return r, nil
