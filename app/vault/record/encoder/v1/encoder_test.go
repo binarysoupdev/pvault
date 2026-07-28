@@ -19,13 +19,12 @@ func TestEncodeRecordReturnsErrorWhenRecordVersionUnsupported(t *testing.T) {
 	e := v1.Encoder{}
 	buffer := &bytes.Buffer{}
 
-	const PASSWORD = "Password123!"
 	RECORD := record.Mock{
 		Version: record_v1.VERSION + 1,
 	}
 
 	//-- act
-	res := e.EncodeRecord(buffer, PASSWORD, RECORD)
+	res := e.EncodeRecord(buffer, "", RECORD)
 
 	//-- assert
 	require.ErrorContains(t, res, fmt.Sprintf("unsupported record version \"%d\"", RECORD.Version))
@@ -38,11 +37,10 @@ func TestEncodeRecordReturnsErrorWhenErrorWritingData(t *testing.T) {
 		WriteErrors: []error{errors.New("")},
 	}
 
-	const PASSWORD = "Password123!"
 	RECORD := record_v1.Record{}
 
 	//-- act
-	res := e.EncodeRecord(mock, PASSWORD, RECORD)
+	res := e.EncodeRecord(mock, "", RECORD)
 
 	//-- assert
 	require.ErrorContains(t, res, "error encoding record v1")
@@ -57,7 +55,7 @@ func TestDecodeRecordReturnsErrorWhenErrorDecodingHash(t *testing.T) {
 	_, res := e.DecodeRecord(buffer, "")
 
 	//-- assert
-	require.ErrorContains(t, res, "error decoding record")
+	require.ErrorContains(t, res, "error decoding record v1")
 	require.ErrorContains(t, res, "error decoding hash prefix")
 }
 
@@ -73,7 +71,7 @@ func TestDecodeRecordReturnsErrorWhenErrorDecryptingRecord(t *testing.T) {
 	_, res := e.DecodeRecord(buffer, "")
 
 	//-- assert
-	require.ErrorContains(t, res, "error decrypting record")
+	require.ErrorContains(t, res, "error decrypting record v1")
 }
 
 func TestEncodeDecodeRecordReturnsRecordAndNoError(t *testing.T) {

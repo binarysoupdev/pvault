@@ -112,7 +112,7 @@ func TestDecodeIndexReturnsErrorWhenEntryLengthTooShort(t *testing.T) {
 
 	//-- arrange
 	require.ErrorContains(t, res, "error decoding entry [0]")
-	require.ErrorContains(t, res, fmt.Sprintf("length too short (%d)", ENTRY_LENGTH))
+	require.ErrorContains(t, res, fmt.Sprintf("length too short: %d", ENTRY_LENGTH))
 }
 
 func TestDecodeIndexReturnsErrorWhenEntryBodyTooShort(t *testing.T) {

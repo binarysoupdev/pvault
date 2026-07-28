@@ -89,7 +89,7 @@ func (Encoder) decodeEntry(idx index.IndexMap, r io.Reader) error {
 
 	length := int(binary.BigEndian.Uint16(header))
 	if length < 16 {
-		return errors.Format("length too short (%d)", length)
+		return errors.Format("length too short: %d", length)
 	}
 
 	entry, err := util.ReadBytes(r, length)

@@ -7,9 +7,10 @@ import (
 )
 
 type Mock struct {
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
+
 	Version       int
-	ID            uuid.UUID
-	Name          string
 	UpgradeRecord v2.Record
 }
 

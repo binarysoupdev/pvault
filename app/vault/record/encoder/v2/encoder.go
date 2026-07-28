@@ -6,8 +6,8 @@ import (
 	"pvault/app/vault/record"
 	record_v1 "pvault/app/vault/record/record/v1"
 	record_v2 "pvault/app/vault/record/record/v2"
-	"pvault/crypt"
 
+	"github.com/binarysoupdev/cryptool/crypt"
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/google/uuid"
 )
