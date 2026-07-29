@@ -1,11 +1,11 @@
-package v2_test
+package v3_test
 
 import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
 	"pvault/app/vault/record"
-	v2 "pvault/app/vault/record/encoder/v2"
+	v3 "pvault/app/vault/record/encoder/v3"
 	record_v1 "pvault/app/vault/record/record/v1"
 	record_v2 "pvault/app/vault/record/record/v2"
 	"testing"
@@ -17,7 +17,7 @@ import (
 
 func TestEncodeRecordReturnsErrorWhenRecordVersionUnsupported(t *testing.T) {
 	//-- arrange
-	e := v2.Encoder{}
+	e := v3.Encoder{}
 	buffer := &bytes.Buffer{}
 
 	RECORD := record.Mock{
@@ -33,7 +33,7 @@ func TestEncodeRecordReturnsErrorWhenRecordVersionUnsupported(t *testing.T) {
 
 func TestDecodeRecordReturnsErrorWhenErrorReadingHeader(t *testing.T) {
 	//-- arrange
-	e := v2.Encoder{}
+	e := v3.Encoder{}
 	buffer := &bytes.Buffer{}
 
 	//-- act
@@ -45,7 +45,7 @@ func TestDecodeRecordReturnsErrorWhenErrorReadingHeader(t *testing.T) {
 
 func TestDecodeRecordReturnsErrorWhenRecordVersionUnsupported(t *testing.T) {
 	//-- arrange
-	e := v2.Encoder{}
+	e := v3.Encoder{}
 	buffer := &bytes.Buffer{}
 
 	const VERSION = record_v2.VERSION + 1
@@ -63,12 +63,13 @@ func TestDecodeRecordReturnsErrorWhenRecordVersionUnsupported(t *testing.T) {
 
 func TestEncodeDecodeRecordReturnsRecordV1AndNoError(t *testing.T) {
 	//-- arrange
-	e := v2.Encoder{}
+	e := v3.Encoder{}
 	buffer := &bytes.Buffer{}
 
 	const PASSWORD = "Password123!"
 
 	RECORD := record_v1.Record{
+		ID:            uuid.New(),
 		Name:          "name",
 		Password:      "password",
 		Username:      "username",
@@ -88,7 +89,7 @@ func TestEncodeDecodeRecordReturnsRecordV1AndNoError(t *testing.T) {
 
 func TestEncodeDecodeRecordReturnsRecordV2AndNoError(t *testing.T) {
 	//-- arrange
-	e := v2.Encoder{}
+	e := v3.Encoder{}
 	buffer := &bytes.Buffer{}
 
 	const PASSWORD = "Password123!"
