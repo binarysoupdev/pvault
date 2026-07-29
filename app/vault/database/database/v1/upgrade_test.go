@@ -18,7 +18,7 @@ func TestUpgradeReturnsErrorWhenOldIndexNotFound(t *testing.T) {
 	_, res := db_v1.Database{}.Upgrade("invalid")
 
 	//-- assert
-	require.ErrorContains(t, res, "error loading old index file")
+	assert.ErrorContains(t, res, "error loading old index file")
 }
 
 func TestUpgradeReturnsNewDatabaseAndNoErrorAndUpgradesDatabase(t *testing.T) {

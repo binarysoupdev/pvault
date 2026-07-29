@@ -52,7 +52,7 @@ func TestDecryptReturnsErrorWhenSaltTooShort(t *testing.T) {
 	_, res := record.Decrypt[record.Mock](CIPHERTEXT, PASSWORD)
 
 	//-- arrange
-	require.ErrorContains(t, res, "length too short: 0")
+	assert.ErrorContains(t, res, "length too short: 0")
 }
 
 func TestDecryptReturnsErrorWhenCiphertextIsOnlySalt(t *testing.T) {
@@ -64,7 +64,7 @@ func TestDecryptReturnsErrorWhenCiphertextIsOnlySalt(t *testing.T) {
 	_, res := record.Decrypt[record.Mock](CIPHERTEXT, PASSWORD)
 
 	//-- arrange
-	require.ErrorContains(t, res, "length too short: 16")
+	assert.ErrorContains(t, res, "length too short: 16")
 }
 
 func TestDecryptReturnsErrorWhenErrorUnmarshalingJSON(t *testing.T) {
@@ -78,7 +78,7 @@ func TestDecryptReturnsErrorWhenErrorUnmarshalingJSON(t *testing.T) {
 	_, res := record.Decrypt[record.Mock](append(salt, CIPHERTEXT...), PASSWORD)
 
 	//-- arrange
-	require.ErrorContains(t, res, "error unmarshaling json")
+	assert.ErrorContains(t, res, "error unmarshaling json")
 }
 
 func TestEncryptDecryptReturnsErrorWhenPasswordIncorrect(t *testing.T) {
@@ -96,7 +96,7 @@ func TestEncryptDecryptReturnsErrorWhenPasswordIncorrect(t *testing.T) {
 	_, res := record.Decrypt[record.Mock](ciphertext, PASSWORD+"x")
 
 	//-- arrange
-	require.ErrorContains(t, res, "message authentication failed")
+	assert.ErrorContains(t, res, "message authentication failed")
 }
 
 func TestEncryptDecryptReturnsRecordAndNoError(t *testing.T) {

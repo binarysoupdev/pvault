@@ -6,7 +6,7 @@ import (
 	v2 "pvault/app/vault/record/version2"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUnmarshalReturnsErrorWhenVersionIncorrect(t *testing.T) {
@@ -20,5 +20,5 @@ func TestUnmarshalReturnsErrorWhenVersionIncorrect(t *testing.T) {
 	_, res := v2.Unmarshal(bytes, "")
 
 	//-- assert
-	require.ErrorContains(t, res, fmt.Sprintf("incorrect version \"%d\"", VERSION))
+	assert.ErrorContains(t, res, fmt.Sprintf("incorrect version \"%d\"", VERSION))
 }

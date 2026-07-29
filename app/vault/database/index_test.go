@@ -21,7 +21,7 @@ func TestSaveIndexReturnsErrorWhenPathInvalid(t *testing.T) {
 	res := database.SaveIndex(&database.Mock{}, PATH, index.IndexMap{})
 
 	//-- assert
-	require.ErrorContains(t, res, "error creating index file")
+	assert.ErrorContains(t, res, "error creating index file")
 }
 
 func TestSaveIndexReturnsErrorWhenEncodeIndexReturnsError(t *testing.T) {
@@ -35,7 +35,7 @@ func TestSaveIndexReturnsErrorWhenEncodeIndexReturnsError(t *testing.T) {
 	res := database.SaveIndex(mock, PATH, index.IndexMap{})
 
 	//-- assert
-	require.ErrorContains(t, res, "error encoding index")
+	assert.ErrorContains(t, res, "error encoding index")
 }
 
 func TestSaveIndexReturnsNoErrorAndSavesIndex(t *testing.T) {
@@ -61,7 +61,7 @@ func TestLoadIndexReturnsErrorWhenPathInvalid(t *testing.T) {
 	_, res := database.LoadIndex(&database.Mock{}, "invalid")
 
 	//-- assert
-	require.ErrorContains(t, res, "error opening index file")
+	assert.ErrorContains(t, res, "error opening index file")
 }
 
 func TestLoadIndexReturnsErrorWhenDecodeIndexReturnsError(t *testing.T) {
@@ -75,7 +75,7 @@ func TestLoadIndexReturnsErrorWhenDecodeIndexReturnsError(t *testing.T) {
 	_, res := database.LoadIndex(mock, filepath.Dir(FILEPATH))
 
 	//-- assert
-	require.ErrorContains(t, res, "error decoding index")
+	assert.ErrorContains(t, res, "error decoding index")
 }
 
 func TestLoadIndexReturnsIndexAndNoErrorAndLoadsIndex(t *testing.T) {

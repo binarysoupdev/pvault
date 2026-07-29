@@ -24,7 +24,7 @@ func TestEncodeIndexReturnsErrorWhenErrorWritingEntry(t *testing.T) {
 	res := e.EncodeIndex(mock, index.IndexMap{"": uuid.Nil})
 
 	//-- arrange
-	require.ErrorContains(t, res, "error encoding entry [0]")
+	assert.ErrorContains(t, res, "error encoding entry [0]")
 }
 
 func TestDecodeIndexReturnsErrorWhenIndexPairInvalid(t *testing.T) {
@@ -38,7 +38,7 @@ func TestDecodeIndexReturnsErrorWhenIndexPairInvalid(t *testing.T) {
 	_, res := e.DecodeIndex(buffer)
 
 	//-- arrange
-	require.ErrorContains(t, res, "[line 1] invalid index pair")
+	assert.ErrorContains(t, res, "[line 1] invalid index pair")
 }
 
 func TestDecodeIndexReturnsErrorWhenIDInvalid(t *testing.T) {
@@ -52,7 +52,7 @@ func TestDecodeIndexReturnsErrorWhenIDInvalid(t *testing.T) {
 	_, res := e.DecodeIndex(buffer)
 
 	//-- arrange
-	require.ErrorContains(t, res, "[line 1] invalid uuid")
+	assert.ErrorContains(t, res, "[line 1] invalid uuid")
 }
 
 func TestEncodeDecodeIndexReturnsIndexAndNoError(t *testing.T) {

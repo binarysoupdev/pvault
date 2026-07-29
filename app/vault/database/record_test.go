@@ -26,7 +26,7 @@ func TestSaveRecordReturnsErrorWhenPathInvalid(t *testing.T) {
 	res := database.SaveRecord(&database.Mock{}, PATH, RECORD, PASSWORD)
 
 	//-- assert
-	require.ErrorContains(t, res, "error creating record file")
+	assert.ErrorContains(t, res, "error creating record file")
 }
 
 func TestSaveRecordReturnsErrorWhenEncodeRecordReturnsError(t *testing.T) {
@@ -46,7 +46,7 @@ func TestSaveRecordReturnsErrorWhenEncodeRecordReturnsError(t *testing.T) {
 	res := database.SaveRecord(mock, PATH, RECORD, PASSWORD)
 
 	//-- assert
-	require.ErrorContains(t, res, "error encoding record")
+	assert.ErrorContains(t, res, "error encoding record")
 }
 
 func TestSaveRecordReturnsNoErrorAndSavesRecord(t *testing.T) {
@@ -73,7 +73,7 @@ func TestLoadRecordReturnsErrorWhenPathInvalid(t *testing.T) {
 	_, res := database.LoadRecord(&database.Mock{}, "invalid", uuid.Nil, "")
 
 	//-- assert
-	require.ErrorContains(t, res, "error opening record file")
+	assert.ErrorContains(t, res, "error opening record file")
 }
 
 func TestLoadRecordReturnsErrorWhenDecodeRecordReturnsError(t *testing.T) {
@@ -89,7 +89,7 @@ func TestLoadRecordReturnsErrorWhenDecodeRecordReturnsError(t *testing.T) {
 	_, res := database.LoadRecord(mock, filepath.Dir(FILEPATH), ID, "")
 
 	//-- assert
-	require.ErrorContains(t, res, "error decoding record")
+	assert.ErrorContains(t, res, "error decoding record")
 }
 
 func TestLoadRecordReturnsRecordAndNoErrorAndLoadsRecord(t *testing.T) {
@@ -119,7 +119,7 @@ func TestDeleteRecordReturnsErrorWhenPathInvalid(t *testing.T) {
 	res := database.DeleteRecord(mock, "invalid", uuid.Nil)
 
 	//-- assert
-	require.Error(t, res, "error removing record file")
+	assert.ErrorContains(t, res, "error removing record file")
 }
 
 func TestDeleteRecordReturnsNoErrorAndDeletesRecord(t *testing.T) {

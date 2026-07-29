@@ -11,7 +11,6 @@ import (
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestEncodeV1ReturnsErrorWhenErrorWritingData(t *testing.T) {
@@ -72,5 +71,5 @@ func TestDecodeV1ReturnsErrorWhenErrorDecryptingRecord(t *testing.T) {
 	_, res := e.DecodeV1(buffer, "", uuid.Nil)
 
 	//-- assert
-	require.ErrorContains(t, res, "error decrypting record v1")
+	assert.ErrorContains(t, res, "error decrypting record v1")
 }

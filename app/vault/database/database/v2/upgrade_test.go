@@ -22,7 +22,7 @@ func TestUpgradeReturnsErrorWhenOldIndexNotFound(t *testing.T) {
 	_, res := db_v2.Database{}.Upgrade("invalid")
 
 	//-- assert
-	require.ErrorContains(t, res, "error loading old index file")
+	assert.ErrorContains(t, res, "error loading old index file")
 }
 
 func TestUpgradeReturnsErrorWhenUnsupportedRecordVersionDetected(t *testing.T) {
@@ -43,7 +43,7 @@ func TestUpgradeReturnsErrorWhenUnsupportedRecordVersionDetected(t *testing.T) {
 	_, res := db.Upgrade(PATH)
 
 	//-- assert
-	require.ErrorContains(t, res, fmt.Sprintf("unsupported record version \"%d\"", VERSION))
+	assert.ErrorContains(t, res, fmt.Sprintf("unsupported record version \"%d\"", VERSION))
 }
 
 func TestUpgradeReturnsNewDatabaseAndNoErrorAndUpgradesDatabase(t *testing.T) {

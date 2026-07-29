@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestUnmarshalReturnsErrorWhenVersionIncorrect(t *testing.T) {
@@ -21,5 +21,5 @@ func TestUnmarshalReturnsErrorWhenVersionIncorrect(t *testing.T) {
 	_, res := v1.Unmarshal(bytes, "", uuid.Nil)
 
 	//-- assert
-	require.ErrorContains(t, res, fmt.Sprintf("incorrect version \"%d\"", VERSION))
+	assert.ErrorContains(t, res, fmt.Sprintf("incorrect version \"%d\"", VERSION))
 }

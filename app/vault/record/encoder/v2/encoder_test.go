@@ -58,7 +58,7 @@ func TestDecodeRecordReturnsErrorWhenRecordVersionUnsupported(t *testing.T) {
 	_, res := e.DecodeRecord(buffer, "")
 
 	//-- assert
-	require.ErrorContains(t, res, fmt.Sprintf("unsupported record version \"%d\"", VERSION))
+	assert.ErrorContains(t, res, fmt.Sprintf("unsupported record version \"%d\"", VERSION))
 }
 
 func TestEncodeDecodeRecordReturnsRecordV1AndNoError(t *testing.T) {

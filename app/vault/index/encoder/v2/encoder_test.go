@@ -26,7 +26,7 @@ func TestEncodeIndexReturnsErrorWhenErrorWritingHeader(t *testing.T) {
 	res := e.EncodeIndex(mock, index.IndexMap{})
 
 	//-- arrange
-	require.ErrorContains(t, res, "error encoding header")
+	assert.ErrorContains(t, res, "error encoding header")
 }
 
 func TestEncodeIndexReturnsErrorWhenErrorWritingEntry(t *testing.T) {
@@ -40,7 +40,7 @@ func TestEncodeIndexReturnsErrorWhenErrorWritingEntry(t *testing.T) {
 	res := e.EncodeIndex(mock, index.IndexMap{"": uuid.Nil})
 
 	//-- arrange
-	require.ErrorContains(t, res, "error encoding entry [0]")
+	assert.ErrorContains(t, res, "error encoding entry [0]")
 }
 
 func TestDecodeIndexReturnsErrorWhenHeaderTooShort(t *testing.T) {
@@ -52,7 +52,7 @@ func TestDecodeIndexReturnsErrorWhenHeaderTooShort(t *testing.T) {
 	_, res := e.DecodeIndex(buffer)
 
 	//-- arrange
-	require.ErrorContains(t, res, "error decoding header")
+	assert.ErrorContains(t, res, "error decoding header")
 }
 
 func TestDecodeIndexReturnsErrorWhenIndexVersionUnsupported(t *testing.T) {
@@ -70,7 +70,7 @@ func TestDecodeIndexReturnsErrorWhenIndexVersionUnsupported(t *testing.T) {
 	_, res := e.DecodeIndex(buffer)
 
 	//-- arrange
-	require.ErrorContains(t, res, fmt.Sprintf("unsupported index version \"%d\"", VERSION))
+	assert.ErrorContains(t, res, fmt.Sprintf("unsupported index version \"%d\"", VERSION))
 }
 
 func TestDecodeIndexReturnsErrorWhenEntryHeaderTooShort(t *testing.T) {
@@ -87,8 +87,8 @@ func TestDecodeIndexReturnsErrorWhenEntryHeaderTooShort(t *testing.T) {
 	_, res := e.DecodeIndex(buffer)
 
 	//-- arrange
-	require.ErrorContains(t, res, "error decoding entry [0]")
-	require.ErrorContains(t, res, "error decoding header")
+	assert.ErrorContains(t, res, "error decoding entry [0]")
+	assert.ErrorContains(t, res, "error decoding header")
 }
 
 func TestDecodeIndexReturnsErrorWhenEntryLengthTooShort(t *testing.T) {
@@ -111,8 +111,8 @@ func TestDecodeIndexReturnsErrorWhenEntryLengthTooShort(t *testing.T) {
 	_, res := e.DecodeIndex(buffer)
 
 	//-- arrange
-	require.ErrorContains(t, res, "error decoding entry [0]")
-	require.ErrorContains(t, res, fmt.Sprintf("length too short: %d", ENTRY_LENGTH))
+	assert.ErrorContains(t, res, "error decoding entry [0]")
+	assert.ErrorContains(t, res, fmt.Sprintf("length too short: %d", ENTRY_LENGTH))
 }
 
 func TestDecodeIndexReturnsErrorWhenEntryBodyTooShort(t *testing.T) {
@@ -135,8 +135,8 @@ func TestDecodeIndexReturnsErrorWhenEntryBodyTooShort(t *testing.T) {
 	_, res := e.DecodeIndex(buffer)
 
 	//-- arrange
-	require.ErrorContains(t, res, "error decoding entry [0]")
-	require.ErrorContains(t, res, "error decoding body")
+	assert.ErrorContains(t, res, "error decoding entry [0]")
+	assert.ErrorContains(t, res, "error decoding body")
 }
 
 func TestEncodeDecodeIndexReturnsIndexAndNoError(t *testing.T) {
