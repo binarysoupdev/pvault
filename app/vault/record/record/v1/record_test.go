@@ -1,25 +1,32 @@
 package v1_test
 
 import (
-	"encoding/binary"
-	"fmt"
-	v1 "pvault/app/vault/record/version1"
+	v1 "pvault/app/vault/record/record/v1"
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestUnmarshalReturnsErrorWhenVersionIncorrect(t *testing.T) {
+func TestUpgradeReturnsUpgradedRecord(t *testing.T) {
 	//-- arrange
-	const VERSION = v1.VERSION + 1
-
-	bytes := make([]byte, 2)
-	binary.BigEndian.PutUint16(bytes, VERSION)
+	r := v1.Record{
+		Password:      "password",
+		Username:      "username",
+		URL:           "url",
+		RecoveryCodes: []string{"code1", "code2"},
+		ID:            uuid.New(),
+		Name:          "name",
+	}
 
 	//-- act
-	_, res := v1.Unmarshal(bytes, "", uuid.Nil)
+	res := r.Upgrade()
 
 	//-- assert
-	assert.ErrorContains(t, res, fmt.Sprintf("incorrect version \"%d\"", VERSION))
+	assert.Equal(t, r.ID, res.ID)
+	assert.Equal(t, r.Name, res.Name)
+	assert.Equal(t, r.Password, res.Password)
+	assert.Equal(t, r.Username, res.Username)
+	assert.Equal(t, r.URL, res.Other["url"])
+	assert.Equal(t, r.RecoveryCodes, res.Other["recovery_codes"])
 }
