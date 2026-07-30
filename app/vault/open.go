@@ -46,7 +46,7 @@ func loadMetadata(path string) (meta.Metadata, error) {
 	if !ok {
 		return meta.Metadata{}, errors.Format("vault not found at \"%s\"", path)
 	}
-	m := createNewMetadata(version)
+	m := meta.New(version, filepath.Base(path))
 
 	err = meta.SaveMetadata(metaPath, m)
 	if err != nil {

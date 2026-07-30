@@ -19,10 +19,8 @@ func TestEncodeV1ReturnsErrorWhenErrorWritingData(t *testing.T) {
 		WriteErrors: []error{errors.New("")},
 	}
 
-	RECORD := record_v1.Record{}
-
 	//-- act
-	res := e.EncodeV1(mock, "", RECORD)
+	res := e.EncodeV1(mock, "", record_v1.Record{})
 
 	//-- assert
 	assert.ErrorContains(t, res, "error encoding record v1")

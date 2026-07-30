@@ -10,7 +10,7 @@ import (
 	"github.com/binarysoupdev/go-commando/errors"
 )
 
-func CreateNew(path string) (Vault, error) {
+func CreateNew(path, name string) (Vault, error) {
 	_, err := os.Stat(path)
 	if err == nil || !os.IsNotExist(err) {
 		return Vault{}, errors.New("vault path already exists")
@@ -23,7 +23,7 @@ func CreateNew(path string) (Vault, error) {
 
 	v := Vault{
 		Path:     path,
-		Meta:     createNewMetadata(v3.VERSION),
+		Meta:     meta.New(v3.VERSION, name),
 		Database: v3.Database{},
 		Map:      index.IndexMap{},
 	}
