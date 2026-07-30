@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"path/filepath"
 	"pvault/app/cmd/base"
 	"pvault/app/flow"
 	"pvault/app/vault"
@@ -52,7 +53,7 @@ func (cmd VaultCommand) Run(args []string) error {
 }
 
 func (cmd VaultCommand) initialize() error {
-	_, err := vault.CreateNew(cmd.Config.VaultPath)
+	_, err := vault.CreateNew(cmd.Config.VaultPath, filepath.Base(cmd.Config.VaultPath))
 	if err != nil {
 		return errors.Chain(err, "error initializing new vault")
 	}

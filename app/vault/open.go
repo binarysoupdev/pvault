@@ -16,12 +16,12 @@ func Open(path string) (Vault, error) {
 	v := Vault{}
 	var err error
 
-	v.Meta, err = loadMetadata(path)
+	v.Meta, err = createOrLoadMetadata(path)
 	if err != nil {
 		return Vault{}, err
 	}
 
-	v.Database, err = loadDatabaseFromVersion(v.Meta.DatabaseVersion, path)
+	v.Database, err = createDatabaseFromVersion(v.Meta.DatabaseVersion)
 	if err != nil {
 		return Vault{}, err
 	}
@@ -34,12 +34,10 @@ func Open(path string) (Vault, error) {
 	return v, nil
 }
 
-func loadMetadata(path string) (meta.Metadata, error) {
-	metaPath := metadataPath(path)
-
-	_, err := os.Stat(metaPath)
+func createOrLoadMetadata(path string) (meta.Metadata, error) {
+	_, err := os.Stat(metadataPath(path))
 	if err == nil {
-		return meta.LoadMetadata(metaPath)
+		return loadMetadata(path)
 	}
 
 	version, ok := detectLegacyDatabase(path)
@@ -48,9 +46,9 @@ func loadMetadata(path string) (meta.Metadata, error) {
 	}
 	m := meta.New(version, filepath.Base(path))
 
-	err = meta.SaveMetadata(metaPath, m)
+	err = saveMetadata(path, m)
 	if err != nil {
-		return meta.Metadata{}, errors.Chain(err, "error saving new metadata")
+		return meta.Metadata{}, err
 	}
 
 	return m, nil
@@ -70,7 +68,7 @@ func detectLegacyDatabase(path string) (int, bool) {
 	return 0, false
 }
 
-func loadDatabaseFromVersion(version int, path string) (database.Database, error) {
+func createDatabaseFromVersion(version int) (database.Database, error) {
 	switch version {
 	case v1.VERSION:
 		return v1.Database{}, nil

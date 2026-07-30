@@ -28,9 +28,9 @@ func CreateNew(path, name string) (Vault, error) {
 		Map:      index.IndexMap{},
 	}
 
-	err = meta.SaveMetadata(metadataPath(path), v.Meta)
+	err = saveMetadata(path, v.Meta)
 	if err != nil {
-		return Vault{}, errors.Chain(err, "error saving metadata")
+		return Vault{}, err
 	}
 
 	err = database.SaveIndex(v.Database, v.Path, v.Map)
