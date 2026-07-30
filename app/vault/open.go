@@ -13,10 +13,11 @@ import (
 )
 
 func Open(path string) (Vault, error) {
-	v := Vault{}
-	var err error
+	v := Vault{
+		Path: path,
+	}
 
-	v.Meta, err = createOrLoadMetadata(path)
+	err := createOrLoadMetadata(&v)
 	if err != nil {
 		return Vault{}, err
 	}
@@ -26,7 +27,7 @@ func Open(path string) (Vault, error) {
 		return Vault{}, err
 	}
 
-	v.Map, err = database.LoadIndex(v.Database, v.Path)
+	err = v.LoadIndex()
 	if err != nil {
 		return Vault{}, err
 	}
@@ -34,24 +35,19 @@ func Open(path string) (Vault, error) {
 	return v, nil
 }
 
-func createOrLoadMetadata(path string) (meta.Metadata, error) {
-	_, err := os.Stat(metadataPath(path))
+func createOrLoadMetadata(v *Vault) error {
+	_, err := os.Stat(v.MetadataPath())
 	if err == nil {
-		return loadMetadata(path)
+		return v.LoadMetadata()
 	}
 
-	version, ok := detectLegacyDatabase(path)
+	version, ok := detectLegacyDatabase(v.Path)
 	if !ok {
-		return meta.Metadata{}, errors.Format("vault not found at \"%s\"", path)
-	}
-	m := meta.New(version, filepath.Base(path))
-
-	err = saveMetadata(path, m)
-	if err != nil {
-		return meta.Metadata{}, err
+		return errors.Format("vault not found at \"%s\"", v.Path)
 	}
 
-	return m, nil
+	v.Meta = meta.New(version, filepath.Base(v.Path))
+	return v.SaveMetadata()
 }
 
 func detectLegacyDatabase(path string) (int, bool) {

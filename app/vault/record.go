@@ -8,6 +8,10 @@ import (
 	"github.com/google/uuid"
 )
 
+func (v Vault) RecordPath(id uuid.UUID) string {
+	return v.Database.RecordPath(v.Path, id)
+}
+
 func (v Vault) ValidateRecord(r record.Record) error {
 	err := record.Validate(r)
 	if err != nil {
@@ -30,7 +34,7 @@ func (v Vault) SaveRecord(r record.Record, password string) error {
 
 	err = database.SaveRecord(v.Database, v.Path, r, password)
 	if err != nil {
-		return errors.Chain(err, "error saving record")
+		return err
 	}
 
 	existingName, ok := v.Map.FindName(r.GetID())
@@ -39,9 +43,9 @@ func (v Vault) SaveRecord(r record.Record, password string) error {
 	}
 	v.Map[r.GetName()] = r.GetID()
 
-	err = database.SaveIndex(v.Database, v.Path, v.Map)
+	err = v.SaveIndex()
 	if err != nil {
-		return errors.Chain(err, "error saving index")
+		return err
 	}
 
 	return nil
@@ -55,7 +59,7 @@ func (v Vault) LoadRecord(name string, password string) (record.Record, error) {
 
 	r, err := database.LoadRecord(v.Database, v.Path, id, password)
 	if err != nil {
-		return nil, errors.Chain(err, "error loading record")
+		return nil, err
 	}
 
 	return r, nil
@@ -69,14 +73,14 @@ func (v Vault) DeleteRecord(name string) (uuid.UUID, error) {
 
 	err := database.DeleteRecord(v.Database, v.Path, id)
 	if err != nil {
-		return uuid.Nil, errors.Chain(err, "error deleting record")
+		return uuid.Nil, err
 	}
 
 	delete(v.Map, name)
 
-	err = database.SaveIndex(v.Database, v.Path, v.Map)
+	err = v.SaveIndex()
 	if err != nil {
-		return id, errors.Chain(err, "error saving index map")
+		return id, err
 	}
 
 	return id, nil

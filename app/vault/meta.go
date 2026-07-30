@@ -10,22 +10,23 @@ import (
 
 const METADATA_FILE = "VAULT"
 
-func metadataPath(path string) string {
-	return filepath.Join(path, METADATA_FILE)
+func (v Vault) MetadataPath() string {
+	return filepath.Join(v.Path, METADATA_FILE)
 }
 
-func saveMetadata(path string, m meta.Metadata) error {
-	err := meta.SaveMetadata(meta_v1.Encoder{}, metadataPath(path), m)
+func (v Vault) SaveMetadata() error {
+	err := meta.SaveMetadata(meta_v1.Encoder{}, v.MetadataPath(), v.Meta)
 	if err != nil {
 		return errors.Chain(err, "error saving metadata")
 	}
 	return nil
 }
 
-func loadMetadata(path string) (meta.Metadata, error) {
-	m, err := meta.LoadMetadata(meta_v1.Encoder{}, metadataPath(path))
+func (v *Vault) LoadMetadata() error {
+	var err error
+	v.Meta, err = meta.LoadMetadata(meta_v1.Encoder{}, v.MetadataPath())
 	if err != nil {
-		return meta.Metadata{}, errors.Chain(err, "error loading metadata")
+		return errors.Chain(err, "error loading metadata")
 	}
-	return m, nil
+	return nil
 }

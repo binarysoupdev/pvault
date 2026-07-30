@@ -2,7 +2,6 @@ package vault
 
 import (
 	"os"
-	"pvault/app/vault/database"
 	v3 "pvault/app/vault/database/database/v3"
 	"pvault/app/vault/index"
 	"pvault/app/vault/meta"
@@ -28,14 +27,14 @@ func CreateNew(path, name string) (Vault, error) {
 		Map:      index.IndexMap{},
 	}
 
-	err = saveMetadata(path, v.Meta)
+	err = v.SaveMetadata()
 	if err != nil {
 		return Vault{}, err
 	}
 
-	err = database.SaveIndex(v.Database, v.Path, v.Map)
+	err = v.SaveIndex()
 	if err != nil {
-		return Vault{}, errors.Chain(err, "error saving initial index")
+		return Vault{}, err
 	}
 
 	return v, nil

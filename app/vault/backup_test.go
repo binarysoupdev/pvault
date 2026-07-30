@@ -3,87 +3,139 @@ package vault_test
 import (
 	"fmt"
 	"os"
+	"pvault/app/vault"
+	"pvault/app/vault/database"
 	"pvault/app/vault/index"
-	"pvault/app/vault/local"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/suite"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-type BackupTestSuite struct {
-	suite.Suite
-	Vault local.Vault
-}
-
-func TestBackupTestSuite(t *testing.T) {
-	suite.Run(t, &BackupTestSuite{})
-}
-
-func (s *BackupTestSuite) SetupTest() {
-	s.Vault = local.Vault{
-		Index: &index.Mock{
-			Path: file.NewPath(s.T(), ""),
-		},
-		Map: index.IndexMap{},
-	}
-}
-
-//===================================
-
-func (s *BackupTestSuite) TestBackupReturnsErrorWhenPathNotFound() {
+func TestVaultBackupReturnsErrorWhenPathNotFound(t *testing.T) {
 	//-- act
-	res := s.Vault.Backup("invalid")
+	res := vault.Vault{}.Backup("invalid")
 
-	//-- arrange
-	s.Require().ErrorContains(res, "error reading backup directory")
+	//-- assert
+	assert.ErrorContains(t, res, "error reading backup directory")
 }
 
-func (s *BackupTestSuite) TestBackupReturnsErrorWhenPathIsNotADir() {
+func TestVaultBackupReturnsErrorWhenPathIsNotADir(t *testing.T) {
 	//-- arrange
-	PATH := file.CreateEmpty(s.T(), "backups.txt")
+	PATH := file.CreateEmpty(t, "backups.txt")
 
 	//-- act
-	res := s.Vault.Backup(PATH)
+	res := vault.Vault{}.Backup(PATH)
 
-	//-- arrange
-	s.Require().ErrorContains(res, fmt.Sprintf("\"%s\" is not a directory", PATH))
+	//-- assert
+	assert.ErrorContains(t, res, fmt.Sprintf("\"%s\" is not a directory", PATH))
 }
 
-func (s *BackupTestSuite) TestBackupReturnsNoErrorAndBacksUpIndexFileAndRecords() {
+func TestVaultBackupReturnsErrorWhenErrorBackingMetadataFile(t *testing.T) {
 	//-- arrange
-	BACKUP := file.NewPath(s.T(), "")
-	IDS := uuid.UUIDs{uuid.New(), uuid.New()}
-	DATA := [][]byte{{0, 0, 0}, {1, 1, 1}, {2, 2, 2}}
-
-	s.Require().NoError(os.WriteFile(s.Vault.Index.Filepath(), DATA[0], 0666))
-	s.Require().NoError(os.WriteFile(s.Vault.Index.RecordPath(IDS[0]), DATA[1], 0666))
-	s.Require().NoError(os.WriteFile(s.Vault.Index.RecordPath(IDS[1]), DATA[2], 0666))
-
-	s.Vault.Map = index.IndexMap{
-		"foo1": IDS[0],
-		"foo2": IDS[1],
+	PATH := file.NewPath(t, "")
+	v := vault.Vault{
+		Path:     "invalid",
+		Database: &database.Mock{},
 	}
 
 	//-- act
-	res := s.Vault.Backup(BACKUP)
+	res := v.Backup(PATH)
 
+	//-- assert
+	assert.ErrorContains(t, res, "error backing metadata file")
+}
+
+func TestVaultBackupReturnsErrorWhenErrorBackingIndexFile(t *testing.T) {
 	//-- arrange
-	s.Require().NoError(res)
-	idx := index.Mock{
-		Path: BACKUP,
+	PATH := file.NewPath(t, "")
+	v := vault.Vault{
+		Path:     file.NewPath(t, ""),
+		Database: &database.Mock{},
 	}
 
-	data0, err := os.ReadFile(idx.Filepath())
-	s.Require().NoError(err)
-	s.Assert().Equal(DATA[0], data0)
+	require.NoError(t, os.WriteFile(v.MetadataPath(), []byte{}, 0666))
 
-	data1, err := os.ReadFile(idx.RecordPath(IDS[0]))
-	s.Require().NoError(err)
-	s.Assert().Equal(DATA[1], data1)
+	//-- act
+	res := v.Backup(PATH)
 
-	data2, err := os.ReadFile(idx.RecordPath(IDS[1]))
-	s.Require().NoError(err)
-	s.Assert().Equal(DATA[2], data2)
+	//-- assert
+	assert.ErrorContains(t, res, "error backing index file")
+}
+
+func TestVaultBackupReturnsErrorWhenRecordFilesNotFound(t *testing.T) {
+	//-- arrange
+	PATH := file.NewPath(t, "")
+	v := vault.Vault{
+		Path:     file.NewPath(t, ""),
+		Database: &database.Mock{},
+	}
+
+	R1 := uuid.New()
+	R2 := uuid.New()
+	v.Map = index.IndexMap{
+		"name1": R1,
+		"name2": R2,
+	}
+
+	require.NoError(t, os.WriteFile(v.MetadataPath(), []byte{}, 0666))
+	require.NoError(t, os.WriteFile(v.Database.IndexPath(v.Path), []byte{}, 0666))
+
+	//-- act
+	res := v.Backup(PATH)
+
+	//-- assert
+	assert.ErrorContains(t, res, "error backing record "+R1.String())
+	assert.ErrorContains(t, res, "error backing record "+R2.String())
+}
+
+func TestVaultBackupReturnsNoErrorAndBacksUpIndexAndRecords(t *testing.T) {
+	PATH := file.NewPath(t, "")
+	v := vault.Vault{
+		Path:     file.NewPath(t, ""),
+		Database: &database.Mock{},
+	}
+
+	R1 := uuid.New()
+	R2 := uuid.New()
+	v.Map = index.IndexMap{
+		"name1": R1,
+		"name2": R2,
+	}
+
+	METADATA_BYTES := []byte{0, 0, 0}
+	require.NoError(t, os.WriteFile(v.MetadataPath(), METADATA_BYTES, 0666))
+
+	INDEX_BYTES := []byte{1, 1, 1}
+	require.NoError(t, os.WriteFile(v.IndexPath(), INDEX_BYTES, 0666))
+
+	R1_BYTES := []byte{2, 2, 2}
+	require.NoError(t, os.WriteFile(v.RecordPath(R1), R1_BYTES, 0666))
+
+	R2_BYTES := []byte{3, 3, 3}
+	require.NoError(t, os.WriteFile(v.RecordPath(R2), R2_BYTES, 0666))
+
+	//-- act
+	res := v.Backup(PATH)
+
+	//-- assert
+	require.NoError(t, res)
+
+	meta, err := os.ReadFile(v.MetadataPath())
+	require.NoError(t, err)
+	assert.Equal(t, METADATA_BYTES, meta)
+
+	index, err := os.ReadFile(v.IndexPath())
+	require.NoError(t, err)
+	assert.Equal(t, INDEX_BYTES, index)
+
+	r1, err := os.ReadFile(v.RecordPath(R1))
+	require.NoError(t, err)
+	assert.Equal(t, R1_BYTES, r1)
+
+	r2, err := os.ReadFile(v.RecordPath(R2))
+	require.NoError(t, err)
+	assert.Equal(t, R2_BYTES, r2)
 }

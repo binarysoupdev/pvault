@@ -30,7 +30,7 @@ func (db Database) Upgrade(path string) (v3.Database, error) {
 	for _, id := range idx {
 		err := db.upgradeRecord(target, path, id)
 		if err != nil {
-			errs.Add(err)
+			errs.Add(errors.Chain(err, "error backing record "+id.String()))
 			continue
 		}
 	}

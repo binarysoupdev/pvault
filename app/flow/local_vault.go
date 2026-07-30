@@ -28,7 +28,7 @@ func OpenVault(path string) (vault.Vault, error) {
 func BackupVault(v vault.Vault, cfg config.Config) error {
 	err := cfg.ValidateBackupPath()
 	if err != nil {
-		return errors.Chain(err, "error validating backup path")
+		return errors.Chain(err, "error validating \"config.backup_path\"")
 	}
 
 	path := filepath.Join(cfg.BackupPath, fmt.Sprintf("%s (v%d)", time.Now().Format(time.DateTime), v.GetVersion()))

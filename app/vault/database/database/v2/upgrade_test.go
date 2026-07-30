@@ -25,6 +25,28 @@ func TestUpgradeReturnsErrorWhenOldIndexNotFound(t *testing.T) {
 	assert.ErrorContains(t, res, "error loading old index file")
 }
 
+func TestUpgradeReturnsErrorWhenErrorBackingRecords(t *testing.T) {
+	//-- arrange
+	db := db_v2.Database{}
+	PATH := file.NewPath(t, "")
+
+	R1 := uuid.New()
+	R2 := uuid.New()
+
+	INDEX := index.IndexMap{
+		"name1": R1,
+		"name2": R2,
+	}
+	require.NoError(t, database.SaveIndex(db, PATH, INDEX))
+
+	//-- act
+	_, res := db_v2.Database{}.Upgrade(PATH)
+
+	//-- assert
+	assert.ErrorContains(t, res, "error backing record "+R1.String())
+	assert.ErrorContains(t, res, "error backing record "+R2.String())
+}
+
 func TestUpgradeReturnsErrorWhenUnsupportedRecordVersionDetected(t *testing.T) {
 	//-- arrange
 	db := db_v2.Database{}
