@@ -7,10 +7,12 @@ import (
 )
 
 type Vault struct {
-	Path     string
-	Meta     meta.Metadata
-	Database database.Database
-	Map      index.IndexMap
+	Path        string
+	MetaEncoder meta.Encoder
+	Database    database.Database
+
+	Meta meta.Metadata
+	Map  index.IndexMap
 }
 
 func (v Vault) GetVersion() int {

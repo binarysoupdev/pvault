@@ -2,14 +2,25 @@ package vault
 
 import (
 	"os"
-	v3 "pvault/app/vault/database/database/v3"
+	db_v3 "pvault/app/vault/database/database/v3"
 	"pvault/app/vault/index"
 	"pvault/app/vault/meta"
+	meta_encoder "pvault/app/vault/meta/encoder"
 
 	"github.com/binarysoupdev/go-commando/errors"
 )
 
-func CreateNew(path, name string) (Vault, error) {
+func New(path, nickname string) Vault {
+	return Vault{
+		Path:        path,
+		MetaEncoder: meta_encoder.Encoder{},
+		Database:    db_v3.Database{},
+		Meta:        meta.New(db_v3.VERSION, nickname),
+		Map:         index.IndexMap{},
+	}
+}
+
+func InitializeNew(path, name string) (Vault, error) {
 	_, err := os.Stat(path)
 	if err == nil || !os.IsNotExist(err) {
 		return Vault{}, errors.New("vault path already exists")
@@ -20,12 +31,7 @@ func CreateNew(path, name string) (Vault, error) {
 		return Vault{}, errors.Chain(err, "error creating vault directory")
 	}
 
-	v := Vault{
-		Path:     path,
-		Meta:     meta.New(v3.VERSION, name),
-		Database: v3.Database{},
-		Map:      index.IndexMap{},
-	}
+	v := New(path, name)
 
 	err = v.SaveMetadata()
 	if err != nil {

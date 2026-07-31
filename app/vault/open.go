@@ -8,21 +8,15 @@ import (
 	db_v2 "pvault/app/vault/database/database/v2"
 	db_v3 "pvault/app/vault/database/database/v3"
 	"pvault/app/vault/meta"
+	meta_encoder "pvault/app/vault/meta/encoder"
 
 	"github.com/binarysoupdev/go-commando/errors"
 )
 
 func Open(path string) (Vault, error) {
-	v := Vault{
-		Path: path,
-	}
+	v := New(path, filepath.Base(path))
 
-	err := createOrLoadMetadata(&v)
-	if err != nil {
-		return Vault{}, err
-	}
-
-	v.Database, err = createDatabaseFromVersion(v.Meta.DatabaseVersion)
+	err := open(&v)
 	if err != nil {
 		return Vault{}, err
 	}
@@ -35,44 +29,83 @@ func Open(path string) (Vault, error) {
 	return v, nil
 }
 
-func createOrLoadMetadata(v *Vault) error {
-	_, err := os.Stat(v.MetadataPath())
-	if err == nil {
-		return v.LoadMetadata()
+func open(v *Vault) error {
+	ok, err := loadFromMetadata(v)
+	if ok || err != nil {
+		return err
 	}
 
-	version, ok := detectLegacyDatabase(v.Path)
-	if !ok {
-		return errors.Format("vault not found at \"%s\"", v.Path)
+	ok, err = loadFromDatabase(v)
+	if ok || err != nil {
+		return err
 	}
 
-	v.Meta = meta.New(version, filepath.Base(v.Path))
-	return v.SaveMetadata()
+	return errors.Format("vault not found at \"%s\"", v.Path)
 }
 
-func detectLegacyDatabase(path string) (int, bool) {
-	_, err := os.Stat(filepath.Join(path, db_v2.INDEX_FILE))
-	if err == nil {
-		return db_v2.VERSION, true
+func loadFromMetadata(v *Vault) (bool, error) {
+	encoder := detectMetadata(v.Path)
+	if encoder == nil {
+		return false, nil
 	}
 
-	_, err = os.Stat(filepath.Join(path, db_v1.INDEX_FILE))
-	if err == nil {
-		return db_v1.VERSION, true
+	v.MetaEncoder = encoder
+
+	err := v.LoadMetadata()
+	if err != nil {
+		return false, err
 	}
 
-	return -1, false
-}
-
-func createDatabaseFromVersion(version int) (database.Database, error) {
-	switch version {
+	switch v.Meta.DatabaseVersion {
 	case db_v1.VERSION:
-		return db_v1.Database{}, nil
+		v.Database = db_v1.Database{}
 	case db_v2.VERSION:
-		return db_v2.Database{}, nil
+		v.Database = db_v2.Database{}
 	case db_v3.VERSION:
-		return db_v3.Database{}, nil
+		v.Database = db_v3.Database{}
 	default:
-		return nil, errors.Format("unsupported vault version \"%d\"", version)
+		return false, errors.Format("unsupported vault version \"%d\"", v.Meta.DatabaseVersion)
 	}
+
+	return true, nil
+}
+
+func detectMetadata(path string) meta.Encoder {
+	_, err := os.Stat(meta_encoder.Encoder{}.MetadataPath(path))
+	if err == nil {
+		return meta_encoder.Encoder{}
+	}
+
+	return nil
+}
+
+func loadFromDatabase(v *Vault) (bool, error) {
+	db := detectDatabase(v.Path)
+	if db == nil {
+		return false, nil
+	}
+
+	v.Database = db
+	v.Meta.DatabaseVersion = db.GetVersion()
+
+	err := v.SaveMetadata()
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func detectDatabase(path string) database.Database {
+	_, err := os.Stat(db_v2.Database{}.IndexPath(path))
+	if err == nil {
+		return db_v2.Database{}
+	}
+
+	_, err = os.Stat(db_v1.Database{}.IndexPath(path))
+	if err == nil {
+		return db_v1.Database{}
+	}
+
+	return nil
 }

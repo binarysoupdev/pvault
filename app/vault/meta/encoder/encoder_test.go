@@ -1,11 +1,11 @@
-package v1_test
+package encoder_test
 
 import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
 	"pvault/app/vault/meta"
-	v1 "pvault/app/vault/meta/encoder/v1"
+	"pvault/app/vault/meta/encoder"
 	"pvault/util"
 	"testing"
 	"time"
@@ -19,7 +19,7 @@ func TestEncodeMetadataReturnsErrorWhenErrorWritingData(t *testing.T) {
 	//-- arrange
 	const ERROR = "write error"
 
-	e := v1.Encoder{}
+	e := encoder.Encoder{}
 	mock := &util.MockWriter{
 		WriteErrors: []error{errors.New(ERROR)},
 	}
@@ -33,7 +33,7 @@ func TestEncodeMetadataReturnsErrorWhenErrorWritingData(t *testing.T) {
 
 func TestDecodeMetadataReturnsErrorWhenErrorReadingHeader(t *testing.T) {
 	//-- arrange
-	e := v1.Encoder{}
+	e := encoder.Encoder{}
 	buffer := &bytes.Buffer{}
 
 	//-- act
@@ -45,12 +45,12 @@ func TestDecodeMetadataReturnsErrorWhenErrorReadingHeader(t *testing.T) {
 
 func TestDecodeMetadataReturnsErrorWhenVersionNotSupported(t *testing.T) {
 	//-- arrange
-	e := v1.Encoder{}
+	e := encoder.Encoder{}
 	buffer := &bytes.Buffer{}
 
 	const VERSION = meta.VERSION + 1
 
-	HEADER := make([]byte, v1.HEADER_SIZE)
+	HEADER := make([]byte, encoder.HEADER_SIZE)
 	binary.BigEndian.PutUint16(HEADER, VERSION)
 	buffer.Write(HEADER)
 
@@ -62,10 +62,10 @@ func TestDecodeMetadataReturnsErrorWhenVersionNotSupported(t *testing.T) {
 }
 
 func TestDecodeMetadataReturnsErrorWhenErrorReadingNickname(t *testing.T) {
-	e := v1.Encoder{}
+	e := encoder.Encoder{}
 	buffer := &bytes.Buffer{}
 
-	HEADER := make([]byte, v1.HEADER_SIZE)
+	HEADER := make([]byte, encoder.HEADER_SIZE)
 	binary.BigEndian.PutUint16(HEADER, meta.VERSION)
 	binary.BigEndian.PutUint16(HEADER[2+2:], 1)
 	buffer.Write(HEADER)
@@ -78,10 +78,10 @@ func TestDecodeMetadataReturnsErrorWhenErrorReadingNickname(t *testing.T) {
 }
 
 func TestDecodeMetadataReturnsErrorWhenErrorReadingCreationDate(t *testing.T) {
-	e := v1.Encoder{}
+	e := encoder.Encoder{}
 	buffer := &bytes.Buffer{}
 
-	HEADER := make([]byte, v1.HEADER_SIZE)
+	HEADER := make([]byte, encoder.HEADER_SIZE)
 	binary.BigEndian.PutUint16(HEADER, meta.VERSION)
 	binary.BigEndian.PutUint16(HEADER[2+2+2:], 1)
 	buffer.Write(HEADER)
@@ -94,10 +94,10 @@ func TestDecodeMetadataReturnsErrorWhenErrorReadingCreationDate(t *testing.T) {
 }
 
 func TestDecodeMetadataReturnsErrorWhenErrorUnmarshalingCreationDate(t *testing.T) {
-	e := v1.Encoder{}
+	e := encoder.Encoder{}
 	buffer := &bytes.Buffer{}
 
-	HEADER := make([]byte, v1.HEADER_SIZE)
+	HEADER := make([]byte, encoder.HEADER_SIZE)
 	binary.BigEndian.PutUint16(HEADER, meta.VERSION)
 	binary.BigEndian.PutUint16(HEADER[2+2+2:], 1)
 	buffer.Write(HEADER)
@@ -112,7 +112,7 @@ func TestDecodeMetadataReturnsErrorWhenErrorUnmarshalingCreationDate(t *testing.
 }
 
 func TestEncodeDecodeReturnsMetadataAndNoError(t *testing.T) {
-	e := v1.Encoder{}
+	e := encoder.Encoder{}
 	buffer := &bytes.Buffer{}
 
 	DATE := time.Now()

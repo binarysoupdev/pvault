@@ -8,12 +8,13 @@ import (
 )
 
 type Encoder interface {
+	MetadataPath(path string) string
 	EncodeMetadata(w io.Writer, m Metadata) error
 	DecodeMetadata(r io.Reader) (Metadata, error)
 }
 
 func SaveMetadata(e Encoder, path string, m Metadata) error {
-	file, err := os.Create(path)
+	file, err := os.Create(e.MetadataPath(path))
 	if err != nil {
 		return errors.Chain(err, "error creating metadata file")
 	}
@@ -28,7 +29,7 @@ func SaveMetadata(e Encoder, path string, m Metadata) error {
 }
 
 func LoadMetadata(e Encoder, path string) (Metadata, error) {
-	file, err := os.Open(path)
+	file, err := os.Open(e.MetadataPath(path))
 	if err != nil {
 		return Metadata{}, errors.Chain(err, "error opening metadata file")
 	}

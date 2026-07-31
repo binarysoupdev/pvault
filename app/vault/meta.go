@@ -1,21 +1,17 @@
 package vault
 
 import (
-	"path/filepath"
 	"pvault/app/vault/meta"
-	meta_v1 "pvault/app/vault/meta/encoder/v1"
 
 	"github.com/binarysoupdev/go-commando/errors"
 )
 
-const METADATA_FILE = "VAULT"
-
 func (v Vault) MetadataPath() string {
-	return filepath.Join(v.Path, METADATA_FILE)
+	return v.MetaEncoder.MetadataPath(v.Path)
 }
 
 func (v Vault) SaveMetadata() error {
-	err := meta.SaveMetadata(meta_v1.Encoder{}, v.MetadataPath(), v.Meta)
+	err := meta.SaveMetadata(v.MetaEncoder, v.Path, v.Meta)
 	if err != nil {
 		return errors.Chain(err, "error saving metadata")
 	}
@@ -24,7 +20,7 @@ func (v Vault) SaveMetadata() error {
 
 func (v *Vault) LoadMetadata() error {
 	var err error
-	v.Meta, err = meta.LoadMetadata(meta_v1.Encoder{}, v.MetadataPath())
+	v.Meta, err = meta.LoadMetadata(v.MetaEncoder, v.Path)
 	if err != nil {
 		return errors.Chain(err, "error loading metadata")
 	}

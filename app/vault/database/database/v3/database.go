@@ -8,10 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const (
-	VERSION    = 3
-	INDEX_FILE = "INDEX"
-)
+const VERSION = 3
 
 type IndexEncoder = index_v2.Encoder
 type RecordEncoder = record_v3.Encoder
@@ -21,8 +18,12 @@ type Database struct {
 	RecordEncoder
 }
 
+func (db Database) GetVersion() int {
+	return VERSION
+}
+
 func (db Database) IndexPath(path string) string {
-	return filepath.Join(path, INDEX_FILE)
+	return filepath.Join(path, "INDEX")
 }
 
 func (db Database) RecordPath(path string, id uuid.UUID) string {

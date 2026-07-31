@@ -1,12 +1,19 @@
 package meta
 
-import "io"
+import (
+	"io"
+	"path/filepath"
+)
 
 type EncoderMock struct {
 	Metadata Metadata
 
 	EncodeMetadataError error
 	DecodeMetadataError error
+}
+
+func (m EncoderMock) MetadataPath(path string) string {
+	return filepath.Join(path, "metadata.mock")
 }
 
 func (mock *EncoderMock) EncodeMetadata(_ io.Writer, m Metadata) error {

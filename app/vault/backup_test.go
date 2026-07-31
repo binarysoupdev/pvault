@@ -6,6 +6,7 @@ import (
 	"pvault/app/vault"
 	"pvault/app/vault/database"
 	"pvault/app/vault/index"
+	"pvault/app/vault/meta"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -37,8 +38,9 @@ func TestVaultBackupReturnsErrorWhenErrorBackingMetadataFile(t *testing.T) {
 	//-- arrange
 	PATH := file.NewPath(t, "")
 	v := vault.Vault{
-		Path:     "invalid",
-		Database: &database.Mock{},
+		Path:        "invalid",
+		MetaEncoder: &meta.EncoderMock{},
+		Database:    &database.Mock{},
 	}
 
 	//-- act
@@ -52,8 +54,9 @@ func TestVaultBackupReturnsErrorWhenErrorBackingIndexFile(t *testing.T) {
 	//-- arrange
 	PATH := file.NewPath(t, "")
 	v := vault.Vault{
-		Path:     file.NewPath(t, ""),
-		Database: &database.Mock{},
+		Path:        file.NewPath(t, ""),
+		MetaEncoder: &meta.EncoderMock{},
+		Database:    &database.Mock{},
 	}
 
 	require.NoError(t, os.WriteFile(v.MetadataPath(), []byte{}, 0666))
@@ -69,8 +72,9 @@ func TestVaultBackupReturnsErrorWhenRecordFilesNotFound(t *testing.T) {
 	//-- arrange
 	PATH := file.NewPath(t, "")
 	v := vault.Vault{
-		Path:     file.NewPath(t, ""),
-		Database: &database.Mock{},
+		Path:        file.NewPath(t, ""),
+		MetaEncoder: &meta.EncoderMock{},
+		Database:    &database.Mock{},
 	}
 
 	R1 := uuid.New()
@@ -94,8 +98,9 @@ func TestVaultBackupReturnsErrorWhenRecordFilesNotFound(t *testing.T) {
 func TestVaultBackupReturnsNoErrorAndBacksUpIndexAndRecords(t *testing.T) {
 	PATH := file.NewPath(t, "")
 	v := vault.Vault{
-		Path:     file.NewPath(t, ""),
-		Database: &database.Mock{},
+		Path:        file.NewPath(t, ""),
+		MetaEncoder: &meta.EncoderMock{},
+		Database:    &database.Mock{},
 	}
 
 	R1 := uuid.New()

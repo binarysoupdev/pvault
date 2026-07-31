@@ -2,7 +2,7 @@ package vault_test
 
 import (
 	"fmt"
-	"path/filepath"
+	"os"
 	"pvault/app/vault"
 	"pvault/app/vault/database"
 	db_v1 "pvault/app/vault/database/database/v1"
@@ -10,6 +10,7 @@ import (
 	db_v3 "pvault/app/vault/database/database/v3"
 	"pvault/app/vault/index"
 	"pvault/app/vault/meta"
+	meta_encoder "pvault/app/vault/meta/encoder"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"
@@ -43,10 +44,10 @@ func TestOpenReturnsVaultAndNoErrorWhenDatabaseIsV1AndCreatesNewMetadata(t *test
 
 	//-- assert
 	require.NoError(t, err)
+	assert.IsType(t, db_v1.Database{}, res.Database)
 
 	assert.Equal(t, PATH, res.Path)
 	assert.Equal(t, INDEX, res.Map)
-	assert.IsType(t, db_v1.Database{}, res.Database)
 
 	assert.FileExists(t, res.MetadataPath())
 	assert.Equal(t, db_v1.VERSION, res.Meta.DatabaseVersion)
@@ -66,10 +67,10 @@ func TestOpenReturnsVaultAndNoErrorWhenDatabaseIsV2AndCreatesNewMetadata(t *test
 
 	//-- assert
 	require.NoError(t, err)
+	assert.IsType(t, db_v2.Database{}, res.Database)
 
 	assert.Equal(t, PATH, res.Path)
 	assert.Equal(t, INDEX, res.Map)
-	assert.IsType(t, db_v2.Database{}, res.Database)
 
 	assert.FileExists(t, res.MetadataPath())
 	assert.Equal(t, db_v2.VERSION, res.Meta.DatabaseVersion)
@@ -77,10 +78,11 @@ func TestOpenReturnsVaultAndNoErrorWhenDatabaseIsV2AndCreatesNewMetadata(t *test
 
 func TestOpenReturnsErrorWhenErrorLoadingMetadata(t *testing.T) {
 	//-- arrange
-	PATH := file.CreateEmpty(t, vault.METADATA_FILE)
+	PATH := file.NewPath(t, "")
+	require.NoError(t, os.WriteFile(meta_encoder.Encoder{}.MetadataPath(PATH), []byte{}, 0666))
 
 	//-- act
-	_, res := vault.Open(filepath.Dir(PATH))
+	_, res := vault.Open(PATH)
 
 	//-- assert
 	assert.ErrorContains(t, res, "error loading metadata")
@@ -95,7 +97,8 @@ func TestOpenReturnsVaultAndNoErrorWhenDatabaseIsV3AndLoadsMetadata(t *testing.T
 	require.NoError(t, database.SaveIndex(db_v3.Database{}, PATH, INDEX))
 
 	VAULT := vault.Vault{
-		Path: PATH,
+		Path:        PATH,
+		MetaEncoder: meta_encoder.Encoder{},
 		Meta: meta.Metadata{
 			DatabaseVersion: db_v3.VERSION,
 		},
@@ -107,11 +110,10 @@ func TestOpenReturnsVaultAndNoErrorWhenDatabaseIsV3AndLoadsMetadata(t *testing.T
 
 	//-- assert
 	require.NoError(t, err)
+	assert.IsType(t, db_v3.Database{}, res.Database)
 
 	assert.Equal(t, PATH, res.Path)
 	assert.Equal(t, INDEX, res.Map)
-	assert.IsType(t, db_v3.Database{}, res.Database)
-
 	assert.Equal(t, VAULT.Meta, res.Meta)
 }
 
@@ -120,7 +122,8 @@ func TestOpenReturnsErrorWhenDatabaseVersionUnsupported(t *testing.T) {
 	PATH := file.NewPath(t, "")
 
 	VAULT := vault.Vault{
-		Path: PATH,
+		Path:        PATH,
+		MetaEncoder: meta_encoder.Encoder{},
 		Meta: meta.Metadata{
 			DatabaseVersion: db_v3.VERSION + 1,
 		},

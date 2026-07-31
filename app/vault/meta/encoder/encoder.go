@@ -1,8 +1,9 @@
-package v1
+package encoder
 
 import (
 	"encoding/binary"
 	"io"
+	"path/filepath"
 	"pvault/app/vault/meta"
 	"pvault/util"
 	"time"
@@ -13,6 +14,10 @@ import (
 const HEADER_SIZE = 2 + 2 + 2 + 2
 
 type Encoder struct{}
+
+func (Encoder) MetadataPath(path string) string {
+	return filepath.Join(path, "VAULT")
+}
 
 func (Encoder) EncodeMetadata(w io.Writer, m meta.Metadata) error {
 	header := make([]byte, HEADER_SIZE)

@@ -11,6 +11,8 @@ import (
 const CURRENT_VERSION = v3.VERSION
 
 type Database interface {
+	GetVersion() int
+
 	IndexPath(path string) string
 	index.Encoder
 

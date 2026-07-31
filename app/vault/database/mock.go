@@ -11,6 +11,8 @@ import (
 )
 
 type Mock struct {
+	Version int
+
 	Index            index.IndexMap
 	EncodeIndexError error
 	DecodeIndexError error
@@ -21,6 +23,10 @@ type Mock struct {
 	DecodeRecordError error
 
 	UpgradeError error
+}
+
+func (m Mock) GetVersion() int {
+	return m.Version
 }
 
 func (Mock) IndexPath(path string) string {
