@@ -22,7 +22,8 @@ type Mock struct {
 	EncodeRecordError error
 	DecodeRecordError error
 
-	UpgradeError error
+	UpgradedDatabase v3.Database
+	UpgradeError     error
 }
 
 func (m Mock) GetVersion() int {
@@ -57,5 +58,5 @@ func (m Mock) DecodeRecord(_ io.Reader, _ string) (record.Record, error) {
 }
 
 func (m Mock) Upgrade(_ string) (v3.Database, error) {
-	return v3.Database{}, m.UpgradeError
+	return m.UpgradedDatabase, m.UpgradeError
 }

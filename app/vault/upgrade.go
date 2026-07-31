@@ -7,7 +7,7 @@ import (
 )
 
 func (v Vault) IsOutOfDate() bool {
-	return v.Meta.DatabaseVersion < database.CURRENT_VERSION
+	return v.GetVersion() < database.CURRENT_VERSION
 }
 
 func (v *Vault) Upgrade() error {
@@ -17,7 +17,7 @@ func (v *Vault) Upgrade() error {
 
 	new, err := v.Database.Upgrade(v.Path)
 	if err != nil {
-		return err
+		return errors.New("error upgrading database")
 	}
 
 	v.Database = new
