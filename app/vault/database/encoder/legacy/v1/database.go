@@ -13,19 +13,19 @@ const VERSION = 1
 type IndexEncoder = index_v1.Encoder
 type RecordEncoder = record_v1.Encoder
 
-type Database struct {
+type Encoder struct {
 	IndexEncoder
 	RecordEncoder
 }
 
-func (db Database) GetVersion() int {
+func (db Encoder) GetVersion() int {
 	return VERSION
 }
 
-func (db Database) IndexPath(path string) string {
+func (db Encoder) IndexPath(path string) string {
 	return filepath.Join(path, "index.txt")
 }
 
-func (db Database) RecordPath(path string, id uuid.UUID) string {
+func (db Encoder) RecordPath(path string, id uuid.UUID) string {
 	return filepath.Join(path, id.String()+".crypt")
 }

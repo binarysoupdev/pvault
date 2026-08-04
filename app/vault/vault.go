@@ -7,9 +7,9 @@ import (
 )
 
 type Vault struct {
-	Path        string
-	MetaEncoder meta.Encoder
-	Database    database.Database
+	Path            string
+	MetaEncoder     meta.Encoder
+	DatabaseEncoder database.Encoder
 
 	Meta meta.Metadata
 	Map  index.IndexMap

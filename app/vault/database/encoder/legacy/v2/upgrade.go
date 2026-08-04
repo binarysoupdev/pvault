@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 	"pvault/app/vault/database"
-	v3 "pvault/app/vault/database/database/v3"
+	v3 "pvault/app/vault/database/encoder/v3"
 	record_v1 "pvault/app/vault/record/record/legacy/v1"
 	record_v2 "pvault/app/vault/record/record/v2"
 
@@ -13,8 +13,8 @@ import (
 	"github.com/google/uuid"
 )
 
-func (db Database) Upgrade(path string) (v3.Database, error) {
-	target := v3.Database{}
+func (db Encoder) Upgrade(path string) (v3.Encoder, error) {
+	target := v3.Encoder{}
 
 	idx, err := database.LoadIndex(db, path)
 	if err != nil {
@@ -38,7 +38,7 @@ func (db Database) Upgrade(path string) (v3.Database, error) {
 	return target, errs.Collapse("\n")
 }
 
-func (db Database) upgradeIndex(target v3.Database, path string) error {
+func (db Encoder) upgradeIndex(target v3.Encoder, path string) error {
 	err := os.Rename(db.IndexPath(path), target.IndexPath(path))
 	if err != nil {
 		return errors.Chain(err, "error renaming index file")
@@ -47,7 +47,7 @@ func (db Database) upgradeIndex(target v3.Database, path string) error {
 	return nil
 }
 
-func (db Database) upgradeRecord(target v3.Database, path string, id uuid.UUID) error {
+func (db Encoder) upgradeRecord(target v3.Encoder, path string, id uuid.UUID) error {
 	old, err := os.Open(db.RecordPath(path, id))
 	if err != nil {
 		return errors.Chain(err, "error opening old record file")
@@ -69,7 +69,7 @@ func (db Database) upgradeRecord(target v3.Database, path string, id uuid.UUID) 
 	}
 }
 
-func (db Database) upgradeRecordV1(target v3.Database, r io.Reader, path string, id uuid.UUID) error {
+func (db Encoder) upgradeRecordV1(target v3.Encoder, r io.Reader, path string, id uuid.UUID) error {
 	raw, err := db.DecodeRawV1(r)
 	if err != nil {
 		return errors.Chain(err, "error decoding old record")

@@ -23,14 +23,14 @@ func (v Vault) Backup(path string) error {
 		return errors.Chain(err, "error backing metadata file")
 	}
 
-	err = v.backupFile(path, v.Database.IndexPath(v.Path))
+	err = v.backupFile(path, v.DatabaseEncoder.IndexPath(v.Path))
 	if err != nil {
 		return errors.Chain(err, "error backing index file")
 	}
 	errs := errors.Errors{}
 
 	for _, id := range v.Map {
-		err := v.backupFile(path, v.Database.RecordPath(v.Path, id))
+		err := v.backupFile(path, v.DatabaseEncoder.RecordPath(v.Path, id))
 		if err != nil {
 			errs.Add(errors.Chain(err, "error backing record "+id.String()))
 			continue

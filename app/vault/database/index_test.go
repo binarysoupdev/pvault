@@ -18,7 +18,7 @@ func TestSaveIndexReturnsErrorWhenPathInvalid(t *testing.T) {
 	PATH := filepath.Join(t.TempDir(), "invalid")
 
 	//-- act
-	res := database.SaveIndex(&database.Mock{}, PATH, index.IndexMap{})
+	res := database.SaveIndex(&database.EncoderMock{}, PATH, index.IndexMap{})
 
 	//-- assert
 	assert.ErrorContains(t, res, "error creating index file")
@@ -26,7 +26,7 @@ func TestSaveIndexReturnsErrorWhenPathInvalid(t *testing.T) {
 
 func TestSaveIndexReturnsErrorWhenEncodeIndexReturnsError(t *testing.T) {
 	//-- arrange
-	mock := &database.Mock{
+	mock := &database.EncoderMock{
 		EncodeIndexError: errors.New(""),
 	}
 
@@ -44,7 +44,7 @@ func TestSaveIndexReturnsNoErrorAndSavesIndex(t *testing.T) {
 		"name": uuid.New(),
 	}
 
-	mock := &database.Mock{}
+	mock := &database.EncoderMock{}
 
 	//-- act
 	res := database.SaveIndex(mock, PATH, INDEX)
@@ -57,7 +57,7 @@ func TestSaveIndexReturnsNoErrorAndSavesIndex(t *testing.T) {
 
 func TestLoadIndexReturnsErrorWhenPathInvalid(t *testing.T) {
 	//-- act
-	_, res := database.LoadIndex(&database.Mock{}, "invalid")
+	_, res := database.LoadIndex(&database.EncoderMock{}, "invalid")
 
 	//-- assert
 	assert.ErrorContains(t, res, "error opening index file")
@@ -65,7 +65,7 @@ func TestLoadIndexReturnsErrorWhenPathInvalid(t *testing.T) {
 
 func TestLoadIndexReturnsErrorWhenDecodeIndexReturnsError(t *testing.T) {
 	//-- arrange
-	mock := &database.Mock{
+	mock := &database.EncoderMock{
 		DecodeIndexError: errors.New(""),
 	}
 
@@ -81,7 +81,7 @@ func TestLoadIndexReturnsErrorWhenDecodeIndexReturnsError(t *testing.T) {
 
 func TestLoadIndexReturnsIndexAndNoErrorAndLoadsIndex(t *testing.T) {
 	//-- arrange
-	mock := &database.Mock{
+	mock := &database.EncoderMock{
 		Index: index.IndexMap{
 			"name": uuid.New(),
 		},

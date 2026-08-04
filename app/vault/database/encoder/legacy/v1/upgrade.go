@@ -3,15 +3,15 @@ package v1
 import (
 	"os"
 	"pvault/app/vault/database"
-	v3 "pvault/app/vault/database/database/v3"
+	v3 "pvault/app/vault/database/encoder/v3"
 	"pvault/app/vault/index"
 
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/google/uuid"
 )
 
-func (db Database) Upgrade(path string) (v3.Database, error) {
-	target := v3.Database{}
+func (db Encoder) Upgrade(path string) (v3.Encoder, error) {
+	target := v3.Encoder{}
 
 	idx, err := database.LoadIndex(db, path)
 	if err != nil {
@@ -35,7 +35,7 @@ func (db Database) Upgrade(path string) (v3.Database, error) {
 	return target, errs.Collapse("\n")
 }
 
-func (db Database) upgradeIndex(target v3.Database, path string, idx index.IndexMap) error {
+func (db Encoder) upgradeIndex(target v3.Encoder, path string, idx index.IndexMap) error {
 	err := database.SaveIndex(target, path, idx)
 	if err != nil {
 		return errors.Chain(err, "error creating new index file")
@@ -49,7 +49,7 @@ func (db Database) upgradeIndex(target v3.Database, path string, idx index.Index
 	return nil
 }
 
-func (db Database) upgradeRecord(target v3.Database, path string, id uuid.UUID, name string) error {
+func (db Encoder) upgradeRecord(target v3.Encoder, path string, id uuid.UUID, name string) error {
 	old, err := os.Open(db.RecordPath(path, id))
 	if err != nil {
 		return errors.Chain(err, "error opening old record file")

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 	"pvault/app/vault/database"
-	db_v2 "pvault/app/vault/database/database/legacy/v2"
+	db_v2 "pvault/app/vault/database/encoder/legacy/v2"
 	"pvault/app/vault/index"
 	record_v1 "pvault/app/vault/record/record/legacy/v1"
 	record_v2 "pvault/app/vault/record/record/v2"
@@ -18,7 +18,7 @@ import (
 
 func TestUpgradeReturnsErrorWhenOldIndexNotFound(t *testing.T) {
 	//-- act
-	_, res := db_v2.Database{}.Upgrade("invalid")
+	_, res := db_v2.Encoder{}.Upgrade("invalid")
 
 	//-- assert
 	assert.ErrorContains(t, res, "error loading old index file")
@@ -26,7 +26,7 @@ func TestUpgradeReturnsErrorWhenOldIndexNotFound(t *testing.T) {
 
 func TestUpgradeReturnsErrorWhenErrorBackingRecords(t *testing.T) {
 	//-- arrange
-	db := db_v2.Database{}
+	db := db_v2.Encoder{}
 	PATH := t.TempDir()
 
 	R1 := uuid.New()
@@ -39,7 +39,7 @@ func TestUpgradeReturnsErrorWhenErrorBackingRecords(t *testing.T) {
 	require.NoError(t, database.SaveIndex(db, PATH, INDEX))
 
 	//-- act
-	_, res := db_v2.Database{}.Upgrade(PATH)
+	_, res := db_v2.Encoder{}.Upgrade(PATH)
 
 	//-- assert
 	assert.ErrorContains(t, res, "error backing record "+R1.String())
@@ -48,7 +48,7 @@ func TestUpgradeReturnsErrorWhenErrorBackingRecords(t *testing.T) {
 
 func TestUpgradeReturnsErrorWhenUnsupportedRecordVersionDetected(t *testing.T) {
 	//-- arrange
-	db := db_v2.Database{}
+	db := db_v2.Encoder{}
 	PATH := t.TempDir()
 
 	const VERSION = 3
@@ -67,9 +67,9 @@ func TestUpgradeReturnsErrorWhenUnsupportedRecordVersionDetected(t *testing.T) {
 	assert.ErrorContains(t, res, fmt.Sprintf("unsupported record version \"%d\"", VERSION))
 }
 
-func TestUpgradeReturnsNewDatabaseAndNoErrorAndUpgradesDatabase(t *testing.T) {
+func TestUpgradeReturnsNewEncoderAndNoErrorAndUpgradesEncoder(t *testing.T) {
 	//-- arrange
-	db := db_v2.Database{}
+	db := db_v2.Encoder{}
 	PATH := t.TempDir()
 	const PASSWORD = "Password123!"
 

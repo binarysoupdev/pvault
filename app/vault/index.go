@@ -7,11 +7,11 @@ import (
 )
 
 func (v Vault) IndexPath() string {
-	return v.Database.IndexPath(v.Path)
+	return v.DatabaseEncoder.IndexPath(v.Path)
 }
 
 func (v Vault) SaveIndex() error {
-	err := database.SaveIndex(v.Database, v.Path, v.Map)
+	err := database.SaveIndex(v.DatabaseEncoder, v.Path, v.Map)
 	if err != nil {
 		return errors.Chain(err, "error saving index map")
 	}
@@ -21,7 +21,7 @@ func (v Vault) SaveIndex() error {
 func (v *Vault) LoadIndex() error {
 	var err error
 
-	v.Map, err = database.LoadIndex(v.Database, v.Path)
+	v.Map, err = database.LoadIndex(v.DatabaseEncoder, v.Path)
 	if err != nil {
 		return errors.Chain(err, "error loading index map")
 	}

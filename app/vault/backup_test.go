@@ -39,9 +39,9 @@ func TestVaultBackupReturnsErrorWhenPathIsNotADir(t *testing.T) {
 func TestVaultBackupReturnsErrorWhenErrorBackingMetadataFile(t *testing.T) {
 	//-- arrange
 	v := vault.Vault{
-		Path:        "invalid",
-		MetaEncoder: &meta.EncoderMock{},
-		Database:    &database.Mock{},
+		Path:            "invalid",
+		MetaEncoder:     &meta.EncoderMock{},
+		DatabaseEncoder: &database.EncoderMock{},
 	}
 
 	//-- act
@@ -54,9 +54,9 @@ func TestVaultBackupReturnsErrorWhenErrorBackingMetadataFile(t *testing.T) {
 func TestVaultBackupReturnsErrorWhenErrorBackingIndexFile(t *testing.T) {
 	//-- arrange
 	v := vault.Vault{
-		Path:        t.TempDir(),
-		MetaEncoder: &meta.EncoderMock{},
-		Database:    &database.Mock{},
+		Path:            t.TempDir(),
+		MetaEncoder:     &meta.EncoderMock{},
+		DatabaseEncoder: &database.EncoderMock{},
 	}
 
 	require.NoError(t, os.WriteFile(v.MetadataPath(), []byte{}, 0666))
@@ -71,9 +71,9 @@ func TestVaultBackupReturnsErrorWhenErrorBackingIndexFile(t *testing.T) {
 func TestVaultBackupReturnsErrorWhenRecordFilesNotFound(t *testing.T) {
 	//-- arrange
 	v := vault.Vault{
-		Path:        t.TempDir(),
-		MetaEncoder: &meta.EncoderMock{},
-		Database:    &database.Mock{},
+		Path:            t.TempDir(),
+		MetaEncoder:     &meta.EncoderMock{},
+		DatabaseEncoder: &database.EncoderMock{},
 	}
 
 	R1 := uuid.New()
@@ -84,7 +84,7 @@ func TestVaultBackupReturnsErrorWhenRecordFilesNotFound(t *testing.T) {
 	}
 
 	require.NoError(t, os.WriteFile(v.MetadataPath(), []byte{}, 0666))
-	require.NoError(t, os.WriteFile(v.Database.IndexPath(v.Path), []byte{}, 0666))
+	require.NoError(t, os.WriteFile(v.DatabaseEncoder.IndexPath(v.Path), []byte{}, 0666))
 
 	//-- act
 	res := v.Backup(t.TempDir())
@@ -96,9 +96,9 @@ func TestVaultBackupReturnsErrorWhenRecordFilesNotFound(t *testing.T) {
 
 func TestVaultBackupReturnsNoErrorAndBacksUpIndexAndRecords(t *testing.T) {
 	v := vault.Vault{
-		Path:        t.TempDir(),
-		MetaEncoder: &meta.EncoderMock{},
-		Database:    &database.Mock{},
+		Path:            t.TempDir(),
+		MetaEncoder:     &meta.EncoderMock{},
+		DatabaseEncoder: &database.EncoderMock{},
 	}
 
 	R1 := uuid.New()

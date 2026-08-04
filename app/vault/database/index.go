@@ -7,7 +7,7 @@ import (
 	"github.com/binarysoupdev/go-commando/errors"
 )
 
-func SaveIndex(db Database, path string, idx index.IndexMap) error {
+func SaveIndex(db Encoder, path string, idx index.IndexMap) error {
 	file, err := os.Create(db.IndexPath(path))
 	if err != nil {
 		return errors.Chain(err, "error creating index file")
@@ -22,7 +22,7 @@ func SaveIndex(db Database, path string, idx index.IndexMap) error {
 	return nil
 }
 
-func LoadIndex(db Database, path string) (index.IndexMap, error) {
+func LoadIndex(db Encoder, path string) (index.IndexMap, error) {
 	file, err := os.Open(db.IndexPath(path))
 	if err != nil {
 		return nil, errors.Chain(err, "error opening index file")

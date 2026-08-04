@@ -17,7 +17,7 @@ func TestVaultSaveIndexReturnsErrorWhenDatabaseSaveIndexReturnsError(t *testing.
 	//-- arrange
 	v := vault.Vault{
 		Path: t.TempDir(),
-		Database: &database.Mock{
+		DatabaseEncoder: &database.EncoderMock{
 			EncodeIndexError: errors.New(""),
 		},
 	}
@@ -31,11 +31,11 @@ func TestVaultSaveIndexReturnsErrorWhenDatabaseSaveIndexReturnsError(t *testing.
 
 func TestVaultSaveIndexReturnsNoErrorAndSavesIndexMap(t *testing.T) {
 	//-- arrange
-	mock := &database.Mock{}
+	mock := &database.EncoderMock{}
 
 	v := vault.Vault{
-		Path:     t.TempDir(),
-		Database: mock,
+		Path:            t.TempDir(),
+		DatabaseEncoder: mock,
 		Map: index.IndexMap{
 			"name": uuid.New(),
 		},
@@ -54,7 +54,7 @@ func TestVaultLoadIndexReturnsErrorWhenDatabaseLoadIndexReturnsError(t *testing.
 	//-- arrange
 	v := vault.Vault{
 		Path: t.TempDir(),
-		Database: &database.Mock{
+		DatabaseEncoder: &database.EncoderMock{
 			DecodeIndexError: errors.New(""),
 		},
 	}
@@ -68,15 +68,15 @@ func TestVaultLoadIndexReturnsErrorWhenDatabaseLoadIndexReturnsError(t *testing.
 
 func TestVaultLoadIndexReturnsNoErrorAndLoadsIndexMap(t *testing.T) {
 	//-- arrange
-	mock := &database.Mock{
+	mock := &database.EncoderMock{
 		Index: index.IndexMap{
 			"name": uuid.New(),
 		},
 	}
 
 	v := vault.Vault{
-		Path:     t.TempDir(),
-		Database: mock,
+		Path:            t.TempDir(),
+		DatabaseEncoder: mock,
 	}
 	require.NoError(t, os.WriteFile(v.IndexPath(), []byte{}, 0666))
 

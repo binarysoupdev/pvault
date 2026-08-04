@@ -9,7 +9,7 @@ import (
 )
 
 func (v Vault) RecordPath(id uuid.UUID) string {
-	return v.Database.RecordPath(v.Path, id)
+	return v.DatabaseEncoder.RecordPath(v.Path, id)
 }
 
 func (v Vault) ValidateRecord(r record.Record) error {
@@ -32,7 +32,7 @@ func (v Vault) SaveRecord(r record.Record, password string) error {
 		return errors.Chain(err, "error validating record")
 	}
 
-	err = database.SaveRecord(v.Database, v.Path, r, password)
+	err = database.SaveRecord(v.DatabaseEncoder, v.Path, r, password)
 	if err != nil {
 		return errors.Chain(err, "error saving record")
 	}
@@ -57,7 +57,7 @@ func (v Vault) LoadRecord(name string, password string) (record.Record, error) {
 		return nil, errors.Format("name \"%s\" not found", name)
 	}
 
-	r, err := database.LoadRecord(v.Database, v.Path, id, password)
+	r, err := database.LoadRecord(v.DatabaseEncoder, v.Path, id, password)
 	if err != nil {
 		return nil, errors.Chain(err, "error loading record")
 	}
@@ -71,7 +71,7 @@ func (v Vault) DeleteRecord(name string) (uuid.UUID, error) {
 		return uuid.Nil, errors.Format("name \"%s\" not found", name)
 	}
 
-	err := database.DeleteRecord(v.Database, v.Path, id)
+	err := database.DeleteRecord(v.DatabaseEncoder, v.Path, id)
 	if err != nil {
 		return uuid.Nil, errors.Chain(err, "error deleting record")
 	}

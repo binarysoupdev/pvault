@@ -32,7 +32,7 @@ func TestVaultUpgradeReturnsErrorWhenDatabaseUpgradeReturnsError(t *testing.T) {
 		Meta: meta.Metadata{
 			DatabaseVersion: database.CURRENT_VERSION - 1,
 		},
-		Database: &database.Mock{
+		DatabaseEncoder: &database.EncoderMock{
 			UpgradeError: errors.New(""),
 		},
 	}
@@ -46,13 +46,13 @@ func TestVaultUpgradeReturnsErrorWhenDatabaseUpgradeReturnsError(t *testing.T) {
 
 func TestVaultUpgradeReturnsNoErrorAndSetsNewDatabase(t *testing.T) {
 	//-- arrange
-	mock := &database.Mock{}
+	mock := &database.EncoderMock{}
 
 	v := vault.Vault{
 		Meta: meta.Metadata{
 			DatabaseVersion: database.CURRENT_VERSION - 1,
 		},
-		Database: mock,
+		DatabaseEncoder: mock,
 	}
 
 	//-- act
@@ -60,5 +60,5 @@ func TestVaultUpgradeReturnsNoErrorAndSetsNewDatabase(t *testing.T) {
 
 	//-- arrange
 	require.NoError(t, res)
-	assert.Equal(t, mock.UpgradedDatabase, v.Database)
+	assert.Equal(t, mock.UpgradedEncoder, v.DatabaseEncoder)
 }

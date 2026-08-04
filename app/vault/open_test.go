@@ -5,9 +5,9 @@ import (
 	"os"
 	"pvault/app/vault"
 	"pvault/app/vault/database"
-	db_v1 "pvault/app/vault/database/database/legacy/v1"
-	db_v2 "pvault/app/vault/database/database/legacy/v2"
-	db_v3 "pvault/app/vault/database/database/v3"
+	db_v1 "pvault/app/vault/database/encoder/legacy/v1"
+	db_v2 "pvault/app/vault/database/encoder/legacy/v2"
+	db_v3 "pvault/app/vault/database/encoder/v3"
 	"pvault/app/vault/index"
 	"pvault/app/vault/meta"
 	meta_encoder "pvault/app/vault/meta/encoder"
@@ -36,14 +36,14 @@ func TestOpenReturnsVaultAndNoErrorWhenDatabaseIsV1AndCreatesNewMetadata(t *test
 	INDEX := index.IndexMap{
 		"name": uuid.New(),
 	}
-	require.NoError(t, database.SaveIndex(db_v1.Database{}, PATH, INDEX))
+	require.NoError(t, database.SaveIndex(db_v1.Encoder{}, PATH, INDEX))
 
 	//-- act
 	res, err := vault.Open(PATH)
 
 	//-- assert
 	require.NoError(t, err)
-	assert.IsType(t, db_v1.Database{}, res.Database)
+	assert.IsType(t, db_v1.Encoder{}, res.DatabaseEncoder)
 
 	assert.Equal(t, PATH, res.Path)
 	assert.Equal(t, INDEX, res.Map)
@@ -59,14 +59,14 @@ func TestOpenReturnsVaultAndNoErrorWhenDatabaseIsV2AndCreatesNewMetadata(t *test
 	INDEX := index.IndexMap{
 		"name": uuid.New(),
 	}
-	require.NoError(t, database.SaveIndex(db_v2.Database{}, PATH, INDEX))
+	require.NoError(t, database.SaveIndex(db_v2.Encoder{}, PATH, INDEX))
 
 	//-- act
 	res, err := vault.Open(PATH)
 
 	//-- assert
 	require.NoError(t, err)
-	assert.IsType(t, db_v2.Database{}, res.Database)
+	assert.IsType(t, db_v2.Encoder{}, res.DatabaseEncoder)
 
 	assert.Equal(t, PATH, res.Path)
 	assert.Equal(t, INDEX, res.Map)
@@ -93,7 +93,7 @@ func TestOpenReturnsVaultAndNoErrorWhenDatabaseIsV3AndLoadsMetadata(t *testing.T
 	INDEX := index.IndexMap{
 		"name": uuid.New(),
 	}
-	require.NoError(t, database.SaveIndex(db_v3.Database{}, PATH, INDEX))
+	require.NoError(t, database.SaveIndex(db_v3.Encoder{}, PATH, INDEX))
 
 	VAULT := vault.Vault{
 		Path:        PATH,
@@ -109,7 +109,7 @@ func TestOpenReturnsVaultAndNoErrorWhenDatabaseIsV3AndLoadsMetadata(t *testing.T
 
 	//-- assert
 	require.NoError(t, err)
-	assert.IsType(t, db_v3.Database{}, res.Database)
+	assert.IsType(t, db_v3.Encoder{}, res.DatabaseEncoder)
 
 	assert.Equal(t, PATH, res.Path)
 	assert.Equal(t, INDEX, res.Map)

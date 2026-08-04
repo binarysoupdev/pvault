@@ -15,11 +15,11 @@ func (v *Vault) Upgrade() error {
 		return errors.New("vault is up-to-date")
 	}
 
-	new, err := v.Database.Upgrade(v.Path)
+	new, err := v.DatabaseEncoder.Upgrade(v.Path)
 	if err != nil {
 		return errors.New("error upgrading database")
 	}
 
-	v.Database = new
+	v.DatabaseEncoder = new
 	return nil
 }

@@ -2,7 +2,7 @@ package vault
 
 import (
 	"os"
-	db_v3 "pvault/app/vault/database/database/v3"
+	db_v3 "pvault/app/vault/database/encoder/v3"
 	"pvault/app/vault/index"
 	"pvault/app/vault/meta"
 	meta_encoder "pvault/app/vault/meta/encoder"
@@ -12,11 +12,11 @@ import (
 
 func New(path, nickname string) Vault {
 	return Vault{
-		Path:        path,
-		MetaEncoder: meta_encoder.Encoder{},
-		Database:    db_v3.Database{},
-		Meta:        meta.New(db_v3.VERSION, nickname),
-		Map:         index.IndexMap{},
+		Path:            path,
+		MetaEncoder:     meta_encoder.Encoder{},
+		DatabaseEncoder: db_v3.Encoder{},
+		Meta:            meta.New(db_v3.VERSION, nickname),
+		Map:             index.IndexMap{},
 	}
 }
 

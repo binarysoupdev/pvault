@@ -71,7 +71,7 @@ func TestSaveRecordReturnsErrorWhenDatabaseSaveRecordReturnsError(t *testing.T) 
 	//-- arrange
 	v := vault.Vault{
 		Path: t.TempDir(),
-		Database: &database.Mock{
+		DatabaseEncoder: &database.EncoderMock{
 			EncodeRecordError: errors.New(""),
 		},
 	}
@@ -88,7 +88,7 @@ func TestSaveRecordReturnsErrorWhenSaveIndexReturnsError(t *testing.T) {
 	v := vault.Vault{
 		Path: t.TempDir(),
 		Map:  index.IndexMap{},
-		Database: &database.Mock{
+		DatabaseEncoder: &database.EncoderMock{
 			EncodeIndexError: errors.New(""),
 		},
 	}
@@ -103,12 +103,12 @@ func TestSaveRecordReturnsErrorWhenSaveIndexReturnsError(t *testing.T) {
 func TestSaveRecordReturnsNoErrorWithNewIdAndNewName(t *testing.T) {
 	//-- arrange
 	RECORD := record.NewMock("name")
-	mock := &database.Mock{}
+	mock := &database.EncoderMock{}
 
 	v := vault.Vault{
-		Path:     t.TempDir(),
-		Database: mock,
-		Map:      index.IndexMap{},
+		Path:            t.TempDir(),
+		DatabaseEncoder: mock,
+		Map:             index.IndexMap{},
 	}
 
 	//-- act
@@ -124,11 +124,11 @@ func TestSaveRecordReturnsNoErrorWithNewIdAndNewName(t *testing.T) {
 func TestSaveRecordReturnsNoErrorWithExistingIDAndNewName(t *testing.T) {
 	//-- arrange
 	RECORD := record.NewMock("name")
-	mock := &database.Mock{}
+	mock := &database.EncoderMock{}
 
 	v := vault.Vault{
-		Path:     t.TempDir(),
-		Database: mock,
+		Path:            t.TempDir(),
+		DatabaseEncoder: mock,
 		Map: index.IndexMap{
 			RECORD.Name: RECORD.ID,
 		},
@@ -151,8 +151,8 @@ func TestSaveRecordReturnsErrorWithNewIDAndExistingName(t *testing.T) {
 	RECORD := record.NewMock("name")
 
 	v := vault.Vault{
-		Path:     t.TempDir(),
-		Database: &database.Mock{},
+		Path:            t.TempDir(),
+		DatabaseEncoder: &database.EncoderMock{},
 		Map: index.IndexMap{
 			RECORD.Name: uuid.New(),
 		},
@@ -168,11 +168,11 @@ func TestSaveRecordReturnsErrorWithNewIDAndExistingName(t *testing.T) {
 func TestSaveRecordReturnsNoErrorWithExistingIDAndExistingName(t *testing.T) {
 	//-- arrange
 	RECORD := record.NewMock("name")
-	mock := &database.Mock{}
+	mock := &database.EncoderMock{}
 
 	v := vault.Vault{
-		Path:     t.TempDir(),
-		Database: mock,
+		Path:            t.TempDir(),
+		DatabaseEncoder: mock,
 		Map: index.IndexMap{
 			RECORD.Name: RECORD.ID,
 		},
@@ -203,13 +203,13 @@ func TestLoadRecordReturnsErrorWhenNameNotFound(t *testing.T) {
 func TestLoadRecordReturnsErrorWhenDatabaseLoadRecordReturnsError(t *testing.T) {
 	//-- arrange
 	RECORD := record.NewMock("name")
-	mock := &database.Mock{
+	mock := &database.EncoderMock{
 		DecodeRecordError: errors.New(""),
 	}
 
 	v := vault.Vault{
-		Path:     t.TempDir(),
-		Database: mock,
+		Path:            t.TempDir(),
+		DatabaseEncoder: mock,
 		Map: index.IndexMap{
 			RECORD.Name: RECORD.ID,
 		},
@@ -229,13 +229,13 @@ func TestLoadRecordReturnsV1RecordAndNoError(t *testing.T) {
 		ID:   uuid.New(),
 		Name: "name",
 	}
-	mock := &database.Mock{
+	mock := &database.EncoderMock{
 		Record: RECORD,
 	}
 
 	v := vault.Vault{
-		Path:     t.TempDir(),
-		Database: mock,
+		Path:            t.TempDir(),
+		DatabaseEncoder: mock,
 		Map: index.IndexMap{
 			RECORD.Name: RECORD.ID,
 		},
@@ -256,13 +256,13 @@ func TestLoadRecordReturnsV2RecordAndNoError(t *testing.T) {
 		ID:   uuid.New(),
 		Name: "name",
 	}
-	mock := &database.Mock{
+	mock := &database.EncoderMock{
 		Record: RECORD,
 	}
 
 	v := vault.Vault{
-		Path:     t.TempDir(),
-		Database: mock,
+		Path:            t.TempDir(),
+		DatabaseEncoder: mock,
 		Map: index.IndexMap{
 			RECORD.Name: RECORD.ID,
 		},
@@ -293,8 +293,8 @@ func TestDeleteRecordReturnsErrorWhenDatabaseDeleteRecordReturnsError(t *testing
 	RECORD := record.NewMock("name")
 
 	v := vault.Vault{
-		Path:     t.TempDir(),
-		Database: &database.Mock{},
+		Path:            t.TempDir(),
+		DatabaseEncoder: &database.EncoderMock{},
 		Map: index.IndexMap{
 			RECORD.Name: RECORD.ID,
 		},
@@ -310,13 +310,13 @@ func TestDeleteRecordReturnsErrorWhenDatabaseDeleteRecordReturnsError(t *testing
 func TestDeleteRecordReturnsErrorWhenSaveIndexReturnsError(t *testing.T) {
 	//-- arrange
 	RECORD := record.NewMock("name")
-	mock := &database.Mock{
+	mock := &database.EncoderMock{
 		EncodeIndexError: errors.New(""),
 	}
 
 	v := vault.Vault{
-		Path:     t.TempDir(),
-		Database: mock,
+		Path:            t.TempDir(),
+		DatabaseEncoder: mock,
 		Map: index.IndexMap{
 			RECORD.Name: RECORD.ID,
 		},
@@ -333,11 +333,11 @@ func TestDeleteRecordReturnsErrorWhenSaveIndexReturnsError(t *testing.T) {
 func TestDeleteRecordReturnsIDAndNoErrorAndDeletesRecord(t *testing.T) {
 	//-- arrange
 	RECORD := record.NewMock("name")
-	mock := &database.Mock{}
+	mock := &database.EncoderMock{}
 
 	v := vault.Vault{
-		Path:     t.TempDir(),
-		Database: mock,
+		Path:            t.TempDir(),
+		DatabaseEncoder: mock,
 		Map: index.IndexMap{
 			RECORD.Name: RECORD.ID,
 		},

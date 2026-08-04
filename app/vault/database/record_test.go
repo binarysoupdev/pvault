@@ -23,7 +23,7 @@ func TestSaveRecordReturnsErrorWhenPathInvalid(t *testing.T) {
 	}
 
 	//-- act
-	res := database.SaveRecord(&database.Mock{}, PATH, RECORD, PASSWORD)
+	res := database.SaveRecord(&database.EncoderMock{}, PATH, RECORD, PASSWORD)
 
 	//-- assert
 	assert.ErrorContains(t, res, "error creating record file")
@@ -37,7 +37,7 @@ func TestSaveRecordReturnsErrorWhenEncodeRecordReturnsError(t *testing.T) {
 		ID: uuid.New(),
 	}
 
-	mock := &database.Mock{
+	mock := &database.EncoderMock{
 		EncodeRecordError: errors.New(""),
 	}
 
@@ -56,7 +56,7 @@ func TestSaveRecordReturnsNoErrorAndSavesRecord(t *testing.T) {
 	RECORD := record.Mock{
 		ID: uuid.New(),
 	}
-	mock := &database.Mock{}
+	mock := &database.EncoderMock{}
 
 	//-- act
 	res := database.SaveRecord(mock, PATH, RECORD, PASSWORD)
@@ -69,7 +69,7 @@ func TestSaveRecordReturnsNoErrorAndSavesRecord(t *testing.T) {
 
 func TestLoadRecordReturnsErrorWhenPathInvalid(t *testing.T) {
 	//-- act
-	_, res := database.LoadRecord(&database.Mock{}, "invalid", uuid.Nil, "")
+	_, res := database.LoadRecord(&database.EncoderMock{}, "invalid", uuid.Nil, "")
 
 	//-- assert
 	assert.ErrorContains(t, res, "error opening record file")
@@ -77,7 +77,7 @@ func TestLoadRecordReturnsErrorWhenPathInvalid(t *testing.T) {
 
 func TestLoadRecordReturnsErrorWhenDecodeRecordReturnsError(t *testing.T) {
 	//-- arrange
-	mock := &database.Mock{
+	mock := &database.EncoderMock{
 		DecodeRecordError: errors.New(""),
 	}
 	ID := uuid.New()
@@ -96,7 +96,7 @@ func TestLoadRecordReturnsRecordAndNoErrorAndLoadsRecord(t *testing.T) {
 	//-- arrange
 	const PASSWORD = "Password123!"
 
-	mock := &database.Mock{
+	mock := &database.EncoderMock{
 		Record: record.Mock{
 			ID: uuid.New(),
 		},
@@ -115,7 +115,7 @@ func TestLoadRecordReturnsRecordAndNoErrorAndLoadsRecord(t *testing.T) {
 
 func TestDeleteRecordReturnsErrorWhenPathInvalid(t *testing.T) {
 	//-- arrange
-	mock := &database.Mock{}
+	mock := &database.EncoderMock{}
 
 	//-- act
 	res := database.DeleteRecord(mock, "invalid", uuid.Nil)
@@ -126,7 +126,7 @@ func TestDeleteRecordReturnsErrorWhenPathInvalid(t *testing.T) {
 
 func TestDeleteRecordReturnsNoErrorAndDeletesRecord(t *testing.T) {
 	//-- arrange
-	mock := &database.Mock{}
+	mock := &database.EncoderMock{}
 	ID := uuid.New()
 
 	PATH := t.TempDir()

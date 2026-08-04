@@ -4,9 +4,9 @@ import (
 	"os"
 	"path/filepath"
 	"pvault/app/vault/database"
-	db_v1 "pvault/app/vault/database/database/legacy/v1"
-	db_v2 "pvault/app/vault/database/database/legacy/v2"
-	db_v3 "pvault/app/vault/database/database/v3"
+	db_v1 "pvault/app/vault/database/encoder/legacy/v1"
+	db_v2 "pvault/app/vault/database/encoder/legacy/v2"
+	db_v3 "pvault/app/vault/database/encoder/v3"
 	"pvault/app/vault/meta"
 	meta_encoder "pvault/app/vault/meta/encoder"
 
@@ -58,11 +58,11 @@ func loadFromMetadata(v *Vault) (bool, error) {
 
 	switch v.Meta.DatabaseVersion {
 	case db_v1.VERSION:
-		v.Database = db_v1.Database{}
+		v.DatabaseEncoder = db_v1.Encoder{}
 	case db_v2.VERSION:
-		v.Database = db_v2.Database{}
+		v.DatabaseEncoder = db_v2.Encoder{}
 	case db_v3.VERSION:
-		v.Database = db_v3.Database{}
+		v.DatabaseEncoder = db_v3.Encoder{}
 	default:
 		return false, errors.Format("unsupported vault version \"%d\"", v.Meta.DatabaseVersion)
 	}
@@ -85,7 +85,7 @@ func loadFromDatabase(v *Vault) (bool, error) {
 		return false, nil
 	}
 
-	v.Database = db
+	v.DatabaseEncoder = db
 	v.Meta.DatabaseVersion = db.GetVersion()
 
 	err := v.SaveMetadata()
@@ -96,15 +96,15 @@ func loadFromDatabase(v *Vault) (bool, error) {
 	return true, nil
 }
 
-func detectDatabase(path string) database.Database {
-	_, err := os.Stat(db_v2.Database{}.IndexPath(path))
+func detectDatabase(path string) database.Encoder {
+	_, err := os.Stat(db_v2.Encoder{}.IndexPath(path))
 	if err == nil {
-		return db_v2.Database{}
+		return db_v2.Encoder{}
 	}
 
-	_, err = os.Stat(db_v1.Database{}.IndexPath(path))
+	_, err = os.Stat(db_v1.Encoder{}.IndexPath(path))
 	if err == nil {
-		return db_v1.Database{}
+		return db_v1.Encoder{}
 	}
 
 	return nil
