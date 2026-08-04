@@ -8,7 +8,6 @@ import (
 	"pvault/app/vault/index"
 	"testing"
 
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -17,7 +16,7 @@ import (
 func TestVaultSaveIndexReturnsErrorWhenDatabaseSaveIndexReturnsError(t *testing.T) {
 	//-- arrange
 	v := vault.Vault{
-		Path: file.NewPath(t, ""),
+		Path: t.TempDir(),
 		Database: &database.Mock{
 			EncodeIndexError: errors.New(""),
 		},
@@ -35,7 +34,7 @@ func TestVaultSaveIndexReturnsNoErrorAndSavesIndexMap(t *testing.T) {
 	mock := &database.Mock{}
 
 	v := vault.Vault{
-		Path:     file.NewPath(t, ""),
+		Path:     t.TempDir(),
 		Database: mock,
 		Map: index.IndexMap{
 			"name": uuid.New(),
@@ -54,7 +53,7 @@ func TestVaultSaveIndexReturnsNoErrorAndSavesIndexMap(t *testing.T) {
 func TestVaultLoadIndexReturnsErrorWhenDatabaseLoadIndexReturnsError(t *testing.T) {
 	//-- arrange
 	v := vault.Vault{
-		Path: file.NewPath(t, ""),
+		Path: t.TempDir(),
 		Database: &database.Mock{
 			DecodeIndexError: errors.New(""),
 		},
@@ -76,7 +75,7 @@ func TestVaultLoadIndexReturnsNoErrorAndLoadsIndexMap(t *testing.T) {
 	}
 
 	v := vault.Vault{
-		Path:     file.NewPath(t, ""),
+		Path:     t.TempDir(),
 		Database: mock,
 	}
 	require.NoError(t, os.WriteFile(v.IndexPath(), []byte{}, 0666))

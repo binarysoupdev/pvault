@@ -13,7 +13,6 @@ import (
 	meta_encoder "pvault/app/vault/meta/encoder"
 	"testing"
 
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -21,7 +20,7 @@ import (
 
 func TestOpenReturnsErrorWhenDatabaseNotFound(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "")
+	PATH := t.TempDir()
 
 	//-- act
 	_, res := vault.Open(PATH)
@@ -32,7 +31,7 @@ func TestOpenReturnsErrorWhenDatabaseNotFound(t *testing.T) {
 
 func TestOpenReturnsVaultAndNoErrorWhenDatabaseIsV1AndCreatesNewMetadata(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "")
+	PATH := t.TempDir()
 
 	INDEX := index.IndexMap{
 		"name": uuid.New(),
@@ -55,7 +54,7 @@ func TestOpenReturnsVaultAndNoErrorWhenDatabaseIsV1AndCreatesNewMetadata(t *test
 
 func TestOpenReturnsVaultAndNoErrorWhenDatabaseIsV2AndCreatesNewMetadata(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "")
+	PATH := t.TempDir()
 
 	INDEX := index.IndexMap{
 		"name": uuid.New(),
@@ -78,7 +77,7 @@ func TestOpenReturnsVaultAndNoErrorWhenDatabaseIsV2AndCreatesNewMetadata(t *test
 
 func TestOpenReturnsErrorWhenErrorLoadingMetadata(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "")
+	PATH := t.TempDir()
 	require.NoError(t, os.WriteFile(meta_encoder.Encoder{}.MetadataPath(PATH), []byte{}, 0666))
 
 	//-- act
@@ -90,7 +89,7 @@ func TestOpenReturnsErrorWhenErrorLoadingMetadata(t *testing.T) {
 
 func TestOpenReturnsVaultAndNoErrorWhenDatabaseIsV3AndLoadsMetadata(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "")
+	PATH := t.TempDir()
 	INDEX := index.IndexMap{
 		"name": uuid.New(),
 	}
@@ -119,7 +118,7 @@ func TestOpenReturnsVaultAndNoErrorWhenDatabaseIsV3AndLoadsMetadata(t *testing.T
 
 func TestOpenReturnsErrorWhenDatabaseVersionUnsupported(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "")
+	PATH := t.TempDir()
 
 	VAULT := vault.Vault{
 		Path:        PATH,

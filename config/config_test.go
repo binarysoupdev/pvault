@@ -1,18 +1,20 @@
 package config_test
 
 import (
+	"path/filepath"
 	"pvault/config"
+	"pvault/util"
 	"testing"
 
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/stretchr/testify/require"
 )
 
 func TestValidateBackupPathWherePathIsAFileReturnsError(t *testing.T) {
 	//-- arrange
 	cfg := config.Config{
-		BackupPath: file.CreateEmpty(t, "backup.txt"),
+		BackupPath: filepath.Join(t.TempDir(), "backup.txt"),
 	}
+	require.NoError(t, util.CreateEmptyFile(cfg.BackupPath))
 
 	//-- act
 	res := cfg.ValidateBackupPath()
@@ -24,7 +26,7 @@ func TestValidateBackupPathWherePathIsAFileReturnsError(t *testing.T) {
 func TestValidateBackupPathWhereDirectoryDoesNotExistValid(t *testing.T) {
 	//-- arrange
 	cfg := config.Config{
-		BackupPath: file.NewPath(t, "not_exist"),
+		BackupPath: filepath.Join(t.TempDir(), "not_exist"),
 	}
 
 	//-- act
@@ -37,7 +39,7 @@ func TestValidateBackupPathWhereDirectoryDoesNotExistValid(t *testing.T) {
 func TestValidateBackupPathWhereDirectoryExistsValid(t *testing.T) {
 	//-- arrange
 	cfg := config.Config{
-		BackupPath: file.NewPath(t, ""),
+		BackupPath: t.TempDir(),
 	}
 
 	//-- act
@@ -50,7 +52,7 @@ func TestValidateBackupPathWhereDirectoryExistsValid(t *testing.T) {
 func TestValidateOutputPathNotFound(t *testing.T) {
 	//-- arrange
 	cfg := config.Config{
-		OutputPath: file.NewPath(t, "invalid"),
+		OutputPath: filepath.Join(t.TempDir(), "invalid"),
 	}
 
 	//-- act
@@ -63,8 +65,9 @@ func TestValidateOutputPathNotFound(t *testing.T) {
 func TestValidateOutputPathNotDirectory(t *testing.T) {
 	//-- arrange
 	cfg := config.Config{
-		OutputPath: file.CreateEmpty(t, "file.txt"),
+		OutputPath: filepath.Join(t.TempDir(), "file.txt"),
 	}
+	require.NoError(t, util.CreateEmptyFile(cfg.OutputPath))
 
 	//-- act
 	res := cfg.ValidateOutputPath()
@@ -76,7 +79,7 @@ func TestValidateOutputPathNotDirectory(t *testing.T) {
 func TestValidateOutputPathValid(t *testing.T) {
 	//-- arrange
 	cfg := config.Config{
-		OutputPath: file.NewPath(t, ""),
+		OutputPath: t.TempDir(),
 	}
 
 	//-- act

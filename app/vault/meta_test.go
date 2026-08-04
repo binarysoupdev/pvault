@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/errors"
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -15,7 +14,7 @@ import (
 func TestVaultSaveMetadataReturnsErrorWhenMetaEncoderEncodeMetadataReturnsError(t *testing.T) {
 	//-- arrange
 	v := vault.Vault{
-		Path: file.NewPath(t, ""),
+		Path: t.TempDir(),
 		MetaEncoder: &meta.EncoderMock{
 			EncodeMetadataError: errors.New(""),
 		},
@@ -33,7 +32,7 @@ func TestVaultSaveMetadataReturnsNoErrorAndSavesMetadata(t *testing.T) {
 	mock := &meta.EncoderMock{}
 
 	v := vault.Vault{
-		Path:        file.NewPath(t, ""),
+		Path:        t.TempDir(),
 		MetaEncoder: mock,
 		Meta: meta.Metadata{
 			DatabaseVersion: 1,
@@ -53,7 +52,7 @@ func TestVaultSaveMetadataReturnsNoErrorAndSavesMetadata(t *testing.T) {
 func TestVaultLoadMetadataReturnsErrorWhenMetaEncoderDecodeMetadataReturnsError(t *testing.T) {
 	//-- arrange
 	v := vault.Vault{
-		Path: file.NewPath(t, ""),
+		Path: t.TempDir(),
 		MetaEncoder: &meta.EncoderMock{
 			DecodeMetadataError: errors.New(""),
 		},
@@ -76,7 +75,7 @@ func TestVaultLoadMetadataReturnsNoErrorAndLoadsMetadata(t *testing.T) {
 	}
 
 	v := vault.Vault{
-		Path:        file.NewPath(t, ""),
+		Path:        t.TempDir(),
 		MetaEncoder: mock,
 	}
 	require.NoError(t, os.WriteFile(v.MetadataPath(), []byte{}, 0666))

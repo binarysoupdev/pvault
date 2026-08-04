@@ -12,7 +12,6 @@ import (
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/errors"
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -71,7 +70,7 @@ func TestSaveRecordReturnsErrorWhenRecordInvalid(t *testing.T) {
 func TestSaveRecordReturnsErrorWhenDatabaseSaveRecordReturnsError(t *testing.T) {
 	//-- arrange
 	v := vault.Vault{
-		Path: file.NewPath(t, ""),
+		Path: t.TempDir(),
 		Database: &database.Mock{
 			EncodeRecordError: errors.New(""),
 		},
@@ -87,7 +86,7 @@ func TestSaveRecordReturnsErrorWhenDatabaseSaveRecordReturnsError(t *testing.T) 
 func TestSaveRecordReturnsErrorWhenSaveIndexReturnsError(t *testing.T) {
 	//-- arrange
 	v := vault.Vault{
-		Path: file.NewPath(t, ""),
+		Path: t.TempDir(),
 		Map:  index.IndexMap{},
 		Database: &database.Mock{
 			EncodeIndexError: errors.New(""),
@@ -107,7 +106,7 @@ func TestSaveRecordReturnsNoErrorWithNewIdAndNewName(t *testing.T) {
 	mock := &database.Mock{}
 
 	v := vault.Vault{
-		Path:     file.NewPath(t, ""),
+		Path:     t.TempDir(),
 		Database: mock,
 		Map:      index.IndexMap{},
 	}
@@ -128,7 +127,7 @@ func TestSaveRecordReturnsNoErrorWithExistingIDAndNewName(t *testing.T) {
 	mock := &database.Mock{}
 
 	v := vault.Vault{
-		Path:     file.NewPath(t, ""),
+		Path:     t.TempDir(),
 		Database: mock,
 		Map: index.IndexMap{
 			RECORD.Name: RECORD.ID,
@@ -152,7 +151,7 @@ func TestSaveRecordReturnsErrorWithNewIDAndExistingName(t *testing.T) {
 	RECORD := record.NewMock("name")
 
 	v := vault.Vault{
-		Path:     file.NewPath(t, ""),
+		Path:     t.TempDir(),
 		Database: &database.Mock{},
 		Map: index.IndexMap{
 			RECORD.Name: uuid.New(),
@@ -172,7 +171,7 @@ func TestSaveRecordReturnsNoErrorWithExistingIDAndExistingName(t *testing.T) {
 	mock := &database.Mock{}
 
 	v := vault.Vault{
-		Path:     file.NewPath(t, ""),
+		Path:     t.TempDir(),
 		Database: mock,
 		Map: index.IndexMap{
 			RECORD.Name: RECORD.ID,
@@ -209,7 +208,7 @@ func TestLoadRecordReturnsErrorWhenDatabaseLoadRecordReturnsError(t *testing.T) 
 	}
 
 	v := vault.Vault{
-		Path:     file.NewPath(t, ""),
+		Path:     t.TempDir(),
 		Database: mock,
 		Map: index.IndexMap{
 			RECORD.Name: RECORD.ID,
@@ -235,7 +234,7 @@ func TestLoadRecordReturnsV1RecordAndNoError(t *testing.T) {
 	}
 
 	v := vault.Vault{
-		Path:     file.NewPath(t, ""),
+		Path:     t.TempDir(),
 		Database: mock,
 		Map: index.IndexMap{
 			RECORD.Name: RECORD.ID,
@@ -262,7 +261,7 @@ func TestLoadRecordReturnsV2RecordAndNoError(t *testing.T) {
 	}
 
 	v := vault.Vault{
-		Path:     file.NewPath(t, ""),
+		Path:     t.TempDir(),
 		Database: mock,
 		Map: index.IndexMap{
 			RECORD.Name: RECORD.ID,
@@ -294,7 +293,7 @@ func TestDeleteRecordReturnsErrorWhenDatabaseDeleteRecordReturnsError(t *testing
 	RECORD := record.NewMock("name")
 
 	v := vault.Vault{
-		Path:     file.NewPath(t, ""),
+		Path:     t.TempDir(),
 		Database: &database.Mock{},
 		Map: index.IndexMap{
 			RECORD.Name: RECORD.ID,
@@ -316,7 +315,7 @@ func TestDeleteRecordReturnsErrorWhenSaveIndexReturnsError(t *testing.T) {
 	}
 
 	v := vault.Vault{
-		Path:     file.NewPath(t, ""),
+		Path:     t.TempDir(),
 		Database: mock,
 		Map: index.IndexMap{
 			RECORD.Name: RECORD.ID,
@@ -337,7 +336,7 @@ func TestDeleteRecordReturnsIDAndNoErrorAndDeletesRecord(t *testing.T) {
 	mock := &database.Mock{}
 
 	v := vault.Vault{
-		Path:     file.NewPath(t, ""),
+		Path:     t.TempDir(),
 		Database: mock,
 		Map: index.IndexMap{
 			RECORD.Name: RECORD.ID,

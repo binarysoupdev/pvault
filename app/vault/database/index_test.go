@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"pvault/app/vault/database"
 	"pvault/app/vault/index"
+	"pvault/util"
 	"testing"
 
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,7 +15,7 @@ import (
 
 func TestSaveIndexReturnsErrorWhenPathInvalid(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "invalid")
+	PATH := filepath.Join(t.TempDir(), "invalid")
 
 	//-- act
 	res := database.SaveIndex(&database.Mock{}, PATH, index.IndexMap{})
@@ -26,13 +26,12 @@ func TestSaveIndexReturnsErrorWhenPathInvalid(t *testing.T) {
 
 func TestSaveIndexReturnsErrorWhenEncodeIndexReturnsError(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "")
 	mock := &database.Mock{
 		EncodeIndexError: errors.New(""),
 	}
 
 	//-- act
-	res := database.SaveIndex(mock, PATH, index.IndexMap{})
+	res := database.SaveIndex(mock, t.TempDir(), index.IndexMap{})
 
 	//-- assert
 	assert.ErrorContains(t, res, "error encoding index")
@@ -40,7 +39,7 @@ func TestSaveIndexReturnsErrorWhenEncodeIndexReturnsError(t *testing.T) {
 
 func TestSaveIndexReturnsNoErrorAndSavesIndex(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "")
+	PATH := t.TempDir()
 	INDEX := index.IndexMap{
 		"name": uuid.New(),
 	}
@@ -69,10 +68,12 @@ func TestLoadIndexReturnsErrorWhenDecodeIndexReturnsError(t *testing.T) {
 	mock := &database.Mock{
 		DecodeIndexError: errors.New(""),
 	}
-	FILEPATH := file.CreateEmpty(t, mock.IndexPath(""))
+
+	PATH := t.TempDir()
+	require.NoError(t, util.CreateEmptyFile(mock.IndexPath(PATH)))
 
 	//-- act
-	_, res := database.LoadIndex(mock, filepath.Dir(FILEPATH))
+	_, res := database.LoadIndex(mock, PATH)
 
 	//-- assert
 	assert.ErrorContains(t, res, "error decoding index")
@@ -85,10 +86,12 @@ func TestLoadIndexReturnsIndexAndNoErrorAndLoadsIndex(t *testing.T) {
 			"name": uuid.New(),
 		},
 	}
-	FILEPATH := file.CreateEmpty(t, mock.IndexPath(""))
+
+	PATH := t.TempDir()
+	require.NoError(t, util.CreateEmptyFile(mock.IndexPath(PATH)))
 
 	//-- act
-	res, err := database.LoadIndex(mock, filepath.Dir(FILEPATH))
+	res, err := database.LoadIndex(mock, PATH)
 
 	//-- assert
 	require.NoError(t, err)

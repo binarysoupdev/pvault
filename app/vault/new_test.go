@@ -1,20 +1,17 @@
 package vault_test
 
 import (
+	"path/filepath"
 	"pvault/app/vault"
 	"testing"
 
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestInitializeNewReturnsErrorWhenNewDirectoryAlreadyExists(t *testing.T) {
-	//-- arrange
-	PATH := file.NewPath(t, "")
-
 	//-- act
-	_, res := vault.InitializeNew(PATH, "")
+	_, res := vault.InitializeNew(t.TempDir(), "")
 
 	//-- assert
 	require.ErrorContains(t, res, "vault path already exists")
@@ -22,7 +19,7 @@ func TestInitializeNewReturnsErrorWhenNewDirectoryAlreadyExists(t *testing.T) {
 
 func TestInitializeNewReturnsVaultAndNoErrorAndCreatesDirectoryAndVaultFiles(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "vault")
+	PATH := filepath.Join(t.TempDir(), "vault")
 	const NAME = "nickname"
 
 	//-- act

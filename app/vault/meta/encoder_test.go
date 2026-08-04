@@ -2,19 +2,19 @@ package meta_test
 
 import (
 	"os"
+	"path/filepath"
 	"pvault/app/vault/meta"
 	"testing"
 	"time"
 
 	"github.com/binarysoupdev/go-commando/errors"
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestSaveMetadataReturnsErrorWhenPathInvalid(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "path/invalid")
+	PATH := filepath.Join(t.TempDir(), "path/invalid")
 
 	//-- act
 	res := meta.SaveMetadata(&meta.EncoderMock{}, PATH, meta.Metadata{})
@@ -25,13 +25,12 @@ func TestSaveMetadataReturnsErrorWhenPathInvalid(t *testing.T) {
 
 func TestSaveMetadataReturnsErrorWhenEncodeMetadataReturnsError(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "")
 	mock := &meta.EncoderMock{
 		EncodeMetadataError: errors.New(""),
 	}
 
 	//-- act
-	res := meta.SaveMetadata(mock, PATH, meta.Metadata{})
+	res := meta.SaveMetadata(mock, t.TempDir(), meta.Metadata{})
 
 	//-- assert
 	assert.ErrorContains(t, res, "error encoding metadata")
@@ -39,7 +38,7 @@ func TestSaveMetadataReturnsErrorWhenEncodeMetadataReturnsError(t *testing.T) {
 
 func TestSaveMetadataReturnsNoErrorAndSavesMetadata(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "")
+	PATH := t.TempDir()
 
 	META := meta.Metadata{
 		DatabaseVersion: 1,
@@ -68,7 +67,7 @@ func TestLoadMetadataReturnsErrorWhenPathInvalid(t *testing.T) {
 
 func TestLoadMetadataReturnsErrorWhenDecodeMetadataReturnsError(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "")
+	PATH := t.TempDir()
 
 	mock := &meta.EncoderMock{
 		DecodeMetadataError: errors.New(""),
@@ -84,7 +83,7 @@ func TestLoadMetadataReturnsErrorWhenDecodeMetadataReturnsError(t *testing.T) {
 
 func TestLoadMetadataReturnsMetadataAndNoErrorAndLoadsMetadata(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "")
+	PATH := t.TempDir()
 
 	mock := &meta.EncoderMock{
 		Metadata: meta.Metadata{

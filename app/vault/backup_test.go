@@ -3,13 +3,14 @@ package vault_test
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"pvault/app/vault"
 	"pvault/app/vault/database"
 	"pvault/app/vault/index"
 	"pvault/app/vault/meta"
+	"pvault/util"
 	"testing"
 
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -25,7 +26,8 @@ func TestVaultBackupReturnsErrorWhenPathNotFound(t *testing.T) {
 
 func TestVaultBackupReturnsErrorWhenPathIsNotADir(t *testing.T) {
 	//-- arrange
-	PATH := file.CreateEmpty(t, "backups.txt")
+	PATH := filepath.Join(t.TempDir(), "backups.txt")
+	require.NoError(t, util.CreateEmptyFile(PATH))
 
 	//-- act
 	res := vault.Vault{}.Backup(PATH)
@@ -36,7 +38,6 @@ func TestVaultBackupReturnsErrorWhenPathIsNotADir(t *testing.T) {
 
 func TestVaultBackupReturnsErrorWhenErrorBackingMetadataFile(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "")
 	v := vault.Vault{
 		Path:        "invalid",
 		MetaEncoder: &meta.EncoderMock{},
@@ -44,7 +45,7 @@ func TestVaultBackupReturnsErrorWhenErrorBackingMetadataFile(t *testing.T) {
 	}
 
 	//-- act
-	res := v.Backup(PATH)
+	res := v.Backup(t.TempDir())
 
 	//-- assert
 	assert.ErrorContains(t, res, "error backing metadata file")
@@ -52,9 +53,8 @@ func TestVaultBackupReturnsErrorWhenErrorBackingMetadataFile(t *testing.T) {
 
 func TestVaultBackupReturnsErrorWhenErrorBackingIndexFile(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "")
 	v := vault.Vault{
-		Path:        file.NewPath(t, ""),
+		Path:        t.TempDir(),
 		MetaEncoder: &meta.EncoderMock{},
 		Database:    &database.Mock{},
 	}
@@ -62,7 +62,7 @@ func TestVaultBackupReturnsErrorWhenErrorBackingIndexFile(t *testing.T) {
 	require.NoError(t, os.WriteFile(v.MetadataPath(), []byte{}, 0666))
 
 	//-- act
-	res := v.Backup(PATH)
+	res := v.Backup(t.TempDir())
 
 	//-- assert
 	assert.ErrorContains(t, res, "error backing index file")
@@ -70,9 +70,8 @@ func TestVaultBackupReturnsErrorWhenErrorBackingIndexFile(t *testing.T) {
 
 func TestVaultBackupReturnsErrorWhenRecordFilesNotFound(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "")
 	v := vault.Vault{
-		Path:        file.NewPath(t, ""),
+		Path:        t.TempDir(),
 		MetaEncoder: &meta.EncoderMock{},
 		Database:    &database.Mock{},
 	}
@@ -88,7 +87,7 @@ func TestVaultBackupReturnsErrorWhenRecordFilesNotFound(t *testing.T) {
 	require.NoError(t, os.WriteFile(v.Database.IndexPath(v.Path), []byte{}, 0666))
 
 	//-- act
-	res := v.Backup(PATH)
+	res := v.Backup(t.TempDir())
 
 	//-- assert
 	assert.ErrorContains(t, res, "error backing record "+R1.String())
@@ -96,9 +95,8 @@ func TestVaultBackupReturnsErrorWhenRecordFilesNotFound(t *testing.T) {
 }
 
 func TestVaultBackupReturnsNoErrorAndBacksUpIndexAndRecords(t *testing.T) {
-	PATH := file.NewPath(t, "")
 	v := vault.Vault{
-		Path:        file.NewPath(t, ""),
+		Path:        t.TempDir(),
 		MetaEncoder: &meta.EncoderMock{},
 		Database:    &database.Mock{},
 	}
@@ -123,7 +121,7 @@ func TestVaultBackupReturnsNoErrorAndBacksUpIndexAndRecords(t *testing.T) {
 	require.NoError(t, os.WriteFile(v.RecordPath(R2), R2_BYTES, 0666))
 
 	//-- act
-	res := v.Backup(PATH)
+	res := v.Backup(t.TempDir())
 
 	//-- assert
 	require.NoError(t, res)

@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"pvault/app/vault/database"
 	"pvault/app/vault/record"
+	"pvault/util"
 	"testing"
 
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,7 +15,7 @@ import (
 
 func TestSaveRecordReturnsErrorWhenPathInvalid(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "invalid")
+	PATH := filepath.Join(t.TempDir(), "invalid")
 	const PASSWORD = "Password123!"
 
 	RECORD := record.Mock{
@@ -31,7 +31,6 @@ func TestSaveRecordReturnsErrorWhenPathInvalid(t *testing.T) {
 
 func TestSaveRecordReturnsErrorWhenEncodeRecordReturnsError(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "")
 	const PASSWORD = "Password123!"
 
 	RECORD := record.Mock{
@@ -43,7 +42,7 @@ func TestSaveRecordReturnsErrorWhenEncodeRecordReturnsError(t *testing.T) {
 	}
 
 	//-- act
-	res := database.SaveRecord(mock, PATH, RECORD, PASSWORD)
+	res := database.SaveRecord(mock, t.TempDir(), RECORD, PASSWORD)
 
 	//-- assert
 	assert.ErrorContains(t, res, "error encoding record")
@@ -51,7 +50,7 @@ func TestSaveRecordReturnsErrorWhenEncodeRecordReturnsError(t *testing.T) {
 
 func TestSaveRecordReturnsNoErrorAndSavesRecord(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "")
+	PATH := t.TempDir()
 	const PASSWORD = "Password123!"
 
 	RECORD := record.Mock{
@@ -81,12 +80,13 @@ func TestLoadRecordReturnsErrorWhenDecodeRecordReturnsError(t *testing.T) {
 	mock := &database.Mock{
 		DecodeRecordError: errors.New(""),
 	}
-
 	ID := uuid.New()
-	FILEPATH := file.CreateEmpty(t, mock.RecordPath("", ID))
+
+	PATH := t.TempDir()
+	require.NoError(t, util.CreateEmptyFile(mock.RecordPath(PATH, ID)))
 
 	//-- act
-	_, res := database.LoadRecord(mock, filepath.Dir(FILEPATH), ID, "")
+	_, res := database.LoadRecord(mock, PATH, ID, "")
 
 	//-- assert
 	assert.ErrorContains(t, res, "error decoding record")
@@ -101,10 +101,12 @@ func TestLoadRecordReturnsRecordAndNoErrorAndLoadsRecord(t *testing.T) {
 			ID: uuid.New(),
 		},
 	}
-	FILEPATH := file.CreateEmpty(t, mock.RecordPath("", mock.Record.GetID()))
+
+	PATH := t.TempDir()
+	require.NoError(t, util.CreateEmptyFile(mock.RecordPath(PATH, mock.Record.GetID())))
 
 	//-- act
-	res, err := database.LoadRecord(mock, filepath.Dir(FILEPATH), mock.Record.GetID(), PASSWORD)
+	res, err := database.LoadRecord(mock, PATH, mock.Record.GetID(), PASSWORD)
 
 	//-- assert
 	require.NoError(t, err)
@@ -126,12 +128,14 @@ func TestDeleteRecordReturnsNoErrorAndDeletesRecord(t *testing.T) {
 	//-- arrange
 	mock := &database.Mock{}
 	ID := uuid.New()
-	FILEPATH := file.CreateEmpty(t, mock.RecordPath("", ID))
+
+	PATH := t.TempDir()
+	require.NoError(t, util.CreateEmptyFile(mock.RecordPath(PATH, ID)))
 
 	//-- act
-	res := database.DeleteRecord(mock, filepath.Dir(FILEPATH), ID)
+	res := database.DeleteRecord(mock, PATH, ID)
 
 	//-- assert
 	require.NoError(t, res)
-	assert.NoFileExists(t, FILEPATH)
+	assert.NoFileExists(t, PATH)
 }

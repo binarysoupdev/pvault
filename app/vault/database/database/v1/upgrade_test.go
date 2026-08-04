@@ -7,7 +7,6 @@ import (
 	record_v1 "pvault/app/vault/record/record/v1"
 	"testing"
 
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -24,7 +23,7 @@ func TestUpgradeReturnsErrorWhenOldIndexNotFound(t *testing.T) {
 func TestUpgradeReturnsErrorWhenErrorBackingRecords(t *testing.T) {
 	//-- arrange
 	db := db_v1.Database{}
-	PATH := file.NewPath(t, "")
+	PATH := t.TempDir()
 
 	R1 := uuid.New()
 	R2 := uuid.New()
@@ -46,7 +45,7 @@ func TestUpgradeReturnsErrorWhenErrorBackingRecords(t *testing.T) {
 func TestUpgradeReturnsNewDatabaseAndNoErrorAndUpgradesDatabase(t *testing.T) {
 	//-- arrange
 	db := db_v1.Database{}
-	PATH := file.NewPath(t, "")
+	PATH := t.TempDir()
 	const PASSWORD = "Password123!"
 
 	R1 := record_v1.Record{
