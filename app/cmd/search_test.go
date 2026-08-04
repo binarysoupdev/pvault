@@ -3,9 +3,9 @@ package cmd_test
 import (
 	"os"
 	"pvault/app/cmd"
+	"pvault/app/config"
 	"pvault/app/vault/local"
 	record "pvault/app/vault/record/version2"
-	"pvault/config"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/json"

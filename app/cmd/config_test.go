@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"pvault/app/cmd"
+	"pvault/app/config"
 	v1 "pvault/app/vault/index/version1"
-	"pvault/config"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/json"

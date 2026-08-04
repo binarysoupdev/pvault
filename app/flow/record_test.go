@@ -2,9 +2,9 @@ package flow_test
 
 import (
 	"path/filepath"
+	"pvault/app/config"
 	"pvault/app/flow"
 	v2 "pvault/app/vault/record/version2"
-	"pvault/config"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/file"

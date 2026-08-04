@@ -1,7 +1,7 @@
 package base
 
 import (
-	"pvault/config"
+	"pvault/app/config"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/go-commando/errors"

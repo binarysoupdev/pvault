@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"pvault/app/cmd/base"
+	"pvault/app/config"
 	"pvault/app/flow"
-	"pvault/config"
 	"pvault/tools/clipboard"
 	"pvault/tools/qrcode"
 

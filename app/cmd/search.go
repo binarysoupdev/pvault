@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"pvault/app/cmd/base"
+	"pvault/app/config"
 	"pvault/app/flow"
-	"pvault/config"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/go-commando/json"

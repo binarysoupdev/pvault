@@ -2,7 +2,7 @@ package config_test
 
 import (
 	"path/filepath"
-	"pvault/config"
+	"pvault/app/config"
 	"pvault/util"
 	"testing"
 

@@ -2,8 +2,8 @@ package flow
 
 import (
 	"path/filepath"
+	"pvault/app/config"
 	v2 "pvault/app/vault/record/record/v2"
-	"pvault/config"
 
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/binarysoupdev/go-commando/json"

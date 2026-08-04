@@ -2,11 +2,11 @@ package flow_test
 
 import (
 	"fmt"
+	"pvault/app/config"
 	"pvault/app/flow"
 	"pvault/app/vault/index"
 	index_v1 "pvault/app/vault/index/version1"
 	"pvault/app/vault/local"
-	"pvault/config"
 	"regexp"
 
 	"testing"

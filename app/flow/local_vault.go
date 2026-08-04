@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"pvault/app/config"
 	"pvault/app/vault"
-	"pvault/config"
 	"time"
 
 	"github.com/binarysoupdev/go-commando/errors"

@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 	"pvault/app/cmd"
+	"pvault/app/config"
 	"pvault/app/vault/index"
 	v1 "pvault/app/vault/index/version1"
 	"pvault/app/vault/local"
 	record "pvault/app/vault/record/version2"
-	"pvault/config"
 	"regexp"
 	"testing"
 

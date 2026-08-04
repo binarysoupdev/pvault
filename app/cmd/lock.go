@@ -3,9 +3,9 @@ package cmd
 import (
 	"os"
 	"pvault/app/cmd/base"
+	"pvault/app/config"
 	"pvault/app/flow"
 	v2 "pvault/app/vault/record/record/v2"
-	"pvault/config"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/go-commando/errors"

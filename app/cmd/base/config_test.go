@@ -3,7 +3,7 @@ package base_test
 import (
 	"fmt"
 	"pvault/app/cmd/base"
-	"pvault/config"
+	"pvault/app/config"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/json"

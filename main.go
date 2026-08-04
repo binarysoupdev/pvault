@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"pvault/app/cmd"
-	"pvault/config"
+	"pvault/app/config"
 	"pvault/tools/clipboard"
 	"pvault/tools/qrcode"
 	"pvault/version"
