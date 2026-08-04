@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"pvault/app/cmd"
+	config_cmds "pvault/app/commands/config"
+	record_cmds "pvault/app/commands/record"
+	vault_cmds "pvault/app/commands/vault"
 	"pvault/app/config"
 	"pvault/tools/clipboard"
 	"pvault/tools/qrcode"
@@ -29,14 +31,14 @@ func main() {
 	configLoader := json.NewLoader[config.Config](configPath())
 
 	runner := command.NewRunner(
-		cmd.NewConfigCommand(configLoader),
-		cmd.NewVaultCommand(configLoader),
-		cmd.NewCreateCommand(configLoader),
-		cmd.NewLockCommand(configLoader),
-		cmd.NewUnlockCommand(configLoader),
-		cmd.NewDeleteCommand(configLoader),
-		cmd.NewSearchCommand(configLoader),
-		cmd.NewCopyCommand(configLoader, clipboard.AtottoClipboard{}, qrcode.Skip2Renderer{}),
+		config_cmds.NewConfigCommand(configLoader),
+		vault_cmds.NewVaultCommand(configLoader),
+		vault_cmds.NewSearchCommand(configLoader),
+		record_cmds.NewCreateCommand(configLoader),
+		record_cmds.NewLockCommand(configLoader),
+		record_cmds.NewUnlockCommand(configLoader),
+		record_cmds.NewDeleteCommand(configLoader),
+		record_cmds.NewCopyCommand(configLoader, clipboard.AtottoClipboard{}, qrcode.Skip2Renderer{}),
 	)
 
 	if *ls || len(os.Args) < 2 {
