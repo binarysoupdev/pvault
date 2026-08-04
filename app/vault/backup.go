@@ -1,9 +1,9 @@
 package vault
 
 import (
-	"io"
 	"os"
 	"path/filepath"
+	"pvault/util"
 
 	"github.com/binarysoupdev/go-commando/errors"
 )
@@ -41,24 +41,5 @@ func (v Vault) Backup(path string) error {
 }
 
 func (Vault) backupFile(dir string, src string) error {
-	dest := filepath.Join(dir, filepath.Base(src))
-
-	s, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer s.Close()
-
-	d, err := os.Create(dest)
-	if err != nil {
-		return err
-	}
-	defer d.Close()
-
-	_, err = io.Copy(d, s)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return util.CopyFile(filepath.Join(dir, filepath.Base(src)), src)
 }
