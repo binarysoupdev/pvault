@@ -3,8 +3,8 @@ package v2_test
 import (
 	"bytes"
 	"encoding/binary"
-	v2 "pvault/app/vault/record/encoder/v2"
-	record_v1 "pvault/app/vault/record/record/v1"
+	v2 "pvault/app/vault/record/encoder/legacy/v2"
+	record_v1 "pvault/app/vault/record/record/legacy/v1"
 	"pvault/util"
 	"testing"
 

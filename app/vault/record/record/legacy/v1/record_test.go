@@ -1,7 +1,7 @@
 package v1_test
 
 import (
-	v1 "pvault/app/vault/record/record/v1"
+	v1 "pvault/app/vault/record/record/legacy/v1"
 	"testing"
 
 	"github.com/google/uuid"

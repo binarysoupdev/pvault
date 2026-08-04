@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 	"pvault/app/vault/database"
-	db_v2 "pvault/app/vault/database/database/v2"
+	db_v2 "pvault/app/vault/database/database/legacy/v2"
 	"pvault/app/vault/index"
-	record_v1 "pvault/app/vault/record/record/v1"
+	record_v1 "pvault/app/vault/record/record/legacy/v1"
 	record_v2 "pvault/app/vault/record/record/v2"
 	"testing"
 

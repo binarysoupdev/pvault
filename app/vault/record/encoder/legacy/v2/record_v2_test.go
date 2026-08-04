@@ -2,7 +2,7 @@ package v2_test
 
 import (
 	"bytes"
-	v2 "pvault/app/vault/record/encoder/v2"
+	v2 "pvault/app/vault/record/encoder/legacy/v2"
 	record_v2 "pvault/app/vault/record/record/v2"
 	"pvault/util"
 	"testing"

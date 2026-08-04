@@ -2,8 +2,8 @@ package v1_test
 
 import (
 	"bytes"
-	v1 "pvault/app/vault/record/encoder/v1"
-	record_v1 "pvault/app/vault/record/record/v1"
+	v1 "pvault/app/vault/record/encoder/legacy/v1"
+	record_v1 "pvault/app/vault/record/record/legacy/v1"
 	"pvault/util"
 	"testing"
 

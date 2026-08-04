@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"io"
 	"pvault/app/vault/record"
-	record_v1 "pvault/app/vault/record/record/v1"
+	record_v1 "pvault/app/vault/record/record/legacy/v1"
 	record_v2 "pvault/app/vault/record/record/v2"
 	"pvault/util"
 

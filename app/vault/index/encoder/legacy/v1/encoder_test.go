@@ -3,7 +3,7 @@ package v1_test
 import (
 	"bytes"
 	"pvault/app/vault/index"
-	v1 "pvault/app/vault/index/encoder/v1"
+	v1 "pvault/app/vault/index/encoder/legacy/v1"
 	"pvault/util"
 	"testing"
 

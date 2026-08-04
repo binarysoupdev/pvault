@@ -2,8 +2,8 @@ package v1
 
 import (
 	"path/filepath"
-	index_v1 "pvault/app/vault/index/encoder/v1"
-	record_v1 "pvault/app/vault/record/encoder/v1"
+	index_v1 "pvault/app/vault/index/encoder/legacy/v1"
+	record_v1 "pvault/app/vault/record/encoder/legacy/v1"
 
 	"github.com/google/uuid"
 )

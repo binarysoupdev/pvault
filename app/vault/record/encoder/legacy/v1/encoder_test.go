@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"pvault/app/vault/record"
-	v1 "pvault/app/vault/record/encoder/v1"
-	record_v1 "pvault/app/vault/record/record/v1"
+	v1 "pvault/app/vault/record/encoder/legacy/v1"
+	record_v1 "pvault/app/vault/record/record/legacy/v1"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

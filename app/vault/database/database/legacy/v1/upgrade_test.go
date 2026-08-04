@@ -2,9 +2,9 @@ package v1_test
 
 import (
 	"pvault/app/vault/database"
-	db_v1 "pvault/app/vault/database/database/v1"
+	db_v1 "pvault/app/vault/database/database/legacy/v1"
 	"pvault/app/vault/index"
-	record_v1 "pvault/app/vault/record/record/v1"
+	record_v1 "pvault/app/vault/record/record/legacy/v1"
 	"testing"
 
 	"github.com/google/uuid"

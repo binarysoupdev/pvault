@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"io"
 	"pvault/app/vault/record"
-	v1 "pvault/app/vault/record/record/v1"
+	v1 "pvault/app/vault/record/record/legacy/v1"
 	"pvault/util"
 
 	"github.com/binarysoupdev/go-commando/errors"

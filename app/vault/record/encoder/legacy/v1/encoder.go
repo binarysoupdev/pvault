@@ -3,7 +3,7 @@ package v1
 import (
 	"io"
 	"pvault/app/vault/record"
-	record_v1 "pvault/app/vault/record/record/v1"
+	record_v1 "pvault/app/vault/record/record/legacy/v1"
 
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/google/uuid"
