@@ -6,17 +6,13 @@ import (
 	"testing"
 
 	"github.com/binarysoupdev/cryptool/crypt"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestEncryptReturnsPlaintextAndNoErrorWhenPasswordEmpty(t *testing.T) {
 	//-- arrange
-	RECORD := record.Mock{
-		ID:   uuid.New(),
-		Name: "name",
-	}
+	RECORD := record.NewMock("name")
 	PLAINTEXT, _ := json.Marshal(RECORD)
 
 	//-- act
@@ -29,10 +25,7 @@ func TestEncryptReturnsPlaintextAndNoErrorWhenPasswordEmpty(t *testing.T) {
 
 func TestDecryptReturnsRecordAndNoErrorWhenPasswordEmpty(t *testing.T) {
 	//-- arrange
-	RECORD := record.Mock{
-		ID:   uuid.New(),
-		Name: "name",
-	}
+	RECORD := record.NewMock("name")
 	CIPHERTEXT, _ := json.Marshal(RECORD)
 
 	//-- act
@@ -83,10 +76,7 @@ func TestDecryptReturnsErrorWhenErrorUnmarshalingJSON(t *testing.T) {
 
 func TestEncryptDecryptReturnsErrorWhenPasswordIncorrect(t *testing.T) {
 	//-- arrange
-	RECORD := record.Mock{
-		ID:   uuid.New(),
-		Name: "name",
-	}
+	RECORD := record.NewMock("name")
 	const PASSWORD = "Password123!"
 
 	ciphertext, err := record.Encrypt(RECORD, PASSWORD)
@@ -101,10 +91,7 @@ func TestEncryptDecryptReturnsErrorWhenPasswordIncorrect(t *testing.T) {
 
 func TestEncryptDecryptReturnsRecordAndNoError(t *testing.T) {
 	//-- arrange
-	RECORD := record.Mock{
-		ID:   uuid.New(),
-		Name: "name",
-	}
+	RECORD := record.NewMock("name")
 	const PASSWORD = "Password123!"
 
 	ciphertext, err := record.Encrypt(RECORD, PASSWORD)

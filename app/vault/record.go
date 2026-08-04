@@ -15,7 +15,7 @@ func (v Vault) RecordPath(id uuid.UUID) string {
 func (v Vault) ValidateRecord(r record.Record) error {
 	err := record.Validate(r)
 	if err != nil {
-		return errors.Chain(err, "record invalid")
+		return err
 	}
 
 	existingId, ok := v.Map[r.GetName()]
@@ -34,7 +34,7 @@ func (v Vault) SaveRecord(r record.Record, password string) error {
 
 	err = database.SaveRecord(v.Database, v.Path, r, password)
 	if err != nil {
-		return err
+		return errors.Chain(err, "error saving record")
 	}
 
 	existingName, ok := v.Map.FindName(r.GetID())
@@ -59,7 +59,7 @@ func (v Vault) LoadRecord(name string, password string) (record.Record, error) {
 
 	r, err := database.LoadRecord(v.Database, v.Path, id, password)
 	if err != nil {
-		return nil, err
+		return nil, errors.Chain(err, "error loading record")
 	}
 
 	return r, nil
@@ -73,7 +73,7 @@ func (v Vault) DeleteRecord(name string) (uuid.UUID, error) {
 
 	err := database.DeleteRecord(v.Database, v.Path, id)
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, errors.Chain(err, "error deleting record")
 	}
 
 	delete(v.Map, name)

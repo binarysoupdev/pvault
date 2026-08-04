@@ -2,263 +2,356 @@ package vault_test
 
 import (
 	"fmt"
+	"os"
+	"pvault/app/vault"
+	"pvault/app/vault/database"
 	"pvault/app/vault/index"
-	"pvault/app/vault/local"
 	"pvault/app/vault/record"
-	record_v1 "pvault/app/vault/record/version1"
-	record_v2 "pvault/app/vault/record/version2"
+	record_v1 "pvault/app/vault/record/record/v1"
+	record_v2 "pvault/app/vault/record/record/v2"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/binarysoupdev/tinsel/file"
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/suite"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-type RecordTestSuite struct {
-	suite.Suite
-	Index  index.Mock
-	Record *record.Mock
-	Vault  local.Vault
-}
-
-func TestRecordTestSuite(t *testing.T) {
-	suite.Run(t, &RecordTestSuite{})
-}
-
-func (s *RecordTestSuite) SetupTest() {
-	s.Index = index.Mock{
-		Path: file.NewPath(s.T(), ""),
-	}
-
-	s.Record = &record.Mock{
-		ID:   uuid.New(),
-		Name: "name",
-	}
-
-	s.Vault = local.Vault{
-		Index: &s.Index,
-		Map:   index.IndexMap{},
-	}
-}
-
-//===================================
-
-func (s *RecordTestSuite) TestValidateRecordReturnsErrorWhenRecordInvalid() {
+func TestValidateRecordReturnsErrorWhenRecordInvalid(t *testing.T) {
 	//-- act
-	res := s.Vault.ValidateRecord(&record.Mock{})
+	res := vault.Vault{}.ValidateRecord(&record.Mock{})
 
 	//-- assert
-	s.Require().ErrorContains(res, "record invalid")
+	assert.ErrorContains(t, res, "id cannot be nil")
 }
 
-func (s *RecordTestSuite) TestValidateRecordReturnsErrorWhenNameAlreadyExistsForAnotherRecord() {
+func TestValidateRecordReturnsErrorWhenNameAlreadyExistsForAnotherRecord(t *testing.T) {
 	//-- arrange
-	s.Vault.Map = index.IndexMap{
-		s.Record.Name: uuid.New(),
+	RECORD := record.NewMock("name")
+
+	v := vault.Vault{
+		Map: index.IndexMap{
+			RECORD.Name: uuid.New(),
+		},
 	}
 
 	//-- act
-	res := s.Vault.ValidateRecord(s.Record)
+	res := v.ValidateRecord(RECORD)
 
 	//-- assert
-	s.Require().ErrorContains(res, fmt.Sprintf("name \"%s\" already exists", s.Record.Name))
+	assert.ErrorContains(t, res, fmt.Sprintf("name \"%s\" already exists", RECORD.Name))
 }
 
-func (s *RecordTestSuite) TestValidateRecordReturnsNoErrorWhenNameExistsForSameRecord() {
+func TestValidateRecordReturnsNoErrorWhenNameExistsForSameRecord(t *testing.T) {
 	//-- arrange
-	s.Vault.Map = index.IndexMap{
-		s.Record.Name: s.Record.ID,
+	RECORD := record.NewMock("name")
+
+	v := vault.Vault{
+		Map: index.IndexMap{
+			RECORD.Name: RECORD.ID,
+		},
 	}
 
 	//-- act
-	res := s.Vault.ValidateRecord(s.Record)
+	res := v.ValidateRecord(RECORD)
 
 	//-- assert
-	s.Require().NoError(res)
+	require.NoError(t, res)
 }
 
-func (s *RecordTestSuite) TestSaveRecordReturnsErrorWhenRecordInvalid() {
+func TestSaveRecordReturnsErrorWhenRecordInvalid(t *testing.T) {
 	//-- act
-	res := s.Vault.SaveRecord(&record.Mock{}, "")
+	res := vault.Vault{}.SaveRecord(&record.Mock{}, "")
 
 	//-- assert
-	s.Require().ErrorContains(res, "error validating record")
+	assert.ErrorContains(t, res, "error validating record")
 }
 
-func (s *RecordTestSuite) TestSaveRecordReturnsErrorWhenRecordSaveFileReturnsError() {
+func TestSaveRecordReturnsErrorWhenDatabaseSaveRecordReturnsError(t *testing.T) {
 	//-- arrange
-	s.Record.SaveFileError = errors.New("")
+	v := vault.Vault{
+		Path: file.NewPath(t, ""),
+		Database: &database.Mock{
+			EncodeRecordError: errors.New(""),
+		},
+	}
 
 	//-- act
-	res := s.Vault.SaveRecord(s.Record, "")
+	res := v.SaveRecord(record.NewMock("name"), "")
 
 	//-- assert
-	s.Require().ErrorContains(res, "error saving record")
+	assert.ErrorContains(t, res, "error saving record")
 }
 
-func (s *RecordTestSuite) TestSaveRecordReturnsErrorWhenIndexSaveMapReturnsError() {
+func TestSaveRecordReturnsErrorWhenSaveIndexReturnsError(t *testing.T) {
 	//-- arrange
-	s.Index.SaveMapError = errors.New("")
+	v := vault.Vault{
+		Path: file.NewPath(t, ""),
+		Map:  index.IndexMap{},
+		Database: &database.Mock{
+			EncodeIndexError: errors.New(""),
+		},
+	}
 
 	//-- act
-	res := s.Vault.SaveRecord(s.Record, "")
+	res := v.SaveRecord(record.NewMock("name"), "")
 
 	//-- assert
-	s.Require().ErrorContains(res, "error saving index map")
+	assert.ErrorContains(t, res, "error saving index map")
 }
 
-func (s *RecordTestSuite) TestSaveRecordReturnsNoErrorWithNewIdAndNewName() {
-	//-- act
-	res := s.Vault.SaveRecord(s.Record, "")
-
-	//-- assert
-	s.Require().NoError(res)
-	s.Assert().Contains(s.Index.Map, s.Record.Name)
-}
-
-func (s *RecordTestSuite) TestSaveRecordReturnsNoErrorWithExistingIDAndNewName() {
+func TestSaveRecordReturnsNoErrorWithNewIdAndNewName(t *testing.T) {
 	//-- arrange
-	s.Vault.Map[s.Record.Name] = s.Record.ID
-	s.Record.Name += "x"
+	RECORD := record.NewMock("name")
+	mock := &database.Mock{}
+
+	v := vault.Vault{
+		Path:     file.NewPath(t, ""),
+		Database: mock,
+		Map:      index.IndexMap{},
+	}
 
 	//-- act
-	res := s.Vault.SaveRecord(s.Record, "")
+	res := v.SaveRecord(RECORD, "")
 
 	//-- assert
-	s.Require().NoError(res)
-	s.Assert().Contains(s.Index.Map, s.Record.Name)
-	s.Assert().Len(s.Index.Map, 1)
+	require.NoError(t, res)
+	assert.Equal(t, RECORD, mock.Record)
+
+	assert.Contains(t, v.Map, RECORD.Name)
 }
 
-func (s *RecordTestSuite) TestSaveRecordReturnsErrorWithNewIDAndExistingName() {
+func TestSaveRecordReturnsNoErrorWithExistingIDAndNewName(t *testing.T) {
 	//-- arrange
-	s.Vault.Map[s.Record.Name] = uuid.New()
+	RECORD := record.NewMock("name")
+	mock := &database.Mock{}
+
+	v := vault.Vault{
+		Path:     file.NewPath(t, ""),
+		Database: mock,
+		Map: index.IndexMap{
+			RECORD.Name: RECORD.ID,
+		},
+	}
+	RECORD.Name += "x"
 
 	//-- act
-	res := s.Vault.SaveRecord(s.Record, "")
+	res := v.SaveRecord(RECORD, "")
 
 	//-- assert
-	s.Require().ErrorContains(res, "error validating record")
+	require.NoError(t, res)
+	assert.Equal(t, RECORD, mock.Record)
+
+	assert.Contains(t, v.Map, RECORD.Name)
+	assert.Len(t, v.Map, 1)
 }
 
-func (s *RecordTestSuite) TestSaveRecordReturnsNoErrorWithExistingIDAndExistingName() {
+func TestSaveRecordReturnsErrorWithNewIDAndExistingName(t *testing.T) {
 	//-- arrange
-	s.Vault.Map[s.Record.Name] = s.Record.ID
+	RECORD := record.NewMock("name")
+
+	v := vault.Vault{
+		Path:     file.NewPath(t, ""),
+		Database: &database.Mock{},
+		Map: index.IndexMap{
+			RECORD.Name: uuid.New(),
+		},
+	}
 
 	//-- act
-	res := s.Vault.SaveRecord(s.Record, "")
+	res := v.SaveRecord(RECORD, "")
 
 	//-- assert
-	s.Require().NoError(res)
-	s.Assert().Contains(s.Index.Map, s.Record.Name)
-	s.Assert().Len(s.Index.Map, 1)
+	assert.ErrorContains(t, res, "error validating record")
 }
 
-func (s *RecordTestSuite) TestLoadRecordReturnsErrorWhenNameNotFound() {
-	//-- act
-	_, res := s.Vault.LoadRecord(s.Record.Name, "")
-
-	//-- assert
-	s.Require().ErrorContains(res, fmt.Sprintf("name \"%s\" not found", s.Record.Name))
-}
-
-func (s *RecordTestSuite) TestLoadRecordReturnsErrorWhenRecordNotFound() {
+func TestSaveRecordReturnsNoErrorWithExistingIDAndExistingName(t *testing.T) {
 	//-- arrange
-	s.Vault.Map[s.Record.Name] = s.Record.ID
+	RECORD := record.NewMock("name")
+	mock := &database.Mock{}
+
+	v := vault.Vault{
+		Path:     file.NewPath(t, ""),
+		Database: mock,
+		Map: index.IndexMap{
+			RECORD.Name: RECORD.ID,
+		},
+	}
 
 	//-- act
-	_, res := s.Vault.LoadRecord(s.Record.Name, "")
+	res := v.SaveRecord(RECORD, "")
 
 	//-- assert
-	s.Require().ErrorContains(res, "error loading record")
+	require.NoError(t, res)
+	assert.Equal(t, RECORD, mock.Record)
+
+	assert.Contains(t, v.Map, RECORD.Name)
+	assert.Len(t, v.Map, 1)
 }
 
-func (s *RecordTestSuite) TestLoadRecordReturnsV1RecordAndNoError() {
+func TestLoadRecordReturnsErrorWhenNameNotFound(t *testing.T) {
+	//-- arrange
+	RECORD := record.NewMock("name")
+
+	//-- act
+	_, res := vault.Vault{}.LoadRecord(RECORD.Name, "")
+
+	//-- assert
+	assert.ErrorContains(t, res, fmt.Sprintf("name \"%s\" not found", RECORD.Name))
+}
+
+func TestLoadRecordReturnsErrorWhenDatabaseLoadRecordReturnsError(t *testing.T) {
+	//-- arrange
+	RECORD := record.NewMock("name")
+	mock := &database.Mock{
+		DecodeRecordError: errors.New(""),
+	}
+
+	v := vault.Vault{
+		Path:     file.NewPath(t, ""),
+		Database: mock,
+		Map: index.IndexMap{
+			RECORD.Name: RECORD.ID,
+		},
+	}
+	require.NoError(t, os.WriteFile(mock.RecordPath(v.Path, RECORD.ID), []byte{}, 0666))
+
+	//-- act
+	_, res := v.LoadRecord(RECORD.Name, "")
+
+	//-- assert
+	assert.ErrorContains(t, res, "error loading record")
+}
+
+func TestLoadRecordReturnsV1RecordAndNoError(t *testing.T) {
 	//-- arrange
 	RECORD := record_v1.Record{
 		ID:   uuid.New(),
 		Name: "name",
 	}
-	const PASSWORD = "Password123!"
+	mock := &database.Mock{
+		Record: RECORD,
+	}
 
-	err := s.Vault.SaveRecord(RECORD, PASSWORD)
-	s.Require().NoError(err)
+	v := vault.Vault{
+		Path:     file.NewPath(t, ""),
+		Database: mock,
+		Map: index.IndexMap{
+			RECORD.Name: RECORD.ID,
+		},
+	}
+	require.NoError(t, os.WriteFile(mock.RecordPath(v.Path, RECORD.ID), []byte{}, 0666))
 
 	//-- act
-	res, err := s.Vault.LoadRecord(RECORD.Name, PASSWORD)
+	res, err := v.LoadRecord(RECORD.Name, "")
 
 	//-- assert
-	s.Require().NoError(err)
-	s.Assert().Equal(RECORD, res)
+	require.NoError(t, err)
+	assert.Equal(t, RECORD, res)
 }
 
-func (s *RecordTestSuite) TestLoadRecordReturnsV2RecordAndNoError() {
+func TestLoadRecordReturnsV2RecordAndNoError(t *testing.T) {
 	//-- arrange
 	RECORD := record_v2.Record{
 		ID:   uuid.New(),
 		Name: "name",
 	}
-	const PASSWORD = "Password123!"
+	mock := &database.Mock{
+		Record: RECORD,
+	}
 
-	err := s.Vault.SaveRecord(RECORD, PASSWORD)
-	s.Require().NoError(err)
+	v := vault.Vault{
+		Path:     file.NewPath(t, ""),
+		Database: mock,
+		Map: index.IndexMap{
+			RECORD.Name: RECORD.ID,
+		},
+	}
+	require.NoError(t, os.WriteFile(mock.RecordPath(v.Path, RECORD.ID), []byte{}, 0666))
 
 	//-- act
-	res, err := s.Vault.LoadRecord(RECORD.Name, PASSWORD)
+	res, err := v.LoadRecord(RECORD.Name, "")
 
 	//-- assert
-	s.Require().NoError(err)
-	s.Assert().Equal(RECORD, res)
+	require.NoError(t, err)
+	assert.Equal(t, RECORD, res)
 }
 
-func (s *RecordTestSuite) TestDeleteRecordReturnsErrorWhenNameNotFound() {
-	//-- act
-	_, res := s.Vault.DeleteRecord(s.Record.Name)
-
-	//-- assert
-	s.Require().ErrorContains(res, fmt.Sprintf("name \"%s\" not found", s.Record.Name))
-}
-
-func (s *RecordTestSuite) TestDeleteRecordReturnsErrorWhenRecordNotFound() {
+func TestDeleteRecordReturnsErrorWhenNameNotFound(t *testing.T) {
 	//-- arrange
-	s.Vault.Map[s.Record.Name] = s.Record.ID
+	RECORD := record.NewMock("name")
 
 	//-- act
-	_, res := s.Vault.DeleteRecord(s.Record.Name)
+	_, res := vault.Vault{}.DeleteRecord(RECORD.Name)
 
 	//-- assert
-	s.Require().ErrorContains(res, "error deleting record")
+	assert.ErrorContains(t, res, fmt.Sprintf("name \"%s\" not found", RECORD.Name))
 }
 
-func (s *RecordTestSuite) TestDeleteRecordReturnsErrorWhenIndexSaveMapReturnsError() {
+func TestDeleteRecordReturnsErrorWhenDatabaseDeleteRecordReturnsError(t *testing.T) {
 	//-- arrange
-	const PASSWORD = "Password123!"
-	err := s.Vault.SaveRecord(s.Record, PASSWORD)
-	s.Require().NoError(err)
+	RECORD := record.NewMock("name")
 
-	s.Index.SaveMapError = errors.New("")
+	v := vault.Vault{
+		Path:     file.NewPath(t, ""),
+		Database: &database.Mock{},
+		Map: index.IndexMap{
+			RECORD.Name: RECORD.ID,
+		},
+	}
 
 	//-- act
-	_, res := s.Vault.DeleteRecord(s.Record.Name)
+	_, res := v.DeleteRecord(RECORD.Name)
 
 	//-- assert
-	s.Require().ErrorContains(res, "error saving index map")
+	assert.ErrorContains(t, res, "error deleting record")
 }
 
-func (s *RecordTestSuite) TestDeleteRecordReturnsIDAndNoErrorAndDeletesRecord() {
+func TestDeleteRecordReturnsErrorWhenSaveIndexReturnsError(t *testing.T) {
 	//-- arrange
-	const PASSWORD = "Password123!"
-	err := s.Vault.SaveRecord(s.Record, PASSWORD)
-	s.Require().NoError(err)
+	RECORD := record.NewMock("name")
+	mock := &database.Mock{
+		EncodeIndexError: errors.New(""),
+	}
+
+	v := vault.Vault{
+		Path:     file.NewPath(t, ""),
+		Database: mock,
+		Map: index.IndexMap{
+			RECORD.Name: RECORD.ID,
+		},
+	}
+	require.NoError(t, os.WriteFile(mock.RecordPath(v.Path, RECORD.ID), []byte{}, 0666))
 
 	//-- act
-	id, err := s.Vault.DeleteRecord(s.Record.Name)
+	_, res := v.DeleteRecord(RECORD.Name)
 
 	//-- assert
-	s.Require().NoError(err)
+	assert.ErrorContains(t, res, "error saving index map")
+}
 
-	s.Assert().Equal(s.Record.ID, id)
-	s.Assert().Empty(s.Index.Map)
-	s.Assert().NoFileExists(s.Index.RecordPath(id))
+func TestDeleteRecordReturnsIDAndNoErrorAndDeletesRecord(t *testing.T) {
+	//-- arrange
+	RECORD := record.NewMock("name")
+	mock := &database.Mock{}
+
+	v := vault.Vault{
+		Path:     file.NewPath(t, ""),
+		Database: mock,
+		Map: index.IndexMap{
+			RECORD.Name: RECORD.ID,
+		},
+	}
+	require.NoError(t, os.WriteFile(mock.RecordPath(v.Path, RECORD.ID), []byte{}, 0666))
+
+	//-- act
+	id, err := v.DeleteRecord(RECORD.Name)
+
+	//-- assert
+	require.NoError(t, err)
+	assert.Equal(t, RECORD.ID, id)
+
+	assert.Empty(t, v.Map)
+	assert.NoFileExists(t, mock.RecordPath(v.Path, RECORD.ID))
 }

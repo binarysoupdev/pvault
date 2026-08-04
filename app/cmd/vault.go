@@ -53,7 +53,7 @@ func (cmd VaultCommand) Run(args []string) error {
 }
 
 func (cmd VaultCommand) initialize() error {
-	_, err := vault.CreateNew(cmd.Config.VaultPath, filepath.Base(cmd.Config.VaultPath))
+	_, err := vault.InitializeNew(cmd.Config.VaultPath, filepath.Base(cmd.Config.VaultPath))
 	if err != nil {
 		return errors.Chain(err, "error initializing new vault")
 	}

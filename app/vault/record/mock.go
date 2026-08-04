@@ -14,6 +14,13 @@ type Mock struct {
 	UpgradeRecord v2.Record
 }
 
+func NewMock(name string) Mock {
+	return Mock{
+		ID:   uuid.New(),
+		Name: name,
+	}
+}
+
 func (m Mock) GetVersion() int {
 	return m.Version
 }

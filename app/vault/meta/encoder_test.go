@@ -1,6 +1,7 @@
 package meta_test
 
 import (
+	"os"
 	"pvault/app/vault/meta"
 	"testing"
 	"time"
@@ -24,7 +25,7 @@ func TestSaveMetadataReturnsErrorWhenPathInvalid(t *testing.T) {
 
 func TestSaveMetadataReturnsErrorWhenEncodeMetadataReturnsError(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "meta")
+	PATH := file.NewPath(t, "")
 	mock := &meta.EncoderMock{
 		EncodeMetadataError: errors.New(""),
 	}
@@ -38,13 +39,13 @@ func TestSaveMetadataReturnsErrorWhenEncodeMetadataReturnsError(t *testing.T) {
 
 func TestSaveMetadataReturnsNoErrorAndSavesMetadata(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "meta")
+	PATH := file.NewPath(t, "")
+
 	META := meta.Metadata{
 		DatabaseVersion: 1,
 		Nickname:        "nickname",
 		CreationDate:    time.Now(),
 	}
-
 	mock := &meta.EncoderMock{}
 
 	//-- act
@@ -53,7 +54,8 @@ func TestSaveMetadataReturnsNoErrorAndSavesMetadata(t *testing.T) {
 	//-- assert
 	require.NoError(t, res)
 	assert.Equal(t, mock.Metadata, META)
-	assert.FileExists(t, PATH)
+
+	assert.FileExists(t, mock.MetadataPath(PATH))
 }
 
 func TestLoadMetadataReturnsErrorWhenPathInvalid(t *testing.T) {
@@ -66,10 +68,12 @@ func TestLoadMetadataReturnsErrorWhenPathInvalid(t *testing.T) {
 
 func TestLoadMetadataReturnsErrorWhenDecodeMetadataReturnsError(t *testing.T) {
 	//-- arrange
+	PATH := file.NewPath(t, "")
+
 	mock := &meta.EncoderMock{
 		DecodeMetadataError: errors.New(""),
 	}
-	PATH := file.CreateEmpty(t, "meta")
+	require.NoError(t, os.WriteFile(mock.MetadataPath(PATH), []byte{}, 0666))
 
 	//-- act
 	_, res := meta.LoadMetadata(mock, PATH)
@@ -80,6 +84,8 @@ func TestLoadMetadataReturnsErrorWhenDecodeMetadataReturnsError(t *testing.T) {
 
 func TestLoadMetadataReturnsMetadataAndNoErrorAndLoadsMetadata(t *testing.T) {
 	//-- arrange
+	PATH := file.NewPath(t, "")
+
 	mock := &meta.EncoderMock{
 		Metadata: meta.Metadata{
 			DatabaseVersion: 1,
@@ -87,7 +93,7 @@ func TestLoadMetadataReturnsMetadataAndNoErrorAndLoadsMetadata(t *testing.T) {
 			CreationDate:    time.Now(),
 		},
 	}
-	PATH := file.CreateEmpty(t, "meta")
+	require.NoError(t, os.WriteFile(mock.MetadataPath(PATH), []byte{}, 0666))
 
 	//-- act
 	res, err := meta.LoadMetadata(mock, PATH)
