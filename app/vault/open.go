@@ -8,7 +8,7 @@ import (
 	db_v2 "pvault/app/vault/database/encoder/legacy/v2"
 	db_v3 "pvault/app/vault/database/encoder/v3"
 	"pvault/app/vault/meta"
-	meta_encoder "pvault/app/vault/meta/encoder"
+	meta_v1 "pvault/app/vault/meta/encoder/v1"
 
 	"github.com/binarysoupdev/go-commando/errors"
 )
@@ -71,9 +71,9 @@ func loadFromMetadata(v *Vault) (bool, error) {
 }
 
 func detectMetadata(path string) meta.Encoder {
-	_, err := os.Stat(meta_encoder.Encoder{}.MetadataPath(path))
+	_, err := os.Stat(meta_v1.Encoder{}.MetadataPath(path))
 	if err == nil {
-		return meta_encoder.Encoder{}
+		return meta_v1.Encoder{}
 	}
 
 	return nil

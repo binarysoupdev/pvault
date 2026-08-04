@@ -10,7 +10,7 @@ import (
 	db_v3 "pvault/app/vault/database/encoder/v3"
 	"pvault/app/vault/index"
 	"pvault/app/vault/meta"
-	meta_encoder "pvault/app/vault/meta/encoder"
+	meta_v1 "pvault/app/vault/meta/encoder/v1"
 	"testing"
 
 	"github.com/google/uuid"
@@ -78,7 +78,7 @@ func TestOpenReturnsVaultAndNoErrorWhenDatabaseIsV2AndCreatesNewMetadata(t *test
 func TestOpenReturnsErrorWhenErrorLoadingMetadata(t *testing.T) {
 	//-- arrange
 	PATH := t.TempDir()
-	require.NoError(t, os.WriteFile(meta_encoder.Encoder{}.MetadataPath(PATH), []byte{}, 0666))
+	require.NoError(t, os.WriteFile(meta_v1.Encoder{}.MetadataPath(PATH), []byte{}, 0666))
 
 	//-- act
 	_, res := vault.Open(PATH)
@@ -97,7 +97,7 @@ func TestOpenReturnsVaultAndNoErrorWhenDatabaseIsV3AndLoadsMetadata(t *testing.T
 
 	VAULT := vault.Vault{
 		Path:        PATH,
-		MetaEncoder: meta_encoder.Encoder{},
+		MetaEncoder: meta_v1.Encoder{},
 		Meta: meta.Metadata{
 			DatabaseVersion: db_v3.VERSION,
 		},
@@ -122,7 +122,7 @@ func TestOpenReturnsErrorWhenDatabaseVersionUnsupported(t *testing.T) {
 
 	VAULT := vault.Vault{
 		Path:        PATH,
-		MetaEncoder: meta_encoder.Encoder{},
+		MetaEncoder: meta_v1.Encoder{},
 		Meta: meta.Metadata{
 			DatabaseVersion: db_v3.VERSION + 1,
 		},

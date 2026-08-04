@@ -1,4 +1,4 @@
-package encoder
+package v1
 
 import (
 	"encoding/binary"

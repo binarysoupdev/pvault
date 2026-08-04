@@ -5,7 +5,7 @@ import (
 	db_v3 "pvault/app/vault/database/encoder/v3"
 	"pvault/app/vault/index"
 	"pvault/app/vault/meta"
-	meta_encoder "pvault/app/vault/meta/encoder"
+	meta_v1 "pvault/app/vault/meta/encoder/v1"
 
 	"github.com/binarysoupdev/go-commando/errors"
 )
@@ -13,7 +13,7 @@ import (
 func New(path, nickname string) Vault {
 	return Vault{
 		Path:            path,
-		MetaEncoder:     meta_encoder.Encoder{},
+		MetaEncoder:     meta_v1.Encoder{},
 		DatabaseEncoder: db_v3.Encoder{},
 		Meta:            meta.New(db_v3.VERSION, nickname),
 		Map:             index.IndexMap{},
