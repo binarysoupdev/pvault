@@ -14,6 +14,7 @@ import (
 	"pvault/util"
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
@@ -232,18 +233,19 @@ func (s *VaultTestSuite) TestRunValidateFailsWithInvalidVault() {
 
 func (s *VaultTestSuite) TestRunValidatePassesAndPrintsVaultPathAndRecordCount() {
 	//-- arrange
-	v, err := vault.InitializeNew(s.Config.VaultPath, "")
-	s.Require().NoError(err)
-
 	const NUM_RECORDS = 5
 	const PASSWORD = "Password123!"
+	const NICKNAME = "nickname"
+
+	v, err := vault.InitializeNew(s.Config.VaultPath, NICKNAME)
+	s.Require().NoError(err)
 
 	for i := range NUM_RECORDS {
 		err := v.SaveRecord(record_v2.NewEmptyRecord(fmt.Sprintf("name_%d", i)), PASSWORD)
 		s.Require().NoError(err)
 	}
 
-	out := pipe.OpenStdout(2)
+	out := pipe.OpenStdout(3)
 	defer out.Close()
 
 	//-- act
@@ -251,6 +253,7 @@ func (s *VaultTestSuite) TestRunValidatePassesAndPrintsVaultPathAndRecordCount()
 
 	//-- assert
 	s.RequireResultPass()
-	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault verified at \"%s\" (@v%d)", v.Path, v.GetVersion()))
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault \"%s\" verified at \"%s\" (@v%d)", NICKNAME, v.Path, v.GetVersion()))
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Created on %s", v.Meta.CreationDate.Format(time.DateOnly)))
 	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("[%d] records found", NUM_RECORDS))
 }

@@ -6,6 +6,7 @@ import (
 	"pvault/app/config"
 	vault_flow "pvault/app/flow/vault"
 	"pvault/app/vault"
+	"time"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/go-commando/errors"
@@ -102,7 +103,8 @@ func (cmd VaultCommand) validate() error {
 		return err
 	}
 
-	style.BoldInfo.Printf("[=] Vault verified at \"%s\" (@v%d)\n", v.Path, v.GetVersion())
+	style.BoldInfo.Printf("[=] Vault \"%s\" verified at \"%s\" (@v%d)\n", v.Meta.Nickname, v.Path, v.GetVersion())
+	style.Info.Printf("Created on %s\n", v.Meta.CreationDate.Format(time.DateOnly))
 	style.Info.Printf("[%d] records found\n", len(v.Map))
 
 	return nil
