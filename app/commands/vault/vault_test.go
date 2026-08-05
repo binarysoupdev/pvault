@@ -3,20 +3,21 @@ package vault_test
 import (
 	"fmt"
 	"os"
-	"pvault/app/cmd"
+	"path/filepath"
+	cmd "pvault/app/commands/vault"
 	"pvault/app/config"
+	"pvault/app/vault"
+	"pvault/app/vault/database"
+	db_v1 "pvault/app/vault/database/encoder/legacy/v1"
 	"pvault/app/vault/index"
-	v1 "pvault/app/vault/index/version1"
-	"pvault/app/vault/local"
-	record "pvault/app/vault/record/version2"
+	record_v2 "pvault/app/vault/record/record/v2"
+	"pvault/util"
 	"regexp"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
-	"github.com/binarysoupdev/tinsel/rand"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -30,7 +31,7 @@ type VaultTestSuite struct {
 
 func TestVaultCommandSuite(t *testing.T) {
 	s := VaultTestSuite{
-		ConfigLoader: json.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: json.NewLoader[config.Config](filepath.Join(t.TempDir(), "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewVaultCommand(s.ConfigLoader))
@@ -40,8 +41,8 @@ func TestVaultCommandSuite(t *testing.T) {
 func (s *VaultTestSuite) SetupTest() {
 	s.Config = config.Config{
 		Version:    config.VERSION,
-		VaultPath:  file.NewPath(s.T(), "vault"),
-		BackupPath: file.NewPath(s.T(), ""),
+		VaultPath:  filepath.Join(s.T().TempDir(), "vault"),
+		BackupPath: s.T().TempDir(),
 	}
 
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
@@ -50,7 +51,7 @@ func (s *VaultTestSuite) SetupTest() {
 
 //=====================================
 
-func (s *VaultTestSuite) TestRunFailErrorLoadingConfig() {
+func (s *VaultTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 	//-- arrange
 	err := os.Remove(s.ConfigLoader.Path)
 	s.Require().NoError(err)
@@ -62,9 +63,9 @@ func (s *VaultTestSuite) TestRunFailErrorLoadingConfig() {
 	s.RequireResultFail("invalid config path")
 }
 
-func (s *VaultTestSuite) TestRunInitWithInvalidVaultPathReturnsError() {
+func (s *VaultTestSuite) TestRunInitFailsWithInvalidVaultPath() {
 	//-- arrange
-	s.Config.VaultPath = file.NewPath(s.T(), "")
+	s.Config.VaultPath = s.T().TempDir()
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
@@ -75,7 +76,7 @@ func (s *VaultTestSuite) TestRunInitWithInvalidVaultPathReturnsError() {
 	s.RequireResultFail("error initializing new vault")
 }
 
-func (s *VaultTestSuite) TestRunInitValidInitializesVault() {
+func (s *VaultTestSuite) TestRunInitPassesAndInitializesVault() {
 	//-- arrange
 	out := pipe.OpenStdout(1)
 	defer out.Close()
@@ -91,7 +92,7 @@ func (s *VaultTestSuite) TestRunInitValidInitializesVault() {
 
 func (s *VaultTestSuite) TestRunBackupFailsWithInvalidVault() {
 	//-- arrange
-	s.Config.VaultPath = file.NewPath(s.T(), "")
+	s.Config.VaultPath = s.T().TempDir()
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
@@ -104,25 +105,25 @@ func (s *VaultTestSuite) TestRunBackupFailsWithInvalidVault() {
 
 func (s *VaultTestSuite) TestRunBackupFailsWithInvalidBackupPath() {
 	//-- arrange
-	s.Config.BackupPath = file.CreateEmpty(s.T(), "backups.txt")
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Config.BackupPath = filepath.Join(s.T().TempDir(), "backups.txt")
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
+	s.Require().NoError(util.CreateEmptyFile(s.Config.BackupPath))
 
-	_, err = local.CreateNewVault(s.Config.VaultPath)
+	_, err := vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 
 	//-- act
 	s.RunCommand("-backup")
 
 	//-- assert
-	s.RequireResultFail("error validating backup path")
+	s.RequireResultFail("error validating \"config.backup_path\"")
 }
 
 func (s *VaultTestSuite) TestRunBackupPassesAndBacksUpVault() {
 	//-- arrange
 	DIR_REGEX := regexp.MustCompile(`"([^"]*)"`)
 
-	_, err := local.CreateNewVault(s.Config.VaultPath)
+	_, err := vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(1)
@@ -144,7 +145,7 @@ func (s *VaultTestSuite) TestRunBackupPassesAndBacksUpVault() {
 
 func (s *VaultTestSuite) TestRunUpgradeFailsWithInvalidVault() {
 	//-- arrange
-	s.Config.VaultPath = file.NewPath(s.T(), "")
+	s.Config.VaultPath = s.T().TempDir()
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
@@ -157,7 +158,7 @@ func (s *VaultTestSuite) TestRunUpgradeFailsWithInvalidVault() {
 
 func (s *VaultTestSuite) TestRunUpgradeFailsWhenVaultIsUpToDate() {
 	//-- arrange
-	_, err := local.CreateNewVault(s.Config.VaultPath)
+	_, err := vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 
 	//-- act
@@ -169,33 +170,30 @@ func (s *VaultTestSuite) TestRunUpgradeFailsWhenVaultIsUpToDate() {
 
 func (s *VaultTestSuite) TestRunUpgradeFailsWithInvalidBackupPath() {
 	//-- arrange
-	s.Config.VaultPath = file.NewPath(s.T(), "")
-	s.Config.BackupPath = file.CreateEmpty(s.T(), "backups.txt")
+	s.Config.VaultPath = s.T().TempDir()
+	s.Config.BackupPath = filepath.Join(s.T().TempDir(), "backups.txt")
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
+	s.Require().NoError(util.CreateEmptyFile(s.Config.BackupPath))
 
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
-
-	err = v1.NewIndex(s.Config.VaultPath).SaveMap(index.IndexMap{})
-	s.Require().NoError(err)
+	s.Require().NoError(database.SaveIndex(db_v1.Encoder{}, s.Config.VaultPath, index.IndexMap{}))
 
 	//-- act
 	s.RunCommand("-upgrade")
 
 	//-- assert
-	s.RequireResultFail("error validating backup path")
+	s.RequireResultFail("error validating \"config.backup_path\"")
 }
 
 func (s *VaultTestSuite) TestRunUpgradePassesAndCreatesBackupAndUpgradesDatabase() {
 	//-- arrange
 	DIR_REGEX := regexp.MustCompile(`"([^"]*)"`)
 
-	s.Config.VaultPath = file.NewPath(s.T(), "")
+	s.Config.VaultPath = s.T().TempDir()
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
-	v1 := v1.NewIndex(s.Config.VaultPath)
-	err = v1.SaveMap(index.IndexMap{})
-	s.Require().NoError(err)
+	db := db_v1.Encoder{}
+	s.Require().NoError(database.SaveIndex(db, s.Config.VaultPath, index.IndexMap{}))
 
 	out := pipe.OpenStdout(2)
 	defer out.Close()
@@ -213,15 +211,15 @@ func (s *VaultTestSuite) TestRunUpgradePassesAndCreatesBackupAndUpgradesDatabase
 	require.Len(s.T(), match, 2)
 	assert.DirExists(s.T(), match[1])
 
-	v, err := local.OpenVault(s.Config.VaultPath)
+	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
 
-	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("[+] Vault Upgraded (@v%d -> @v%d)", v1.GetVersion(), v.GetVersion()))
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("[+] Vault Upgraded (@v%d -> @v%d)", db.GetVersion(), v.GetVersion()))
 }
 
-func (s *VaultTestSuite) TestRunValidateWithInvalidVaultFails() {
+func (s *VaultTestSuite) TestRunValidateFailsWithInvalidVault() {
 	//-- arrange
-	s.Config.VaultPath = file.NewPath(s.T(), "")
+	s.Config.VaultPath = s.T().TempDir()
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
@@ -232,16 +230,16 @@ func (s *VaultTestSuite) TestRunValidateWithInvalidVaultFails() {
 	s.RequireResultFail("error opening vault")
 }
 
-func (s *VaultTestSuite) TestRunValidatePassPrintsVaultPathAndRecordCount() {
+func (s *VaultTestSuite) TestRunValidatePassesAndPrintsVaultPathAndRecordCount() {
 	//-- arrange
-	v, err := local.CreateNewVault(s.Config.VaultPath)
+	v, err := vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 
-	rand := rand.New(0)
+	const NUM_RECORDS = 5
+	const PASSWORD = "Password123!"
 
-	NUM_RECORDS := 5
-	for range NUM_RECORDS {
-		err := v.SaveRecord(record.NewEmptyRecord(rand.ASCII(10)), rand.ASCII(30))
+	for i := range NUM_RECORDS {
+		err := v.SaveRecord(record_v2.NewEmptyRecord(fmt.Sprintf("name_%d", i)), PASSWORD)
 		s.Require().NoError(err)
 	}
 

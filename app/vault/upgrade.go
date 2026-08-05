@@ -21,5 +21,12 @@ func (v *Vault) Upgrade() error {
 	}
 
 	v.DatabaseEncoder = new
+	v.Meta.DatabaseVersion = new.GetVersion()
+
+	err = v.SaveMetadata()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

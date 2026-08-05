@@ -48,7 +48,7 @@ func (s *ConfigTestSuite) SetupTest() {
 
 //=====================================
 
-func (s *ConfigTestSuite) TestRunNewWithExistingConfigReturnsError() {
+func (s *ConfigTestSuite) TestRunNewFailsWithExistingConfig() {
 	//-- act
 	s.RunCommand("-new")
 
@@ -56,7 +56,7 @@ func (s *ConfigTestSuite) TestRunNewWithExistingConfigReturnsError() {
 	s.RequireResultFail(fmt.Sprintf("config file \"%s\" already exists", s.ConfigLoader.Path))
 }
 
-func (s *ConfigTestSuite) TestRunNewCreatesNewConfig() {
+func (s *ConfigTestSuite) TestRunNewPassesAndCreatesNewConfig() {
 	//-- arrange
 	s.Require().NoError(os.Remove(s.ConfigLoader.Path))
 
@@ -73,7 +73,7 @@ func (s *ConfigTestSuite) TestRunNewCreatesNewConfig() {
 	s.Assert().Contains(out.ReadLine(), "[+] Created New Config: "+s.ConfigLoader.Path)
 }
 
-func (s *ConfigTestSuite) TestRunNotNewConfigNotFoundReturnsError() {
+func (s *ConfigTestSuite) TestRunFailsWhenConfigNotFound() {
 	//-- arrange
 	s.Require().NoError(os.Remove(s.ConfigLoader.Path))
 
@@ -84,7 +84,7 @@ func (s *ConfigTestSuite) TestRunNotNewConfigNotFoundReturnsError() {
 	s.RequireResultFail("invalid config path")
 }
 
-func (s *ConfigTestSuite) TestRunValidateConfigWithInvalidVaultPrintsError() {
+func (s *ConfigTestSuite) TestRunValidatePassesWithInvalidVaultAndPrintsError() {
 	//-- arrange
 	s.Config.VaultPath = s.T().TempDir()
 	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
@@ -104,7 +104,7 @@ func (s *ConfigTestSuite) TestRunValidateConfigWithInvalidVaultPrintsError() {
 	s.Assert().Contains(vaultPath, "error opening vault")
 }
 
-func (s *ConfigTestSuite) TestRunValidateConfigWithOutOfDateVaultPrintsError() {
+func (s *ConfigTestSuite) TestRunValidatePassesWithOutOfDateVaultAndPrintsError() {
 	//-- arrange
 	PATH := s.T().TempDir()
 	DATABASE := db_v1.Encoder{}
@@ -133,7 +133,7 @@ func (s *ConfigTestSuite) TestRunValidateConfigWithOutOfDateVaultPrintsError() {
 	s.Assert().Contains(vaultPath, fmt.Sprintf("vault (@v%d) out-of-date", META.DatabaseVersion))
 }
 
-func (s *ConfigTestSuite) TestRunValidatePassWithInvalidBackupPathPrintsError() {
+func (s *ConfigTestSuite) TestRunValidatePassesWithInvalidBackupPathAndPrintsError() {
 	//-- arrange
 	s.Config.BackupPath = filepath.Join(s.T().TempDir(), "backup.txt")
 	s.Require().NoError(util.CreateEmptyFile(s.Config.BackupPath))
@@ -155,7 +155,7 @@ func (s *ConfigTestSuite) TestRunValidatePassWithInvalidBackupPathPrintsError() 
 	s.Assert().Contains(outputPath, "path not a directory")
 }
 
-func (s *ConfigTestSuite) TestRunValidateWithInvalidOutputPathPrintsError() {
+func (s *ConfigTestSuite) TestRunValidatePassesWithInvalidOutputPathAndPrintsError() {
 	//-- arrange
 	s.Config.OutputPath = "invalid"
 	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
@@ -176,7 +176,7 @@ func (s *ConfigTestSuite) TestRunValidateWithInvalidOutputPathPrintsError() {
 	s.Assert().Contains(outputPath, "path not found")
 }
 
-func (s *ConfigTestSuite) TestRunValidatePassConfigPrintsConfig() {
+func (s *ConfigTestSuite) TestRunValidatePassesAndPrintsConfig() {
 	//-- arrange
 	_, err := vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)

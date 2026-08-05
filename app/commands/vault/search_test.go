@@ -2,17 +2,16 @@ package vault_test
 
 import (
 	"os"
-	"pvault/app/cmd"
+	"path/filepath"
+	cmd "pvault/app/commands/vault"
 	"pvault/app/config"
-	"pvault/app/vault/local"
-	record "pvault/app/vault/record/version2"
+	"pvault/app/vault"
+	record_v2 "pvault/app/vault/record/record/v2"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
-	"github.com/binarysoupdev/tinsel/rand"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -24,7 +23,7 @@ type SearchTestSuite struct {
 
 func TestSearchCommandSuite(t *testing.T) {
 	s := SearchTestSuite{
-		ConfigLoader: json.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: json.NewLoader[config.Config](filepath.Join(t.TempDir(), "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewSearchCommand(s.ConfigLoader))
@@ -34,19 +33,19 @@ func TestSearchCommandSuite(t *testing.T) {
 func (s *SearchTestSuite) SetupTest() {
 	s.Config = config.Config{
 		Version:    config.VERSION,
-		VaultPath:  file.NewPath(s.T(), "vault"),
-		OutputPath: file.NewPath(s.T(), ""),
+		VaultPath:  filepath.Join(s.T().TempDir(), "vault"),
+		OutputPath: s.T().TempDir(),
 	}
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
-	_, err = local.CreateNewVault(s.Config.VaultPath)
+	_, err = vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 }
 
 //=====================================
 
-func (s *SearchTestSuite) TestRunFailErrorLoadingConfig() {
+func (s *SearchTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 	//-- arrange
 	err := os.Remove(s.ConfigLoader.Path)
 	s.Require().NoError(err)
@@ -58,10 +57,9 @@ func (s *SearchTestSuite) TestRunFailErrorLoadingConfig() {
 	s.RequireResultFail("invalid config path")
 }
 
-func (s *SearchTestSuite) TestRunInvalidVaultPath() {
+func (s *SearchTestSuite) TestRunFailsWithInvalidVaultPath() {
 	//-- arrange
-	rand := rand.New(0)
-	NAME := rand.ASCII(15)
+	const NAME = "name"
 
 	s.Config.VaultPath = "invalid"
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
@@ -74,7 +72,7 @@ func (s *SearchTestSuite) TestRunInvalidVaultPath() {
 	s.RequireResultFail("error opening vault")
 }
 
-func (s *SearchTestSuite) TestRunInvalidNoResults() {
+func (s *SearchTestSuite) TestRunFailsWhenNoResults() {
 	//-- act
 	s.RunCommand("-s", "no match")
 
@@ -82,15 +80,15 @@ func (s *SearchTestSuite) TestRunInvalidNoResults() {
 	s.RequireResultFail("no matches found")
 }
 
-func (s *SearchTestSuite) TestRunValidDisplaySearchResults() {
+func (s *SearchTestSuite) TestRunPassesAndDisplaysSearchResults() {
 	//-- arrange
-	rand := rand.New(0)
-	NAME := rand.ASCII(15)
+	const NAME = "name"
+	const PASSWORD = "Password123!"
 
-	v, err := local.OpenVault(s.Config.VaultPath)
+	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
 
-	err = v.SaveRecord(record.NewEmptyRecord(NAME), rand.ASCII(30))
+	err = v.SaveRecord(record_v2.NewEmptyRecord(NAME), PASSWORD)
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(1)
@@ -103,6 +101,6 @@ func (s *SearchTestSuite) TestRunValidDisplaySearchResults() {
 	s.RequireResultPass()
 
 	line := out.ReadLine()
-	s.Assert().Contains(line, "[1]")
+	s.Assert().Contains(line, "[0]")
 	s.Assert().Contains(line, NAME)
 }
