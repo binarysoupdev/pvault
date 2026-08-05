@@ -178,7 +178,9 @@ func (s *ConfigTestSuite) TestRunValidatePassesWithInvalidOutputPathAndPrintsErr
 
 func (s *ConfigTestSuite) TestRunValidatePassesAndPrintsConfig() {
 	//-- arrange
-	_, err := vault.InitializeNew(s.Config.VaultPath, "")
+	const NICKNAME = "nickname"
+
+	_, err := vault.InitializeNew(s.Config.VaultPath, NICKNAME)
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(4)
@@ -193,7 +195,7 @@ func (s *ConfigTestSuite) TestRunValidatePassesAndPrintsConfig() {
 
 	vaultPath := out.ReadLine()
 	s.Assert().Contains(vaultPath, s.Config.VaultPath)
-	s.Assert().Contains(vaultPath, fmt.Sprintf("verified (@v%d)", database.CURRENT_VERSION))
+	s.Assert().Contains(vaultPath, fmt.Sprintf("verified (\"%s\"@v%d)", NICKNAME, database.CURRENT_VERSION))
 
 	backupPath := out.ReadLine()
 	s.Assert().Contains(backupPath, s.Config.BackupPath)

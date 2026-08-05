@@ -94,7 +94,7 @@ func (cmd ConfigCommand) validateVaultPath() {
 	if err != nil {
 		style.Error.Printf("-> %s\n", err)
 	} else {
-		style.Success.Printf("-> verified (@v%d)\n", v.GetVersion())
+		style.Success.Printf("-> verified (\"%s\"@v%d)\n", v.Meta.Nickname, v.GetVersion())
 	}
 }
 
