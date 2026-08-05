@@ -38,28 +38,54 @@ func (cmd *VaultCommand) Initialize() error {
 
 func (cmd VaultCommand) Run(args []string) error {
 	init := cmd.Flags.Bool("init", false, "initialize the vault")
+	nickname := cmd.Flags.String("nickname", "", "set the vault's nickname")
 	backup := cmd.Flags.Bool("backup", false, "backup the vault to the backup directory")
 	upgrade := cmd.Flags.Bool("upgrade", false, "upgrade the vault if it's out-of-date")
 	cmd.ParseFlags(args)
 
 	if *init {
-		return cmd.initialize()
-	} else if *backup {
-		return cmd.backup()
-	} else if *upgrade {
-		return cmd.upgrade()
-	} else {
-		return cmd.validate()
+		return cmd.initialize(*nickname)
 	}
+	if *nickname != "" {
+		return cmd.setNickname(*nickname)
+	}
+	if *backup {
+		return cmd.backup()
+	}
+	if *upgrade {
+		return cmd.upgrade()
+	}
+	return cmd.validate()
 }
 
-func (cmd VaultCommand) initialize() error {
-	_, err := vault.InitializeNew(cmd.Config.VaultPath, filepath.Base(cmd.Config.VaultPath))
+func (cmd VaultCommand) initialize(nickname string) error {
+	if nickname == "" {
+		nickname = filepath.Base(cmd.Config.VaultPath)
+	}
+
+	_, err := vault.InitializeNew(cmd.Config.VaultPath, nickname)
 	if err != nil {
 		return errors.Chain(err, "error initializing new vault")
 	}
 
-	style.BoldCreate.Printf("[+] New Vault Initialized: %s\n", cmd.Config.VaultPath)
+	style.BoldCreate.Printf("[+] New Vault \"%s\" Initialized: %s\n", nickname, cmd.Config.VaultPath)
+	return nil
+}
+
+func (cmd VaultCommand) setNickname(nickname string) error {
+	v, err := vault_flow.OpenVault(cmd.Config.VaultPath)
+	if err != nil {
+		return err
+	}
+
+	v.Meta.Nickname = nickname
+
+	err = v.SaveMetadata()
+	if err != nil {
+		return err
+	}
+
+	style.Create.Printf("[+] Set Nickname: %s\n", v.Meta.Nickname)
 	return nil
 }
 
