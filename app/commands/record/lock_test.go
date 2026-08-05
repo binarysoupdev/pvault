@@ -2,10 +2,10 @@ package record_test
 
 import (
 	"os"
-	"pvault/app/cmd"
+	cmd "pvault/app/commands/record"
 	"pvault/app/config"
-	"pvault/app/vault/local"
-	v2 "pvault/app/vault/record/version2"
+	"pvault/app/vault"
+	record_v2 "pvault/app/vault/record/record/v2"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/json"
@@ -22,7 +22,7 @@ type LockTestSuite struct {
 	Config       config.Config
 
 	RecordPath string
-	Record     v2.Record
+	Record     record_v2.Record
 }
 
 func TestLockCommandSuite(t *testing.T) {
@@ -43,12 +43,12 @@ func (s *LockTestSuite) SetupTest() {
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
-	_, err = local.CreateNewVault(s.Config.VaultPath)
+	_, err = vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
 	s.RecordPath = file.NewPath(s.T(), rand.ASCII(10))
-	s.Record = v2.NewEmptyRecord(rand.ASCII(15))
+	s.Record = record_v2.NewEmptyRecord(rand.ASCII(15))
 
 	err = json.MarshalFile(s.Record, s.RecordPath)
 	s.Require().NoError(err)
@@ -56,7 +56,7 @@ func (s *LockTestSuite) SetupTest() {
 
 //=====================================
 
-func (s *LockTestSuite) TestRunFailErrorLoadingConfig() {
+func (s *LockTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 	//-- arrange
 	err := os.Remove(s.ConfigLoader.Path)
 	s.Require().NoError(err)
@@ -68,7 +68,7 @@ func (s *LockTestSuite) TestRunFailErrorLoadingConfig() {
 	s.RequireResultFail("invalid config path")
 }
 
-func (s *LockTestSuite) TestRunPathNotEmpty() {
+func (s *LockTestSuite) TestRunFailsWhenPathIsEmpty() {
 	//-- act
 	s.RunCommand("-path", "")
 
@@ -76,7 +76,7 @@ func (s *LockTestSuite) TestRunPathNotEmpty() {
 	s.RequireResultFail("\"path\" cannot be empty")
 }
 
-func (s *LockTestSuite) TestRunInvalidVaultPath() {
+func (s *LockTestSuite) TestRunFailsWithInvalidVaultPath() {
 	//-- arrange
 	s.Config.VaultPath = "invalid"
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
@@ -89,7 +89,7 @@ func (s *LockTestSuite) TestRunInvalidVaultPath() {
 	s.RequireResultFail("error opening vault")
 }
 
-func (s *LockTestSuite) TestRunInvalidRecordPath() {
+func (s *LockTestSuite) TestRunFailsWithInvalidRecordPath() {
 	//-- act
 	s.RunCommand("-path", "invalid")
 
@@ -97,7 +97,7 @@ func (s *LockTestSuite) TestRunInvalidRecordPath() {
 	s.RequireResultFail("error loading source record")
 }
 
-func (s *LockTestSuite) TestRunInvalidRecord() {
+func (s *LockTestSuite) TestRunFailsWithInvalidRecord() {
 	//-- arrange
 	s.Record.Name = ""
 
@@ -111,13 +111,13 @@ func (s *LockTestSuite) TestRunInvalidRecord() {
 	s.RequireResultFail("error validating record")
 }
 
-func (s *LockTestSuite) TestRunInvalidNameAlreadyExists() {
+func (s *LockTestSuite) TestRunFailsWhenNameAlreadyExists() {
 	//-- arrange
-	v, err := local.OpenVault(s.Config.VaultPath)
+	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
-	err = v.SaveRecord(v2.NewEmptyRecord(s.Record.Name), rand.ASCII(30))
+	err = v.SaveRecord(record_v2.NewEmptyRecord(s.Record.Name), rand.ASCII(30))
 	s.Require().NoError(err)
 
 	//-- act
@@ -127,7 +127,7 @@ func (s *LockTestSuite) TestRunInvalidNameAlreadyExists() {
 	s.RequireResultFail("error validating record")
 }
 
-func (s *LockTestSuite) TestRunIncorrectVerifyPassword() {
+func (s *LockTestSuite) TestRunFailsWithIncorrectVerifyPassword() {
 	//-- arrange
 	rand := rand.New(0)
 	PASSWORD := rand.ASCII(30)
@@ -148,7 +148,7 @@ func (s *LockTestSuite) TestRunIncorrectVerifyPassword() {
 	s.Assert().Contains(io.ReadLine(), "Verify PASSWORD")
 }
 
-func (s *LockTestSuite) TestRunValidSaveNew() {
+func (s *LockTestSuite) TestRunPassesAndSavesNewRecord() {
 	//-- arrange
 	rand := rand.New(0)
 	PASSWORD := rand.ASCII(30)
@@ -172,7 +172,7 @@ func (s *LockTestSuite) TestRunValidSaveNew() {
 	s.Assert().Contains(io.ReadLine(), "[-] "+s.RecordPath)
 	s.Assert().NoFileExists(s.RecordPath)
 
-	v, err := local.OpenVault(s.Config.VaultPath)
+	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	res, err := v.LoadRecord(s.Record.Name, PASSWORD)
@@ -180,15 +180,15 @@ func (s *LockTestSuite) TestRunValidSaveNew() {
 	s.Assert().Equal(s.Record, res)
 }
 
-func (s *LockTestSuite) TestRunValidUpdateExisting() {
+func (s *LockTestSuite) TestRunPassesAndUpdatesExistingRecord() {
 	//-- arrange
-	OLD_RECORD := v2.NewEmptyRecord(s.Record.Name + "x")
+	OLD_RECORD := record_v2.NewEmptyRecord(s.Record.Name + "x")
 	OLD_RECORD.ID = s.Record.ID
 
 	rand := rand.New(0)
 	PASSWORD := rand.ASCII(30)
 
-	v, err := local.OpenVault(s.Config.VaultPath)
+	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	err = v.SaveRecord(OLD_RECORD, PASSWORD+"x")
@@ -213,7 +213,7 @@ func (s *LockTestSuite) TestRunValidUpdateExisting() {
 	s.Assert().Contains(io.ReadLine(), "[-] "+s.RecordPath)
 	s.Assert().NoFileExists(s.RecordPath)
 
-	v, err = local.OpenVault(v.Path)
+	v, err = vault.Open(v.Path)
 	s.Require().NoError(err)
 
 	res, err := v.LoadRecord(s.Record.Name, PASSWORD)

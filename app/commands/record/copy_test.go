@@ -3,12 +3,10 @@ package record_test
 import (
 	"errors"
 	"os"
-	"pvault/app/cmd"
+	cmd "pvault/app/commands/record"
 	"pvault/app/config"
 	"pvault/app/vault"
-	vault "pvault/app/vault"
-	"pvault/app/vault/local"
-	v2 "pvault/app/vault/record/version2"
+	record_v2 "pvault/app/vault/record/record/v2"
 	"pvault/tools/clipboard"
 	"pvault/tools/qrcode"
 	"testing"
@@ -30,7 +28,7 @@ type CopyTestSuite struct {
 	Config       config.Config
 
 	Vault    vault.Vault
-	Record   v2.Record
+	Record   record_v2.Record
 	Password string
 }
 
@@ -57,13 +55,13 @@ func (s *CopyTestSuite) SetupTest() {
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
-	s.Record = v2.NewEmptyRecord(rand.ASCII(15))
+	s.Record = record_v2.NewEmptyRecord(rand.ASCII(15))
 	s.Record.Username = rand.ASCII(10)
 	s.Record.Password = rand.ASCII(30)
 
 	s.Password = rand.ASCII(30)
 
-	s.Vault, err = local.CreateNewVault(s.Config.VaultPath)
+	s.Vault, err = vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 
 	err = s.Vault.SaveRecord(s.Record, s.Password)
@@ -72,7 +70,7 @@ func (s *CopyTestSuite) SetupTest() {
 
 //=====================================
 
-func (s *CopyTestSuite) TestRunFailClipboardUnsupported() {
+func (s *CopyTestSuite) TestRunFailsWhenClipboardUnsupported() {
 	//-- arrange
 	s.Clipboard.Unsupported = errors.New("")
 
@@ -83,7 +81,7 @@ func (s *CopyTestSuite) TestRunFailClipboardUnsupported() {
 	s.RequireResultFail("clipboard unsupported")
 }
 
-func (s *CopyTestSuite) TestRunFailErrorLoadingConfig() {
+func (s *CopyTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 	//-- arrange
 	err := os.Remove(s.ConfigLoader.Path)
 	s.Require().NoError(err)
@@ -95,7 +93,7 @@ func (s *CopyTestSuite) TestRunFailErrorLoadingConfig() {
 	s.RequireResultFail("invalid config path")
 }
 
-func (s *CopyTestSuite) TestRunFailInvalidVaultPath() {
+func (s *CopyTestSuite) TestRunFailsWithInvalidVaultPath() {
 	//-- arrange
 	s.Config.VaultPath = "invalid"
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
@@ -108,7 +106,7 @@ func (s *CopyTestSuite) TestRunFailInvalidVaultPath() {
 	s.RequireResultFail("error opening vault")
 }
 
-func (s *CopyTestSuite) TestRunFailInvalidNoResults() {
+func (s *CopyTestSuite) TestRunFailsWithNoResults() {
 	//-- act
 	s.RunCommand("-s", "no match")
 
@@ -116,7 +114,7 @@ func (s *CopyTestSuite) TestRunFailInvalidNoResults() {
 	s.RequireResultFail("no matches found")
 }
 
-func (s *CopyTestSuite) TestRunFailIncorrectPassword() {
+func (s *CopyTestSuite) TestRunFailsWithIncorrectPassword() {
 	//-- arrange
 	io := pipe.OpenStdio(1, 2, false)
 	defer io.Close()
@@ -134,7 +132,7 @@ func (s *CopyTestSuite) TestRunFailIncorrectPassword() {
 	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")
 }
 
-func (s *CopyTestSuite) TestRunFailErrorCopyingToClipboard() {
+func (s *CopyTestSuite) TestRunFailsWhenErrorCopyingToClipboard() {
 	//-- arrange
 	s.Clipboard.Error = errors.New("")
 
@@ -155,7 +153,7 @@ func (s *CopyTestSuite) TestRunFailErrorCopyingToClipboard() {
 	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
 }
 
-func (s *CopyTestSuite) TestRunPassPasswordCopied() {
+func (s *CopyTestSuite) TestRunPassesAndCopiesPassword() {
 	//-- arrange
 	io := pipe.OpenStdio(1, 4, false)
 	defer io.Close()
@@ -177,7 +175,7 @@ func (s *CopyTestSuite) TestRunPassPasswordCopied() {
 	s.Assert().Contains(io.ReadLine(), "[=] PASSWORD copied to clipboard")
 }
 
-func (s *CopyTestSuite) TestRunPassUsernameCopied() {
+func (s *CopyTestSuite) TestRunPassesAndCopiesUsername() {
 	//-- arrange
 	io := pipe.OpenStdio(1, 4, false)
 	defer io.Close()

@@ -3,12 +3,10 @@ package record_test
 import (
 	"fmt"
 	"os"
-	"pvault/app/cmd"
+	cmd "pvault/app/commands/record"
 	"pvault/app/config"
 	"pvault/app/vault"
-	vault "pvault/app/vault"
-	"pvault/app/vault/local"
-	v2 "pvault/app/vault/record/version2"
+	record_v2 "pvault/app/vault/record/record/v2"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/json"
@@ -25,7 +23,7 @@ type DeleteTestSuite struct {
 	Config       config.Config
 
 	Vault  vault.Vault
-	Record v2.Record
+	Record record_v2.Record
 }
 
 func TestDeleteCommandSuite(t *testing.T) {
@@ -47,9 +45,9 @@ func (s *DeleteTestSuite) SetupTest() {
 	s.Require().NoError(err)
 
 	rand := rand.New(0)
-	s.Record = v2.NewEmptyRecord(rand.ASCII(15))
+	s.Record = record_v2.NewEmptyRecord(rand.ASCII(15))
 
-	s.Vault, err = local.CreateNewVault(s.Config.VaultPath)
+	s.Vault, err = vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 
 	err = s.Vault.SaveRecord(s.Record, rand.ASCII(30))
@@ -58,7 +56,7 @@ func (s *DeleteTestSuite) SetupTest() {
 
 //=====================================
 
-func (s *DeleteTestSuite) TestRunFailErrorLoadingConfig() {
+func (s *DeleteTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 	//-- arrange
 	err := os.Remove(s.ConfigLoader.Path)
 	s.Require().NoError(err)
@@ -70,7 +68,7 @@ func (s *DeleteTestSuite) TestRunFailErrorLoadingConfig() {
 	s.RequireResultFail("invalid config path")
 }
 
-func (s *DeleteTestSuite) TestRunInvalidVaultPath() {
+func (s *DeleteTestSuite) TestRunFailsWithInvalidVaultPath() {
 	//-- arrange
 	s.Config.VaultPath = "invalid"
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
@@ -83,7 +81,7 @@ func (s *DeleteTestSuite) TestRunInvalidVaultPath() {
 	s.RequireResultFail("error opening vault")
 }
 
-func (s *DeleteTestSuite) TestRunInvalidNoResults() {
+func (s *DeleteTestSuite) TestRunFailsWhenNoResults() {
 	//-- act
 	s.RunCommand("-s", "no match")
 
@@ -91,7 +89,7 @@ func (s *DeleteTestSuite) TestRunInvalidNoResults() {
 	s.RequireResultFail("no matches found")
 }
 
-func (s *DeleteTestSuite) TestRunIncorrectConfirmName() {
+func (s *DeleteTestSuite) TestRunFailsWithIncorrectConfirmName() {
 	//-- arrange
 	io := pipe.OpenStdio(1, 2, true)
 	defer io.Close()
@@ -109,7 +107,7 @@ func (s *DeleteTestSuite) TestRunIncorrectConfirmName() {
 	s.Assert().Contains(io.ReadLine(), "Confirm NAME: "+s.Record.Name+"x")
 }
 
-func (s *DeleteTestSuite) TestRunValid() {
+func (s *DeleteTestSuite) TestRunPassesAndDeletesRecord() {
 	//-- arrange
 	io := pipe.OpenStdio(1, 3, true)
 	defer io.Close()
@@ -127,8 +125,7 @@ func (s *DeleteTestSuite) TestRunValid() {
 	s.Assert().Contains(io.ReadLine(), "Confirm NAME: "+s.Record.Name)
 	s.Assert().Contains(io.ReadLine(), "[-] Deleted Record: "+s.Record.ID.String())
 
-	var err error
-	s.Vault.Map, err = s.Vault.Index.LoadMap()
+	err := s.Vault.LoadIndex()
 	s.Require().NoError(err)
 
 	_, err = s.Vault.LoadRecord(s.Record.Name, "")

@@ -49,10 +49,12 @@ func TestVaultUpgradeReturnsNoErrorAndSetsNewDatabase(t *testing.T) {
 	mock := &database.EncoderMock{}
 
 	v := vault.Vault{
+		Path: t.TempDir(),
 		Meta: meta.Metadata{
 			DatabaseVersion: database.CURRENT_VERSION - 1,
 		},
 		DatabaseEncoder: mock,
+		MetaEncoder:     &meta.EncoderMock{},
 	}
 
 	//-- act

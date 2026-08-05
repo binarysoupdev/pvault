@@ -3,10 +3,10 @@ package record_test
 import (
 	"os"
 	"path/filepath"
-	"pvault/app/cmd"
+	cmd "pvault/app/commands/record"
 	"pvault/app/config"
-	"pvault/app/vault/local"
-	v2 "pvault/app/vault/record/version2"
+	"pvault/app/vault"
+	v2 "pvault/app/vault/record/record/v2"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/json"
@@ -23,7 +23,7 @@ type CreateTestSuite struct {
 	ConfigLoader json.Loader[config.Config]
 	Config       config.Config
 
-	Vault local.Vault
+	Vault vault.Vault
 }
 
 func TestCreateCommandSuite(t *testing.T) {
@@ -44,13 +44,13 @@ func (s *CreateTestSuite) SetupTest() {
 	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
 	s.Require().NoError(err)
 
-	s.Vault, err = local.CreateNewVault(s.Config.VaultPath)
+	s.Vault, err = vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 }
 
 //=====================================
 
-func (s *CreateTestSuite) TestRunFailErrorLoadingConfig() {
+func (s *CreateTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 	//-- arrange
 	err := os.Remove(s.ConfigLoader.Path)
 	s.Require().NoError(err)
@@ -62,7 +62,7 @@ func (s *CreateTestSuite) TestRunFailErrorLoadingConfig() {
 	s.RequireResultFail("invalid config path")
 }
 
-func (s *CreateTestSuite) TestRunNameNotEmpty() {
+func (s *CreateTestSuite) TestRunFailsWhenNameIsEmpty() {
 	//-- act
 	s.RunCommand("-name", "")
 
@@ -70,7 +70,7 @@ func (s *CreateTestSuite) TestRunNameNotEmpty() {
 	s.RequireResultFail("\"name\" cannot be empty")
 }
 
-func (s *CreateTestSuite) TestRunInvalidVaultPath() {
+func (s *CreateTestSuite) TestRunFailsWithInvalidVaultPath() {
 	//-- arrange
 	rand := rand.New(0)
 	NAME := rand.ASCII(15)
@@ -86,7 +86,7 @@ func (s *CreateTestSuite) TestRunInvalidVaultPath() {
 	s.RequireResultFail("error opening vault")
 }
 
-func (s *CreateTestSuite) TestRunFailConfigOutputPathInvalid() {
+func (s *CreateTestSuite) TestRunFailsWhenConfigOutputPathInvalid() {
 	//-- arrange
 	const NAME = "name"
 
@@ -101,12 +101,12 @@ func (s *CreateTestSuite) TestRunFailConfigOutputPathInvalid() {
 	s.RequireResultFail("error validating config \"output_path\"")
 }
 
-func (s *CreateTestSuite) TestRunInvalidNameAlreadyExists() {
+func (s *CreateTestSuite) TestRunFailsWhenNameAlreadyExists() {
 	//-- arrange
 	rand := rand.New(0)
 	NAME := rand.ASCII(15)
 
-	v, err := local.OpenVault(s.Config.VaultPath)
+	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
 
 	err = v.SaveRecord(v2.NewEmptyRecord(NAME), rand.ASCII(30))
@@ -119,7 +119,7 @@ func (s *CreateTestSuite) TestRunInvalidNameAlreadyExists() {
 	s.RequireResultFail("error validating record")
 }
 
-func (s *CreateTestSuite) TestRunIncorrectVerifyPassword() {
+func (s *CreateTestSuite) TestRunFailsWithIncorrectVerifyPassword() {
 	//-- arrange
 	rand := rand.New(0)
 	NAME := rand.ASCII(15)
@@ -141,7 +141,7 @@ func (s *CreateTestSuite) TestRunIncorrectVerifyPassword() {
 	s.Assert().Contains(io.ReadLine(), "Verify PASSWORD")
 }
 
-func (s *CreateTestSuite) TestRunValid() {
+func (s *CreateTestSuite) TestRunPassesAndCreatesNewRecord() {
 	//-- arrange
 	rand := rand.New(0)
 	NAME := rand.ASCII(15)
@@ -171,7 +171,7 @@ func (s *CreateTestSuite) TestRunValid() {
 	OUTPUT_FILE := filepath.Join(s.Config.OutputPath, ID.String()+".json")
 	s.Assert().Contains(io.ReadLine(), "[+] "+OUTPUT_FILE)
 
-	s.Vault.Map, err = s.Vault.Index.LoadMap()
+	err = s.Vault.LoadIndex()
 	s.Require().NoError(err)
 
 	r1, err := json.UnmarshalFile[v2.Record](OUTPUT_FILE)
