@@ -33,9 +33,5 @@ func (cmd *ConfigCommand) LoadConfig() error {
 		return errors.Format("unsupported config version \"%d\"", cmd.Config.Version)
 	}
 
-	if cmd.Config.Version.IsOutOfDate(config.VERSION) {
-		return errors.Format("config version \"%d\" out-of-date (run \"config -upgrade\" to repair)", cmd.Config.Version)
-	}
-
 	return nil
 }
