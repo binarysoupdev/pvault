@@ -13,7 +13,7 @@ import (
 func SaveRecord(cfg config.Config, r record_v2.Record) error {
 	err := cfg.ValidateOutputPath()
 	if err != nil {
-		return errors.Chain(err, "error validating output path")
+		return errors.Chain(err, "error validating \"config.output_path\"")
 	}
 
 	path := filepath.Join(cfg.OutputPath, r.ID.String()+".json")

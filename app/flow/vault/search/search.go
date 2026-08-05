@@ -3,6 +3,7 @@ package search
 import (
 	"errors"
 	"flag"
+	"pvault/app/flow/prompt"
 	vault_flow "pvault/app/flow/vault"
 	"strings"
 
@@ -43,24 +44,19 @@ func (f SearchFlow) Select(v vault_flow.Vault) (string, error) {
 	}
 
 	if len(matches) == 1 {
-		f.displayMatch(matches[0], 1)
+		f.displayMatch(matches[0], 0)
 		return matches[0], nil
 	}
 
-	index := *f.index - 1
+	f.displayMatches(matches)
+	index := f.selectIndex(len(matches))
 
-	if index < 0 || index >= len(matches) {
-		f.displayMatches(matches)
-		return "", errors.New("rerun with \"-x <index>\"")
-	}
-
-	f.displayMatch(matches[index], index+1)
 	return matches[index], nil
 }
 
 func (f SearchFlow) displayMatches(matches []string) {
 	for i, match := range matches {
-		f.displayMatch(match, i+1)
+		f.displayMatch(match, i)
 	}
 }
 
@@ -71,4 +67,14 @@ func (f SearchFlow) displayMatch(match string, index int) {
 	RESULT_STYLE.Printf("[%d] %s", index, match[:start])
 	HIGHLIGHT_STYLE.Print(match[start:end])
 	RESULT_STYLE.Println(match[end:])
+}
+
+func (f SearchFlow) selectIndex(numMatches int) int {
+	index := *f.index
+
+	for index < 0 || index >= numMatches {
+		index = prompt.Number("Select MATCH: ", -1)
+	}
+
+	return index
 }

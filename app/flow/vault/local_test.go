@@ -2,52 +2,60 @@ package vault_test
 
 import (
 	"fmt"
+	"path/filepath"
 	"pvault/app/config"
-	"pvault/app/flow"
+	flow "pvault/app/flow/vault"
+	"pvault/app/vault"
+	"pvault/app/vault/database"
+	db_v1 "pvault/app/vault/database/encoder/legacy/v1"
 	"pvault/app/vault/index"
-	index_v1 "pvault/app/vault/index/version1"
-	"pvault/app/vault/local"
+	"pvault/app/vault/meta"
+	meta_v1 "pvault/app/vault/meta/encoder/v1"
+	"pvault/util"
 	"regexp"
 
 	"testing"
 
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestLoadLocalVaultReturnsErrorWithInvalidPath(t *testing.T) {
+func TestOpenVaultReturnsErrorWithInvalidPath(t *testing.T) {
 	//-- act
-	_, res := flow.OpenLocalVault("invalid")
+	_, res := flow.OpenVault("invalid")
 
 	//-- assert
 	require.ErrorContains(t, res, "error opening vault")
 }
 
-func TestLoadLocalVaultReturnsErrorWhenVaultOutOfDate(t *testing.T) {
+func TestOpenVaultReturnsErrorWhenVaultOutOfDate(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "")
+	PATH := t.TempDir()
+	DATABASE := db_v1.Encoder{}
 
-	err := index_v1.NewIndex(PATH).SaveMap(index.IndexMap{})
-	require.NoError(t, err)
+	META := meta.Metadata{
+		DatabaseVersion: DATABASE.GetVersion(),
+	}
+	require.NoError(t, meta.SaveMetadata(meta_v1.Encoder{}, PATH, META))
+	require.NoError(t, database.SaveIndex(DATABASE, PATH, index.IndexMap{}))
 
 	//-- act
-	_, res := flow.OpenLocalVault(PATH)
+	_, res := flow.OpenVault(PATH)
 
 	//-- assert
-	require.ErrorContains(t, res, fmt.Sprintf("vault (@v%d) out-of-date", index_v1.VERSION))
+	require.ErrorContains(t, res, fmt.Sprintf("vault (@v%d) out-of-date", META.DatabaseVersion))
 }
 
-func TestLoadLocalVaultReturnsVaultAndNoError(t *testing.T) {
+func TestOpenVaultReturnsVaultAndNoError(t *testing.T) {
 	//-- arrange
-	PATH := file.NewPath(t, "vault")
+	PATH := filepath.Join(t.TempDir(), "vault")
 
-	_, err := local.CreateNewVault(PATH)
+	_, err := vault.InitializeNew(PATH, "")
 	require.NoError(t, err)
 
 	//-- act
-	_, res := flow.OpenLocalVault(PATH)
+	_, res := flow.OpenVault(PATH)
 
 	//-- assert
 	require.NoError(t, res)
@@ -56,14 +64,15 @@ func TestLoadLocalVaultReturnsVaultAndNoError(t *testing.T) {
 func TestBackupVaultReturnsErrorWhenBackupPathInvalid(t *testing.T) {
 	//-- arrange
 	CONFIG := config.Config{
-		BackupPath: file.CreateEmpty(t, "invalid.txt"),
+		BackupPath: filepath.Join(t.TempDir(), "invalid.txt"),
 	}
+	require.NoError(t, util.CreateEmptyFile(CONFIG.BackupPath))
 
 	//-- act
-	res := flow.BackupVault(local.Vault{}, CONFIG)
+	res := flow.BackupVault(vault.Vault{}, CONFIG)
 
 	//-- assert
-	require.ErrorContains(t, res, "error validating backup path")
+	require.ErrorContains(t, res, "error validating \"config.backup_path\"")
 }
 
 func TestBackupVaultReturnsNoErrorAndBacksUpVault(t *testing.T) {
@@ -71,11 +80,11 @@ func TestBackupVaultReturnsNoErrorAndBacksUpVault(t *testing.T) {
 	DIR_REGEX := regexp.MustCompile(`"([^"]*)"`)
 
 	CONFIG := config.Config{
-		VaultPath:  file.NewPath(t, "vault"),
-		BackupPath: file.NewPath(t, ""),
+		VaultPath:  filepath.Join(t.TempDir(), "vault"),
+		BackupPath: t.TempDir(),
 	}
 
-	v, err := local.CreateNewVault(CONFIG.VaultPath)
+	v, err := vault.InitializeNew(CONFIG.VaultPath, "")
 	require.NoError(t, err)
 
 	out := pipe.OpenStdout(1)

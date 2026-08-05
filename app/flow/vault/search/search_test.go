@@ -2,8 +2,8 @@ package search_test
 
 import (
 	"flag"
-	"pvault/app/flow"
-	"pvault/app/vault"
+	vault_flow "pvault/app/flow/vault"
+	flow "pvault/app/flow/vault/search"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/pipe"
@@ -12,7 +12,7 @@ import (
 
 type SearchFlowSuite struct {
 	suite.Suite
-	Vault *vault.Mock
+	VaultMock *vault_flow.VaultMock
 
 	Flow  flow.SearchFlow
 	flags *flag.FlagSet
@@ -23,7 +23,7 @@ func TestSearchFlowSuite(t *testing.T) {
 }
 
 func (s *SearchFlowSuite) SetupTest() {
-	s.Vault = &vault.Mock{}
+	s.VaultMock = &vault_flow.VaultMock{}
 
 	s.flags = flag.NewFlagSet("", flag.PanicOnError)
 	s.Flow = flow.NewSearchFlow(s.flags)
@@ -38,132 +38,122 @@ func (s *SearchFlowSuite) ParseFlags(args ...string) {
 func (s *SearchFlowSuite) TestDisplayReturnsErrorWhenNoResults() {
 	//-- arrange
 	const SEARCH = "term"
-	s.Vault.SearchResults = []string{}
+	s.VaultMock.SearchResults = []string{}
 
 	//-- act
 	s.ParseFlags("-s", SEARCH)
-	res := s.Flow.Display(s.Vault)
+	res := s.Flow.Display(s.VaultMock)
 
 	//-- assert
 	s.Assert().ErrorContains(res, "no matches found")
-	s.Assert().Equal(SEARCH, s.Vault.SearchTermParam)
+	s.Assert().Equal(SEARCH, s.VaultMock.SearchTermParam)
 }
 
 func (s *SearchFlowSuite) TestDisplayReturnsNoErrorAndPrintResults() {
 	//-- arrange
 	const SEARCH = "Foo"
-	s.Vault.SearchResults = []string{"Foo1", "Foo2"}
+	s.VaultMock.SearchResults = []string{"Foo1", "Foo2"}
 
 	out := pipe.OpenStdout(2)
 	defer out.Close()
 
 	//-- act
 	s.ParseFlags("-s", SEARCH)
-	err := s.Flow.Display(s.Vault)
+	err := s.Flow.Display(s.VaultMock)
 
 	//-- assert
 	s.Require().NoError(err)
-	s.Assert().Equal(SEARCH, s.Vault.SearchTermParam)
+	s.Assert().Equal(SEARCH, s.VaultMock.SearchTermParam)
 
 	line := out.ReadLine()
-	s.Assert().Contains(line, "[1]")
+	s.Assert().Contains(line, "[0]")
 	s.Assert().Contains(line, SEARCH)
 
 	line = out.ReadLine()
-	s.Assert().Contains(line, "[2]")
+	s.Assert().Contains(line, "[1]")
 	s.Assert().Contains(line, SEARCH)
 }
 
 func (s *SearchFlowSuite) TestSelectReturnsErrorWhenNoResults() {
 	//-- arrange
 	const SEARCH = "term"
-	s.Vault.SearchResults = []string{}
+	s.VaultMock.SearchResults = []string{}
 
 	//-- act
 	s.ParseFlags("-s", "term")
-	_, res := s.Flow.Select(s.Vault)
+	_, res := s.Flow.Select(s.VaultMock)
 
 	//-- assert
 	s.Assert().ErrorContains(res, "no matches found")
-	s.Assert().Equal(SEARCH, s.Vault.SearchTermParam)
+	s.Assert().Equal(SEARCH, s.VaultMock.SearchTermParam)
 }
 
 func (s *SearchFlowSuite) TestSelectReturnsNoErrorAndMatchWhenOnlyOneResult() {
 	//-- arrange
 	const SEARCH = "Foo"
-	s.Vault.SearchResults = []string{"Foo1"}
+	s.VaultMock.SearchResults = []string{"Foo1"}
 
 	out := pipe.OpenStdout(1)
 	defer out.Close()
 
 	//-- act
 	s.ParseFlags("-s", SEARCH)
-	res, err := s.Flow.Select(s.Vault)
+	res, err := s.Flow.Select(s.VaultMock)
 
 	//-- assert
 	s.Require().NoError(err)
-	s.Assert().Equal(SEARCH, s.Vault.SearchTermParam)
+	s.Assert().Equal(SEARCH, s.VaultMock.SearchTermParam)
+	s.Assert().Equal(s.VaultMock.SearchResults[0], res)
 
-	s.Assert().Equal(s.Vault.SearchResults[0], res)
-	s.Assert().Contains(out.ReadLine(), SEARCH)
-}
-
-func (s *SearchFlowSuite) TestSelectReturnsErrorWhenManyResultsAndNoIndex() {
-	//-- arrange
-	const SEARCH = "Foo"
-	s.Vault.SearchResults = []string{"Foo1", "Foo2"}
-
-	out := pipe.OpenStdout(3)
-	defer out.Close()
-
-	//-- act
-	s.ParseFlags("-s", SEARCH)
-	_, res := s.Flow.Select(s.Vault)
-
-	//-- assert
-	s.Assert().ErrorContains(res, "rerun with \"-x <index>\"")
-	s.Assert().Equal(SEARCH, s.Vault.SearchTermParam)
-
-	s.Assert().Contains(out.ReadLine(), SEARCH)
-	s.Assert().Contains(out.ReadLine(), SEARCH)
-}
-
-func (s *SearchFlowSuite) TestSelectReturnsErrorWhenManyResultsAndInvalidIndex() {
-	//-- arrange
-	const SEARCH = "Foo"
-	s.Vault.SearchResults = []string{"Foo1", "Foo2"}
-
-	out := pipe.OpenStdout(2)
-	defer out.Close()
-
-	//-- act
-	s.ParseFlags("-s", SEARCH, "-x", "3")
-	_, res := s.Flow.Select(s.Vault)
-
-	//-- assert
-	s.Assert().ErrorContains(res, "rerun with \"-x <index>\"")
-	s.Assert().Equal(SEARCH, s.Vault.SearchTermParam)
-
-	s.Assert().Contains(out.ReadLine(), SEARCH)
-	s.Assert().Contains(out.ReadLine(), SEARCH)
+	line := out.ReadLine()
+	s.Assert().Contains(line, "[0]")
+	s.Assert().Contains(line, SEARCH)
 }
 
 func (s *SearchFlowSuite) TestSelectReturnsMatchAndNoErrorWhenManyResultsAndValidIndex() {
 	//-- arrange
 	const SEARCH = "Foo"
-	s.Vault.SearchResults = []string{"Foo1", "Foo2"}
+	s.VaultMock.SearchResults = []string{"Foo1", "Foo2"}
 
 	out := pipe.OpenStdout(2)
 	defer out.Close()
 
 	//-- act
-	s.ParseFlags("-s", SEARCH, "-x", "1")
-	res, err := s.Flow.Select(s.Vault)
+	s.ParseFlags("-s", SEARCH, "-x", "0")
+	res, err := s.Flow.Select(s.VaultMock)
 
 	//-- assert
 	s.Require().NoError(err)
-	s.Assert().Equal(SEARCH, s.Vault.SearchTermParam)
+	s.Assert().Equal(SEARCH, s.VaultMock.SearchTermParam)
+	s.Assert().Equal(s.VaultMock.SearchResults[0], res)
 
-	s.Assert().Equal(s.Vault.SearchResults[0], res)
-	s.Assert().Contains(out.ReadLine(), SEARCH)
+	s.Assert().Contains(out.ReadLine(), "[0]")
+	s.Assert().Contains(out.ReadLine(), "[1]")
+}
+
+func (s *SearchFlowSuite) TestSelectReturnsMatchAndNoErrorWhenManyResults() {
+	//-- arrange
+	const SEARCH = "Foo"
+	s.VaultMock.SearchResults = []string{"Foo1", "Foo2"}
+
+	io := pipe.OpenStdio(2, 4, false)
+	defer io.Close()
+
+	io.Queue("MATCH: ", len(s.VaultMock.SearchResults))
+	io.Queue("MATCH: ", 0)
+	io.EndQueue()
+
+	//-- act
+	s.ParseFlags("-s", SEARCH)
+	res, err := s.Flow.Select(s.VaultMock)
+
+	//-- assert
+	s.Require().NoError(err)
+	s.Assert().Equal(SEARCH, s.VaultMock.SearchTermParam)
+	s.Assert().Equal(s.VaultMock.SearchResults[0], res)
+
+	s.Assert().Contains(io.ReadLine(), "[0]")
+	s.Assert().Contains(io.ReadLine(), "[1]")
+	s.Assert().Contains(io.ReadLine(), "Select MATCH")
+	s.Assert().Contains(io.ReadLine(), "Select MATCH")
 }

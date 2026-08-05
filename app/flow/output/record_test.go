@@ -3,42 +3,41 @@ package output_test
 import (
 	"path/filepath"
 	"pvault/app/config"
-	"pvault/app/flow"
-	v2 "pvault/app/vault/record/version2"
+	flow "pvault/app/flow/output"
+	record_v2 "pvault/app/vault/record/record/v2"
 	"testing"
 
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestSaveOutputRecordReturnsErrorWhenOutputPathInvalid(t *testing.T) {
+func TestSaveRecordReturnsErrorWhenOutputPathInvalid(t *testing.T) {
 	//-- arrange
 	CONFIG := config.Config{
 		OutputPath: "invalid",
 	}
-	RECORD := v2.Record{}
+	RECORD := record_v2.Record{}
 
 	//-- act
-	res := flow.SaveOutputRecord(CONFIG, RECORD)
+	res := flow.SaveRecord(CONFIG, RECORD)
 
 	//-- assert
-	require.ErrorContains(t, res, "error validating output path")
+	require.ErrorContains(t, res, "error validating \"config.output_path\"")
 }
 
-func TestSaveOutputRecordReturnsNoErrorAndSavesJson(t *testing.T) {
+func TestSaveRecordReturnsNoErrorAndSavesJson(t *testing.T) {
 	//-- arrange
 	CONFIG := config.Config{
-		OutputPath: file.NewPath(t, ""),
+		OutputPath: t.TempDir(),
 	}
-	RECORD := v2.NewEmptyRecord("name")
+	RECORD := record_v2.NewEmptyRecord("name")
 
 	out := pipe.OpenStdout(1)
 	defer out.Close()
 
 	//-- act
-	res := flow.SaveOutputRecord(CONFIG, RECORD)
+	res := flow.SaveRecord(CONFIG, RECORD)
 
 	//-- assert
 	require.NoError(t, res)
