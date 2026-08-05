@@ -4,14 +4,19 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"pvault/app/cmd"
+	cmd "pvault/app/commands/config"
 	"pvault/app/config"
-	v1 "pvault/app/vault/index/version1"
+	"pvault/app/vault"
+	"pvault/app/vault/database"
+	db_v1 "pvault/app/vault/database/encoder/legacy/v1"
+	"pvault/app/vault/index"
+	"pvault/app/vault/meta"
+	meta_v1 "pvault/app/vault/meta/encoder/v1"
+	"pvault/util"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
 	"github.com/stretchr/testify/suite"
 )
@@ -24,7 +29,7 @@ type ConfigTestSuite struct {
 
 func TestConfigCommandSuite(t *testing.T) {
 	s := ConfigTestSuite{
-		ConfigLoader: json.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: json.NewLoader[config.Config](filepath.Join(t.TempDir(), "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewConfigCommand(s.ConfigLoader))
@@ -34,13 +39,11 @@ func TestConfigCommandSuite(t *testing.T) {
 func (s *ConfigTestSuite) SetupTest() {
 	s.Config = config.Config{
 		Version:    config.VERSION,
-		VaultPath:  file.NewPath(s.T(), "vault"),
-		BackupPath: file.NewPath(s.T(), ""),
-		OutputPath: file.NewPath(s.T(), ""),
+		VaultPath:  filepath.Join(s.T().TempDir(), "vault"),
+		BackupPath: s.T().TempDir(),
+		OutputPath: s.T().TempDir(),
 	}
-
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 }
 
 //=====================================
@@ -55,8 +58,7 @@ func (s *ConfigTestSuite) TestRunNewWithExistingConfigReturnsError() {
 
 func (s *ConfigTestSuite) TestRunNewCreatesNewConfig() {
 	//-- arrange
-	err := os.Remove(s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(os.Remove(s.ConfigLoader.Path))
 
 	out := pipe.OpenStdout(1)
 	defer out.Close()
@@ -73,8 +75,7 @@ func (s *ConfigTestSuite) TestRunNewCreatesNewConfig() {
 
 func (s *ConfigTestSuite) TestRunNotNewConfigNotFoundReturnsError() {
 	//-- arrange
-	err := os.Remove(s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(os.Remove(s.ConfigLoader.Path))
 
 	//-- act
 	s.RunCommand()
@@ -85,9 +86,8 @@ func (s *ConfigTestSuite) TestRunNotNewConfigNotFoundReturnsError() {
 
 func (s *ConfigTestSuite) TestRunValidateConfigWithInvalidVaultPrintsError() {
 	//-- arrange
-	s.Config.VaultPath = file.NewPath(s.T(), "")
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Config.VaultPath = s.T().TempDir()
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
 	out := pipe.OpenStdout(3)
 	defer out.Close()
@@ -106,12 +106,17 @@ func (s *ConfigTestSuite) TestRunValidateConfigWithInvalidVaultPrintsError() {
 
 func (s *ConfigTestSuite) TestRunValidateConfigWithOutOfDateVaultPrintsError() {
 	//-- arrange
-	PATH := file.CreateEmpty(s.T(), v1.FILENAME)
-	const LEGACY_VERSION = 1
+	PATH := s.T().TempDir()
+	DATABASE := db_v1.Encoder{}
 
-	s.Config.VaultPath = filepath.Dir(PATH)
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	META := meta.Metadata{
+		DatabaseVersion: DATABASE.GetVersion(),
+	}
+	s.Require().NoError(meta.SaveMetadata(meta_v1.Encoder{}, PATH, META))
+	s.Require().NoError(database.SaveIndex(DATABASE, PATH, index.IndexMap{}))
+
+	s.Config.VaultPath = PATH
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
 	out := pipe.OpenStdout(3)
 	defer out.Close()
@@ -125,14 +130,14 @@ func (s *ConfigTestSuite) TestRunValidateConfigWithOutOfDateVaultPrintsError() {
 
 	vaultPath := out.ReadLine()
 	s.Assert().Contains(vaultPath, s.Config.VaultPath)
-	s.Assert().Contains(vaultPath, fmt.Sprintf("vault (@v%d) out-of-date", LEGACY_VERSION))
+	s.Assert().Contains(vaultPath, fmt.Sprintf("vault (@v%d) out-of-date", META.DatabaseVersion))
 }
 
 func (s *ConfigTestSuite) TestRunValidatePassWithInvalidBackupPathPrintsError() {
 	//-- arrange
-	s.Config.BackupPath = file.CreateEmpty(s.T(), "backup.txt")
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Config.BackupPath = filepath.Join(s.T().TempDir(), "backup.txt")
+	s.Require().NoError(util.CreateEmptyFile(s.Config.BackupPath))
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
 	out := pipe.OpenStdout(3)
 	defer out.Close()
@@ -153,8 +158,7 @@ func (s *ConfigTestSuite) TestRunValidatePassWithInvalidBackupPathPrintsError() 
 func (s *ConfigTestSuite) TestRunValidateWithInvalidOutputPathPrintsError() {
 	//-- arrange
 	s.Config.OutputPath = "invalid"
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
 	out := pipe.OpenStdout(4)
 	defer out.Close()
@@ -174,7 +178,7 @@ func (s *ConfigTestSuite) TestRunValidateWithInvalidOutputPathPrintsError() {
 
 func (s *ConfigTestSuite) TestRunValidatePassConfigPrintsConfig() {
 	//-- arrange
-	_, err := local.CreateNewVault(s.Config.VaultPath)
+	_, err := vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 
 	out := pipe.OpenStdout(4)
@@ -189,7 +193,7 @@ func (s *ConfigTestSuite) TestRunValidatePassConfigPrintsConfig() {
 
 	vaultPath := out.ReadLine()
 	s.Assert().Contains(vaultPath, s.Config.VaultPath)
-	s.Assert().Contains(vaultPath, fmt.Sprintf("verified (@v%d)", local.CURRENT_VERSION))
+	s.Assert().Contains(vaultPath, fmt.Sprintf("verified (@v%d)", database.CURRENT_VERSION))
 
 	backupPath := out.ReadLine()
 	s.Assert().Contains(backupPath, s.Config.BackupPath)
