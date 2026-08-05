@@ -1,11 +1,15 @@
 //go:build prod
 
-package config
+package build
 
 import (
 	"os"
 	"path/filepath"
 )
+
+func AppName() string {
+	return "pvault"
+}
 
 func DataPath() string {
 	path, err := os.UserHomeDir()

@@ -7,6 +7,7 @@ import (
 	"pvault/app/commands/base"
 	"pvault/app/config"
 	vault_flow "pvault/app/flow/vault"
+	"pvault/build"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/go-commando/errors"
@@ -54,7 +55,7 @@ func (cmd ConfigCommand) generateNew() error {
 		return errors.Format("config file \"%s\" already exists", cmd.ConfigLoader.Path)
 	}
 
-	base := config.DataPath()
+	base := build.DataPath()
 
 	config := config.Config{
 		Version:    config.VERSION,

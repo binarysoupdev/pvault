@@ -9,6 +9,7 @@ import (
 	record_cmds "pvault/app/commands/record"
 	vault_cmds "pvault/app/commands/vault"
 	"pvault/app/config"
+	"pvault/build"
 	"pvault/tools/clipboard"
 	"pvault/tools/qrcode"
 	"pvault/version"
@@ -24,7 +25,7 @@ func main() {
 	flag.Parse()
 
 	if *v {
-		version.Display()
+		version.Print()
 		return
 	}
 
@@ -42,7 +43,7 @@ func main() {
 	)
 
 	if *ls || len(os.Args) < 2 {
-		version.Display()
+		version.Print()
 		runner.ListCommands()
 		return
 	}
@@ -59,5 +60,5 @@ func configPath() string {
 		return val
 	}
 
-	return filepath.Join(config.DataPath(), "config.json")
+	return filepath.Join(build.DataPath(), "config.json")
 }
