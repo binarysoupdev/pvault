@@ -1,18 +1,20 @@
 package vault
 
 import (
-	"pvault/app/vault/record"
-
-	"github.com/google/uuid"
+	"pvault/app/vault/database"
+	"pvault/app/vault/index"
+	"pvault/app/vault/meta"
 )
 
-type Vault interface {
-	GetVersion() int
+type Vault struct {
+	Path            string
+	MetaEncoder     meta.Encoder
+	DatabaseEncoder database.Encoder
 
-	SearchNames(term string) []string
+	Meta meta.Metadata
+	Map  index.IndexMap
+}
 
-	ValidateRecord(r record.Record) error
-	SaveRecord(r record.Record, password string) error
-	LoadRecord(name string, password string) (record.Record, error)
-	DeleteRecord(name string) (uuid.UUID, error)
+func (v Vault) GetVersion() int {
+	return v.Meta.DatabaseVersion
 }

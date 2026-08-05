@@ -1,20 +1,44 @@
 package index
 
 import (
-	"pvault/app/vault/data"
-	v2 "pvault/app/vault/index/version2"
+	"strings"
 
 	"github.com/google/uuid"
 )
 
-type Index interface {
-	GetVersion() int
+const VERSION = 1
 
-	Filepath() string
-	RecordPath(id uuid.UUID) string
+type IndexMap map[string]uuid.UUID
 
-	SaveMap(m data.NameMap) error
-	LoadMap() (data.NameMap, error)
+func (m IndexMap) FindName(id uuid.UUID) (string, bool) {
+	for name, val := range m {
+		if val == id {
+			return name, true
+		}
+	}
+	return "", false
+}
 
-	Upgrade() (v2.Index, error)
+func (m IndexMap) GetNames() []string {
+	names := make([]string, len(m))
+	i := 0
+
+	for name := range m {
+		names[i] = name
+		i++
+	}
+
+	return names
+}
+
+func (m IndexMap) SearchNames(subStr string) []string {
+	matches := []string{}
+
+	for name := range m {
+		if strings.Contains(strings.ToLower(name), strings.ToLower(subStr)) {
+			matches = append(matches, name)
+		}
+	}
+
+	return matches
 }

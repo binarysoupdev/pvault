@@ -1,20 +1,24 @@
 package record
 
 import (
-	"os"
-	v2 "pvault/app/vault/record/version2"
+	v2 "pvault/app/vault/record/record/v2"
 
 	"github.com/google/uuid"
 )
 
 type Mock struct {
-	Version       int
-	ID            uuid.UUID
-	Name          string
-	UpgradeRecord v2.Record
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
 
-	PasswordParam string
-	SaveFileError error
+	Version       int
+	UpgradeRecord v2.Record
+}
+
+func NewMock(name string) Mock {
+	return Mock{
+		ID:   uuid.New(),
+		Name: name,
+	}
 }
 
 func (m Mock) GetVersion() int {
@@ -27,12 +31,6 @@ func (m Mock) GetID() uuid.UUID {
 
 func (m Mock) GetName() string {
 	return m.Name
-}
-
-func (m *Mock) SaveFile(path string, password string) error {
-	m.PasswordParam = password
-	os.WriteFile(path, []byte{}, 0666)
-	return m.SaveFileError
 }
 
 func (m Mock) Upgrade() v2.Record {

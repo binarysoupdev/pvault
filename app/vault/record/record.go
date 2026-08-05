@@ -1,7 +1,7 @@
 package record
 
 import (
-	v2 "pvault/app/vault/record/version2"
+	v2 "pvault/app/vault/record/record/v2"
 
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/google/uuid"
@@ -9,11 +9,8 @@ import (
 
 type Record interface {
 	GetVersion() int
-
 	GetID() uuid.UUID
 	GetName() string
-
-	SaveFile(path string, password string) error
 	Upgrade() v2.Record
 }
 
