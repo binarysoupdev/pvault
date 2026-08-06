@@ -2,6 +2,7 @@ package vault
 
 import (
 	"pvault/app/flow/prompt"
+	"pvault/app/logger"
 	record_v2 "pvault/app/vault/record/record/v2"
 
 	"github.com/binarysoupdev/go-commando/errors"
@@ -21,10 +22,13 @@ func SaveRecord(v Vault, r record_v2.Record) error {
 
 	err = v.SaveRecord(r, password)
 	if err != nil {
-		return errors.Chain(err, "error saving vault record")
+		logger.LogError(err)
+		return errors.New("error saving vault record")
 	}
 
+	logger.LogCreate("save record " + r.GetID().String())
 	style.BoldCreate.Printf("[+] Saved Record: %s\n", r.GetID().String())
+
 	return nil
 }
 
@@ -33,10 +37,13 @@ func LoadRecord(v Vault, name string) (record_v2.Record, error) {
 
 	r, err := v.LoadRecord(name, password)
 	if err != nil {
-		return record_v2.Record{}, errors.Chain(err, "error loading vault record")
+		logger.LogError(err)
+		return record_v2.Record{}, errors.New("error loading vault record")
 	}
 
+	logger.LogInfo("load record " + r.GetID().String())
 	style.BoldInfo.Printf("[=] Loaded Record: %s\n", r.GetID().String())
+
 	return r.Upgrade(), nil
 }
 
@@ -47,9 +54,12 @@ func DeleteRecord(v Vault, name string) error {
 
 	id, err := v.DeleteRecord(name)
 	if err != nil {
-		return errors.Chain(err, "error deleting vault record")
+		logger.LogError(err)
+		return errors.New("error deleting vault record")
 	}
 
+	logger.LogDelete("delete record " + id.String())
 	style.BoldDelete.Printf("[-] Deleted Record: %s\n", id.String())
+
 	return nil
 }

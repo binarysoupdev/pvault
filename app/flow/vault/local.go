@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"pvault/app/config"
+	"pvault/app/logger"
 	"pvault/app/vault"
 	"time"
 
@@ -15,9 +16,11 @@ import (
 func OpenVault(path string) (vault.Vault, error) {
 	v, err := vault.Open(path)
 	if err != nil {
+		logger.LogError(err)
 		return vault.Vault{}, errors.New("error opening vault (run \"vault -init\" to repair)")
 	}
 
+	//TODO: add flag to check out-of-date
 	if v.IsOutOfDate() {
 		return vault.Vault{}, errors.Format("vault (@v%d) out-of-date (run \"vault -upgrade\" to repair)", v.GetVersion())
 	}
@@ -40,9 +43,12 @@ func BackupVault(v vault.Vault, cfg config.Config) error {
 
 	err = v.Backup(path)
 	if err != nil {
-		return errors.Chain(err, "error backing vault")
+		logger.LogError(err)
+		return errors.New("error backing vault")
 	}
 
+	logger.LogCreate("create backup " + path)
 	style.BoldCreate.Printf("[+] Created Backup \"%s\"\n", path)
+
 	return nil
 }

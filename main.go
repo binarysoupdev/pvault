@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,30 +9,56 @@ import (
 	tool_cmds "pvault/app/commands/tool"
 	vault_cmds "pvault/app/commands/vault"
 	"pvault/app/config"
+	"pvault/app/logger"
 	"pvault/build"
 	"pvault/tools/clipboard"
 	"pvault/tools/qrcode"
 	"pvault/version"
 
 	"github.com/binarysoupdev/go-commando/command"
+	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/got-style/style"
 )
 
 func main() {
-	v := flag.Bool("v", false, "display version")
-	ls := flag.Bool("ls", false, "list all commands")
-	flag.Parse()
+	runner := buildRunner()
 
-	if *v {
-		version.Print()
+	if len(os.Args) < 2 {
+		printDefault(runner)
 		return
 	}
 
-	configLoader := json.NewLoader[config.Config](configPath())
+	if err := runApp(runner); err != nil {
+		style.BoldError.Print("ERROR: ")
+		fmt.Println(err)
+	}
+}
 
-	runner := command.NewRunner(
-		tool_cmds.NewPasswordCommand(clipboard.AtottoClipboard{}),
+func printDefault(runner command.Runner) {
+	version.Print()
+	runner.ListCommands()
+}
+
+func runApp(runner command.Runner) error {
+	log, err := logger.Open(logPath())
+	if err != nil {
+		return errors.Chain(err, "error opening logger")
+	}
+	defer log.Close()
+
+	return runner.RunCommand(os.Args[1], os.Args[2:])
+}
+
+//=================================================
+
+func buildRunner() command.Runner {
+	configLoader := json.NewLoader[config.Config](configPath())
+	clipboard := clipboard.AtottoClipboard{}
+	qrcode := qrcode.Skip2Renderer{}
+
+	return command.NewRunner(
+		tool_cmds.NewPasswordCommand(clipboard),
 		config_cmds.NewConfigCommand(configLoader),
 		vault_cmds.NewVaultCommand(configLoader),
 		vault_cmds.NewSearchCommand(configLoader),
@@ -41,19 +66,8 @@ func main() {
 		record_cmds.NewLockCommand(configLoader),
 		record_cmds.NewUnlockCommand(configLoader),
 		record_cmds.NewDeleteCommand(configLoader),
-		record_cmds.NewCopyCommand(configLoader, clipboard.AtottoClipboard{}, qrcode.Skip2Renderer{}),
+		record_cmds.NewCopyCommand(configLoader, clipboard, qrcode),
 	)
-
-	if *ls || len(os.Args) < 2 {
-		version.Print()
-		runner.ListCommands()
-		return
-	}
-
-	if err := runner.RunCommand(os.Args[1], os.Args[2:]); err != nil {
-		style.BoldError.Print("ERROR: ")
-		fmt.Println(err)
-	}
 }
 
 func configPath() string {
@@ -63,4 +77,13 @@ func configPath() string {
 	}
 
 	return filepath.Join(build.DataPath(), "config.json")
+}
+
+func logPath() string {
+	val := os.Getenv("LOG")
+	if val != "" {
+		return val
+	}
+
+	return filepath.Join(build.DataPath(), "log.txt")
 }

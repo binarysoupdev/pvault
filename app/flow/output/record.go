@@ -3,6 +3,7 @@ package output
 import (
 	"path/filepath"
 	"pvault/app/config"
+	"pvault/app/logger"
 	record_v2 "pvault/app/vault/record/record/v2"
 
 	"github.com/binarysoupdev/go-commando/errors"
@@ -20,9 +21,12 @@ func SaveRecord(cfg config.Config, r record_v2.Record) error {
 
 	err = json.MarshalFilePretty(r, path, "    ")
 	if err != nil {
-		return errors.Chain(err, "error creating output record")
+		logger.LogError(err)
+		return errors.New("error creating output record")
 	}
 
+	logger.LogCreate("created " + path)
 	style.Create.Printf("[+] %s\n", path)
+
 	return nil
 }
