@@ -1,12 +1,12 @@
 package search
 
 import (
-	"errors"
 	"flag"
 	"pvault/app/flow/prompt"
 	vault_flow "pvault/app/flow/vault"
 	"strings"
 
+	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/binarysoupdev/got-style/style"
 )
 
@@ -14,14 +14,12 @@ var RESULT_STYLE = style.New(style.YELLOW)
 var HIGHLIGHT_STYLE = style.New(style.YELLOW, style.UNDERLINE)
 
 type SearchFlow struct {
-	term  *string
-	index *int
+	term *string
 }
 
 func NewSearchFlow(flags *flag.FlagSet) SearchFlow {
 	return SearchFlow{
-		term:  flags.String("s", "", "the search term"),
-		index: flags.Int("x", -1, "the index if many matches"),
+		term: flags.String("s", "", "the search term"),
 	}
 }
 
@@ -49,7 +47,11 @@ func (f SearchFlow) Select(v vault_flow.Vault) (string, error) {
 	}
 
 	f.displayMatches(matches)
-	index := f.selectIndex(len(matches))
+	index := prompt.Number("Enter INDEX: ", -1)
+
+	if index < 0 || index >= len(matches) {
+		return "", errors.Format("invalid index \"%d\"", index)
+	}
 
 	return matches[index], nil
 }
@@ -67,14 +69,4 @@ func (f SearchFlow) displayMatch(match string, index int) {
 	RESULT_STYLE.Printf("[%d] %s", index, match[:start])
 	HIGHLIGHT_STYLE.Print(match[start:end])
 	RESULT_STYLE.Println(match[end:])
-}
-
-func (f SearchFlow) selectIndex(numMatches int) int {
-	index := *f.index
-
-	for index < 0 || index >= numMatches {
-		index = prompt.Number("Select MATCH: ", -1)
-	}
-
-	return index
 }

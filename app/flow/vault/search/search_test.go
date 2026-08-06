@@ -2,6 +2,7 @@ package search_test
 
 import (
 	"flag"
+	"fmt"
 	vault_flow "pvault/app/flow/vault"
 	flow "pvault/app/flow/vault/search"
 	"testing"
@@ -110,37 +111,41 @@ func (s *SearchFlowSuite) TestSelectReturnsNoErrorAndMatchWhenOnlyOneResult() {
 	s.Assert().Contains(line, SEARCH)
 }
 
+func (s *SearchFlowSuite) TestSelectReturnsErrorWhenManyResultsAndInvalidIndex() {
+	//-- arrange
+	const SEARCH = "Foo"
+	const INDEX = 2
+	s.VaultMock.SearchResults = []string{"Foo1", "Foo2"}
+
+	io := pipe.OpenStdio(1, 3, false)
+	defer io.Close()
+
+	io.Queue("INDEX: ", INDEX)
+	io.EndQueue()
+
+	//-- act
+	s.ParseFlags("-s", SEARCH)
+	_, res := s.Flow.Select(s.VaultMock)
+
+	//-- assert
+	s.Assert().ErrorContains(res, fmt.Sprintf("invalid index \"%d\"", INDEX))
+	s.Assert().Equal(SEARCH, s.VaultMock.SearchTermParam)
+
+	s.Assert().Contains(io.ReadLine(), "[0]")
+	s.Assert().Contains(io.ReadLine(), "[1]")
+	s.Assert().Contains(io.ReadLine(), "Enter INDEX")
+}
+
 func (s *SearchFlowSuite) TestSelectReturnsMatchAndNoErrorWhenManyResultsAndValidIndex() {
 	//-- arrange
 	const SEARCH = "Foo"
+	const INDEX = 1
 	s.VaultMock.SearchResults = []string{"Foo1", "Foo2"}
 
-	out := pipe.OpenStdout(2)
-	defer out.Close()
-
-	//-- act
-	s.ParseFlags("-s", SEARCH, "-x", "0")
-	res, err := s.Flow.Select(s.VaultMock)
-
-	//-- assert
-	s.Require().NoError(err)
-	s.Assert().Equal(SEARCH, s.VaultMock.SearchTermParam)
-	s.Assert().Equal(s.VaultMock.SearchResults[0], res)
-
-	s.Assert().Contains(out.ReadLine(), "[0]")
-	s.Assert().Contains(out.ReadLine(), "[1]")
-}
-
-func (s *SearchFlowSuite) TestSelectReturnsMatchAndNoErrorWhenManyResults() {
-	//-- arrange
-	const SEARCH = "Foo"
-	s.VaultMock.SearchResults = []string{"Foo1", "Foo2"}
-
-	io := pipe.OpenStdio(2, 4, false)
+	io := pipe.OpenStdio(1, 3, false)
 	defer io.Close()
 
-	io.Queue("MATCH: ", len(s.VaultMock.SearchResults))
-	io.Queue("MATCH: ", 0)
+	io.Queue("INDEX: ", INDEX)
 	io.EndQueue()
 
 	//-- act
@@ -150,10 +155,9 @@ func (s *SearchFlowSuite) TestSelectReturnsMatchAndNoErrorWhenManyResults() {
 	//-- assert
 	s.Require().NoError(err)
 	s.Assert().Equal(SEARCH, s.VaultMock.SearchTermParam)
-	s.Assert().Equal(s.VaultMock.SearchResults[0], res)
+	s.Assert().Equal(s.VaultMock.SearchResults[INDEX], res)
 
 	s.Assert().Contains(io.ReadLine(), "[0]")
 	s.Assert().Contains(io.ReadLine(), "[1]")
-	s.Assert().Contains(io.ReadLine(), "Select MATCH")
-	s.Assert().Contains(io.ReadLine(), "Select MATCH")
+	s.Assert().Contains(io.ReadLine(), "Enter INDEX")
 }
