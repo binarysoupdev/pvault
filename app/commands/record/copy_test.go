@@ -126,7 +126,7 @@ func (s *CopyTestSuite) TestRunFailsWithIncorrectPassword() {
 	s.RunCommand("-s", s.Record.Name)
 
 	//-- assert
-	s.RequireResultFail("error decrypting record")
+	s.RequireResultFail("error loading vault record")
 
 	s.Assert().Contains(io.ReadLine(), s.Record.Name)
 	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")
