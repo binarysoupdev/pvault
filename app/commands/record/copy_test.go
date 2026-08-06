@@ -72,7 +72,7 @@ func (s *CopyTestSuite) SetupTest() {
 
 func (s *CopyTestSuite) TestRunFailsWhenClipboardUnsupported() {
 	//-- arrange
-	s.Clipboard.Unsupported = errors.New("")
+	s.Clipboard.UnsupportedError = errors.New("")
 
 	//-- act
 	s.RunCommand()
@@ -134,7 +134,7 @@ func (s *CopyTestSuite) TestRunFailsWithIncorrectPassword() {
 
 func (s *CopyTestSuite) TestRunFailsWhenErrorCopyingToClipboard() {
 	//-- arrange
-	s.Clipboard.Error = errors.New("")
+	s.Clipboard.WriteError = errors.New("")
 
 	io := pipe.OpenStdio(1, 3, false)
 	defer io.Close()

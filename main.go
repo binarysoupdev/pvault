@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	config_cmds "pvault/app/commands/config"
 	record_cmds "pvault/app/commands/record"
+	tool_cmds "pvault/app/commands/tool"
 	vault_cmds "pvault/app/commands/vault"
 	"pvault/app/config"
 	"pvault/build"
@@ -32,6 +33,7 @@ func main() {
 	configLoader := json.NewLoader[config.Config](configPath())
 
 	runner := command.NewRunner(
+		tool_cmds.NewPasswordCommand(clipboard.AtottoClipboard{}),
 		config_cmds.NewConfigCommand(configLoader),
 		vault_cmds.NewVaultCommand(configLoader),
 		vault_cmds.NewSearchCommand(configLoader),
