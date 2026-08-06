@@ -8,8 +8,15 @@ import (
 )
 
 func Password(prompt string) string {
-	fmt.Print(prompt)
+	for {
+		fmt.Print(prompt)
+		if password := readPassword(); password != "" {
+			return password
+		}
+	}
+}
 
+func readPassword() string {
 	password, err := term.ReadPassword(int(os.Stdin.Fd()))
 	if err != nil {
 		return readStdin()
