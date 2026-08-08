@@ -13,16 +13,24 @@ import (
 	"github.com/binarysoupdev/got-style/style"
 )
 
-func OpenVault(path string) (vault.Vault, error) {
+func OpenCurrentVault(path string) (vault.Vault, error) {
+	v, err := OpenLegacyVault(path)
+	if err != nil {
+		return vault.Vault{}, err
+	}
+
+	if v.IsOutOfDate() {
+		return vault.Vault{}, errors.Format("vault (@v%d) out-of-date (run \"vault -upgrade\" to repair)", v.GetVersion())
+	}
+
+	return v, nil
+}
+
+func OpenLegacyVault(path string) (vault.Vault, error) {
 	v, err := vault.Open(path)
 	if err != nil {
 		logger.LogError(err)
 		return vault.Vault{}, errors.New("error opening vault (run \"vault -init\" to repair)")
-	}
-
-	//TODO: add flag to check out-of-date
-	if v.IsOutOfDate() {
-		return vault.Vault{}, errors.Format("vault (@v%d) out-of-date (run \"vault -upgrade\" to repair)", v.GetVersion())
 	}
 
 	return v, nil

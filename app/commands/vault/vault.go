@@ -73,7 +73,7 @@ func (cmd VaultCommand) initialize(nickname string) error {
 }
 
 func (cmd VaultCommand) setNickname(nickname string) error {
-	v, err := vault_flow.OpenVault(cmd.Config.VaultPath)
+	v, err := vault_flow.OpenLegacyVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
 	}
@@ -90,18 +90,18 @@ func (cmd VaultCommand) setNickname(nickname string) error {
 }
 
 func (cmd VaultCommand) backup() error {
-	v, err := vault.Open(cmd.Config.VaultPath)
+	v, err := vault_flow.OpenLegacyVault(cmd.Config.VaultPath)
 	if err != nil {
-		return errors.Chain(err, "error opening vault")
+		return err
 	}
 
 	return vault_flow.BackupVault(v, cmd.Config)
 }
 
 func (cmd VaultCommand) upgrade() error {
-	v, err := vault.Open(cmd.Config.VaultPath)
+	v, err := vault_flow.OpenLegacyVault(cmd.Config.VaultPath)
 	if err != nil {
-		return errors.Chain(err, "error opening vault")
+		return err
 	}
 
 	if !v.IsOutOfDate() {
@@ -124,7 +124,7 @@ func (cmd VaultCommand) upgrade() error {
 }
 
 func (cmd VaultCommand) validate() error {
-	v, err := vault_flow.OpenVault(cmd.Config.VaultPath)
+	v, err := vault_flow.OpenCurrentVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
 	}

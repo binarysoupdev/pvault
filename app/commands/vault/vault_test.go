@@ -10,6 +10,8 @@ import (
 	"pvault/app/vault/database"
 	db_v1 "pvault/app/vault/database/encoder/legacy/v1"
 	"pvault/app/vault/index"
+	"pvault/app/vault/meta"
+	meta_v1 "pvault/app/vault/meta/encoder/v1"
 	record_v2 "pvault/app/vault/record/record/v2"
 	"pvault/util"
 	"regexp"
@@ -279,6 +281,26 @@ func (s *VaultTestSuite) TestRunValidateFailsWithInvalidVault() {
 
 	//-- assert
 	s.RequireResultFail("error opening vault")
+}
+
+func (s *VaultTestSuite) TestRunValidateFailsWhenVaultOutOfDate() {
+	//-- arrange
+	s.Config.VaultPath = s.T().TempDir()
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
+
+	DATABASE := db_v1.Encoder{}
+
+	META := meta.Metadata{
+		DatabaseVersion: DATABASE.GetVersion(),
+	}
+	s.Require().NoError(meta.SaveMetadata(meta_v1.Encoder{}, s.Config.VaultPath, META))
+	s.Require().NoError(database.SaveIndex(DATABASE, s.Config.VaultPath, index.IndexMap{}))
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultFail(fmt.Sprintf("vault (@v%d) out-of-date", DATABASE.GetVersion()))
 }
 
 func (s *VaultTestSuite) TestRunValidatePassesAndPrintsVaultPathAndRecordCount() {

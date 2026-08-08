@@ -38,7 +38,7 @@ func (cmd UnlockCommand) Run(args []string) error {
 	search := search_flow.NewSearchFlow(cmd.Flags)
 	cmd.ParseFlags(args)
 
-	v, err := vault_flow.OpenVault(cmd.Config.VaultPath)
+	v, err := vault_flow.OpenCurrentVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
 	}

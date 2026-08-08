@@ -52,7 +52,7 @@ func (cmd CopyCommand) Run(args []string) error {
 	qr := cmd.Flags.Bool("qr", false, "render as a qrcode")
 	cmd.ParseFlags(args)
 
-	v, err := vault_flow.OpenVault(cmd.Config.VaultPath)
+	v, err := vault_flow.OpenCurrentVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
 	}

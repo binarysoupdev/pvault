@@ -21,15 +21,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestOpenVaultReturnsErrorWithInvalidPath(t *testing.T) {
+func TestOpenLegacyVaultReturnsErrorWithInvalidPath(t *testing.T) {
 	//-- act
-	_, res := flow.OpenVault("invalid")
+	_, res := flow.OpenLegacyVault("invalid")
 
 	//-- assert
 	require.ErrorContains(t, res, "error opening vault")
 }
 
-func TestOpenVaultReturnsErrorWhenVaultOutOfDate(t *testing.T) {
+func TestOpenLegacyVaultReturnsVaultAndNoError(t *testing.T) {
 	//-- arrange
 	PATH := t.TempDir()
 	DATABASE := db_v1.Encoder{}
@@ -41,24 +41,52 @@ func TestOpenVaultReturnsErrorWhenVaultOutOfDate(t *testing.T) {
 	require.NoError(t, database.SaveIndex(DATABASE, PATH, index.IndexMap{}))
 
 	//-- act
-	_, res := flow.OpenVault(PATH)
+	res, err := flow.OpenLegacyVault(PATH)
+
+	//-- assert
+	require.NoError(t, err)
+	assert.Equal(t, DATABASE, res.DatabaseEncoder)
+}
+
+func TestOpenCurrentVaultReturnsErrorWithInvalidPath(t *testing.T) {
+	//-- act
+	_, res := flow.OpenCurrentVault("invalid")
+
+	//-- assert
+	require.ErrorContains(t, res, "error opening vault")
+}
+
+func TestOpenCurrentVaultReturnsErrorWhenVaultOutOfDate(t *testing.T) {
+	//-- arrange
+	PATH := t.TempDir()
+	DATABASE := db_v1.Encoder{}
+
+	META := meta.Metadata{
+		DatabaseVersion: DATABASE.GetVersion(),
+	}
+	require.NoError(t, meta.SaveMetadata(meta_v1.Encoder{}, PATH, META))
+	require.NoError(t, database.SaveIndex(DATABASE, PATH, index.IndexMap{}))
+
+	//-- act
+	_, res := flow.OpenCurrentVault(PATH)
 
 	//-- assert
 	require.ErrorContains(t, res, fmt.Sprintf("vault (@v%d) out-of-date", META.DatabaseVersion))
 }
 
-func TestOpenVaultReturnsVaultAndNoError(t *testing.T) {
+func TestOpenCurrentVaultReturnsVaultAndNoErrorWhenVaultUpToDate(t *testing.T) {
 	//-- arrange
 	PATH := filepath.Join(t.TempDir(), "vault")
 
-	_, err := vault.InitializeNew(PATH, "")
+	VAULT, err := vault.InitializeNew(PATH, "")
 	require.NoError(t, err)
 
 	//-- act
-	_, res := flow.OpenVault(PATH)
+	res, err := flow.OpenCurrentVault(PATH)
 
 	//-- assert
-	require.NoError(t, res)
+	require.NoError(t, err)
+	assert.Equal(t, VAULT.DatabaseEncoder, res.DatabaseEncoder)
 }
 
 func TestBackupVaultReturnsErrorWhenBackupPathInvalid(t *testing.T) {

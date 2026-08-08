@@ -42,7 +42,7 @@ func (cmd CreateCommand) Run(args []string) error {
 		return errors.New("\"name\" cannot be empty")
 	}
 
-	v, err := vault_flow.OpenVault(cmd.Config.VaultPath)
+	v, err := vault_flow.OpenCurrentVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
 	}
