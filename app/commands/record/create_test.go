@@ -17,9 +17,7 @@ import (
 
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
-	"github.com/binarysoupdev/tinsel/rand"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 )
@@ -34,7 +32,7 @@ type CreateTestSuite struct {
 
 func TestCreateCommandSuite(t *testing.T) {
 	s := CreateTestSuite{
-		ConfigLoader: json.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: json.NewLoader[config.Config](filepath.Join(t.TempDir(), "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewCreateCommand(s.ConfigLoader))
@@ -44,12 +42,12 @@ func TestCreateCommandSuite(t *testing.T) {
 func (s *CreateTestSuite) SetupTest() {
 	s.Config = config.Config{
 		Version:    config.VERSION,
-		VaultPath:  file.NewPath(s.T(), "vault"),
-		OutputPath: file.NewPath(s.T(), ""),
+		VaultPath:  filepath.Join(s.T().TempDir(), "vault"),
+		OutputPath: s.T().TempDir(),
 	}
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
+	var err error
 	s.Vault, err = vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 }
@@ -58,8 +56,7 @@ func (s *CreateTestSuite) SetupTest() {
 
 func (s *CreateTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 	//-- arrange
-	err := os.Remove(s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(os.Remove(s.ConfigLoader.Path))
 
 	//-- act
 	s.RunCommand()
@@ -78,12 +75,10 @@ func (s *CreateTestSuite) TestRunFailsWhenNameIsEmpty() {
 
 func (s *CreateTestSuite) TestRunFailsWithInvalidVaultPath() {
 	//-- arrange
-	rand := rand.New(0)
-	NAME := rand.ASCII(15)
+	const NAME = "name"
 
 	s.Config.VaultPath = "invalid"
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
 	//-- act
 	s.RunCommand("-name", NAME)
@@ -119,8 +114,7 @@ func (s *CreateTestSuite) TestRunFailsWhenConfigOutputPathInvalid() {
 	const NAME = "name"
 
 	s.Config.OutputPath = "invalid"
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
 	//-- act
 	s.RunCommand("-name", NAME)
@@ -131,14 +125,13 @@ func (s *CreateTestSuite) TestRunFailsWhenConfigOutputPathInvalid() {
 
 func (s *CreateTestSuite) TestRunFailsWhenNameAlreadyExists() {
 	//-- arrange
-	rand := rand.New(0)
-	NAME := rand.ASCII(15)
+	const NAME = "name"
+	const PASSWORD = "Password123!"
 
 	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
 
-	err = v.SaveRecord(v2.NewEmptyRecord(NAME), rand.ASCII(30))
-	s.Require().NoError(err)
+	s.Require().NoError(v.SaveRecord(v2.NewEmptyRecord(NAME), PASSWORD))
 
 	//-- act
 	s.RunCommand("-name", NAME)
@@ -149,9 +142,8 @@ func (s *CreateTestSuite) TestRunFailsWhenNameAlreadyExists() {
 
 func (s *CreateTestSuite) TestRunFailsWithIncorrectVerifyPassword() {
 	//-- arrange
-	rand := rand.New(0)
-	NAME := rand.ASCII(15)
-	PASSWORD := rand.ASCII(30)
+	const NAME = "name"
+	const PASSWORD = "Password123!"
 
 	io := pipe.OpenStdio(2, 2, false)
 	defer io.Close()
@@ -171,9 +163,8 @@ func (s *CreateTestSuite) TestRunFailsWithIncorrectVerifyPassword() {
 
 func (s *CreateTestSuite) TestRunPassesAndCreatesNewRecord() {
 	//-- arrange
-	rand := rand.New(0)
-	NAME := rand.ASCII(15)
-	PASSWORD := rand.ASCII(30)
+	const NAME = "name"
+	const PASSWORD = "Password123!"
 
 	io := pipe.OpenStdio(2, 4, false)
 	defer io.Close()
@@ -199,8 +190,7 @@ func (s *CreateTestSuite) TestRunPassesAndCreatesNewRecord() {
 	OUTPUT_FILE := filepath.Join(s.Config.OutputPath, ID.String()+".json")
 	s.Assert().Contains(io.ReadLine(), "[+] "+OUTPUT_FILE)
 
-	err = s.Vault.LoadIndex()
-	s.Require().NoError(err)
+	s.Require().NoError(s.Vault.LoadIndex())
 
 	r1, err := json.UnmarshalFile[v2.Record](OUTPUT_FILE)
 	s.Require().NoError(err)

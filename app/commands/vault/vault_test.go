@@ -50,16 +50,14 @@ func (s *VaultTestSuite) SetupTest() {
 		BackupPath: s.T().TempDir(),
 	}
 
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 }
 
 //=====================================
 
 func (s *VaultTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 	//-- arrange
-	err := os.Remove(s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(os.Remove(s.ConfigLoader.Path))
 
 	//-- act
 	s.RunCommand()

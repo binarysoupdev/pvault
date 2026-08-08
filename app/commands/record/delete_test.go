@@ -3,6 +3,7 @@ package record_test
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	cmd "pvault/app/commands/record"
 	"pvault/app/config"
 	"pvault/app/vault"
@@ -16,9 +17,7 @@ import (
 
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
-	"github.com/binarysoupdev/tinsel/rand"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -33,7 +32,7 @@ type DeleteTestSuite struct {
 
 func TestDeleteCommandSuite(t *testing.T) {
 	s := DeleteTestSuite{
-		ConfigLoader: json.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: json.NewLoader[config.Config](filepath.Join(t.TempDir(), "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewDeleteCommand(s.ConfigLoader))
@@ -43,28 +42,25 @@ func TestDeleteCommandSuite(t *testing.T) {
 func (s *DeleteTestSuite) SetupTest() {
 	s.Config = config.Config{
 		Version:    config.VERSION,
-		VaultPath:  file.NewPath(s.T(), "vault"),
-		OutputPath: file.NewPath(s.T(), ""),
+		VaultPath:  filepath.Join(s.T().TempDir(), "vault"),
+		OutputPath: s.T().TempDir(),
 	}
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
-	rand := rand.New(0)
-	s.Record = record_v2.NewEmptyRecord(rand.ASCII(15))
+	s.Record = record_v2.NewEmptyRecord("name")
 
+	var err error
 	s.Vault, err = vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 
-	err = s.Vault.SaveRecord(s.Record, rand.ASCII(30))
-	s.Require().NoError(err)
+	s.Require().NoError(s.Vault.SaveRecord(s.Record, "Password123!"))
 }
 
 //=====================================
 
 func (s *DeleteTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 	//-- arrange
-	err := os.Remove(s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(os.Remove(s.ConfigLoader.Path))
 
 	//-- act
 	s.RunCommand()
@@ -76,8 +72,7 @@ func (s *DeleteTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 func (s *DeleteTestSuite) TestRunFailsWithInvalidVaultPath() {
 	//-- arrange
 	s.Config.VaultPath = "invalid"
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
 	//-- act
 	s.RunCommand("-s", s.Record.Name)
@@ -150,9 +145,8 @@ func (s *DeleteTestSuite) TestRunPassesAndDeletesRecord() {
 	s.Assert().Contains(io.ReadLine(), "Confirm NAME: "+s.Record.Name)
 	s.Assert().Contains(io.ReadLine(), "[-] Deleted Record: "+s.Record.ID.String())
 
-	err := s.Vault.LoadIndex()
-	s.Require().NoError(err)
+	s.Require().NoError(s.Vault.LoadIndex())
 
-	_, err = s.Vault.LoadRecord(s.Record.Name, "")
+	_, err := s.Vault.LoadRecord(s.Record.Name, "")
 	s.Assert().ErrorContains(err, fmt.Sprintf("name \"%s\" not found", s.Record.Name))
 }

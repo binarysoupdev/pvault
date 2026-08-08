@@ -40,9 +40,7 @@ func TestEncodeDecodeRecordReturnsRecordAndNoError(t *testing.T) {
 		URL:           "url",
 		RecoveryCodes: []string{"code1", "code2"},
 	}
-
-	err := e.EncodeRecord(buffer, PASSWORD, RECORD)
-	require.NoError(t, err)
+	require.NoError(t, e.EncodeRecord(buffer, PASSWORD, RECORD))
 
 	//-- act
 	res, err := e.DecodeRecord(buffer, PASSWORD)

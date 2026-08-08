@@ -121,9 +121,7 @@ func TestEncodeDecodeReturnsMetadataAndNoError(t *testing.T) {
 		Nickname:        "nickname",
 		CreationDate:    DATE,
 	}
-
-	err := e.EncodeMetadata(buffer, META)
-	require.NoError(t, err)
+	require.NoError(t, e.EncodeMetadata(buffer, META))
 
 	//-- act
 	res, err := e.DecodeMetadata(buffer)

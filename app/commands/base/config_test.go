@@ -2,12 +2,13 @@ package base_test
 
 import (
 	"fmt"
+	"path/filepath"
 	"pvault/app/commands/base"
 	"pvault/app/config"
+	"pvault/util"
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/json"
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -28,8 +29,9 @@ func TestConfigCommandBaseLoadConfigReturnsErrorWhenConfigNotFound(t *testing.T)
 func TestConfigCommandBaseLoadConfigReturnsErrorWhenConfigIsInvalidJson(t *testing.T) {
 	//-- arrange
 	cmd := base.NewConfigCommand(
-		json.NewLoader[config.Config](file.CreateEmpty(t, "invalid.json")),
+		json.NewLoader[config.Config](filepath.Join(t.TempDir(), "invalid.json")),
 	)
+	require.NoError(t, util.CreateEmptyFile(cmd.ConfigLoader.Path))
 
 	//-- act
 	res := cmd.LoadConfig()
@@ -41,14 +43,13 @@ func TestConfigCommandBaseLoadConfigReturnsErrorWhenConfigIsInvalidJson(t *testi
 func TestConfigCommandBaseLoadConfigReturnsErrorWhenUsingInvalidVersion(t *testing.T) {
 	//-- arrange
 	cmd := base.NewConfigCommand(
-		json.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		json.NewLoader[config.Config](filepath.Join(t.TempDir(), "config.json")),
 	)
 
 	CONFIG := config.Config{
 		Version: config.VERSION + 1,
 	}
-	err := json.MarshalFile(CONFIG, cmd.ConfigLoader.Path)
-	require.NoError(t, err)
+	require.NoError(t, json.MarshalFile(CONFIG, cmd.ConfigLoader.Path))
 
 	//-- act
 	res := cmd.LoadConfig()
@@ -60,7 +61,7 @@ func TestConfigCommandBaseLoadConfigReturnsErrorWhenUsingInvalidVersion(t *testi
 func TestConfigCommandBaseLoadConfigReturnsNoErrorAndLoadsConfigWhenValid(t *testing.T) {
 	//-- arrange
 	cmd := base.NewConfigCommand(
-		json.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		json.NewLoader[config.Config](filepath.Join(t.TempDir(), "config.json")),
 	)
 
 	CONFIG := config.Config{
@@ -69,8 +70,7 @@ func TestConfigCommandBaseLoadConfigReturnsNoErrorAndLoadsConfigWhenValid(t *tes
 		VaultPath:  "vault/path",
 		OutputPath: "output/path",
 	}
-	err := json.MarshalFile(CONFIG, cmd.ConfigLoader.Path)
-	require.NoError(t, err)
+	require.NoError(t, json.MarshalFile(CONFIG, cmd.ConfigLoader.Path))
 
 	//-- act
 	res := cmd.LoadConfig()

@@ -3,6 +3,7 @@ package record_test
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	cmd "pvault/app/commands/record"
 	"pvault/app/config"
 	"pvault/app/vault"
@@ -16,9 +17,7 @@ import (
 
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
-	"github.com/binarysoupdev/tinsel/rand"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -33,7 +32,7 @@ type LockTestSuite struct {
 
 func TestLockCommandSuite(t *testing.T) {
 	s := LockTestSuite{
-		ConfigLoader: json.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: json.NewLoader[config.Config](filepath.Join(t.TempDir(), "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewLockCommand(s.ConfigLoader))
@@ -43,29 +42,25 @@ func TestLockCommandSuite(t *testing.T) {
 func (s *LockTestSuite) SetupTest() {
 	s.Config = config.Config{
 		Version:    config.VERSION,
-		VaultPath:  file.NewPath(s.T(), "vault"),
-		OutputPath: file.NewPath(s.T(), ""),
+		VaultPath:  filepath.Join(s.T().TempDir(), "vault"),
+		OutputPath: s.T().TempDir(),
 	}
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
+
+	_, err := vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 
-	_, err = vault.InitializeNew(s.Config.VaultPath, "")
-	s.Require().NoError(err)
+	s.RecordPath = filepath.Join(s.T().TempDir(), "record.json")
+	s.Record = record_v2.NewEmptyRecord("name")
 
-	rand := rand.New(0)
-	s.RecordPath = file.NewPath(s.T(), rand.ASCII(10))
-	s.Record = record_v2.NewEmptyRecord(rand.ASCII(15))
-
-	err = json.MarshalFile(s.Record, s.RecordPath)
-	s.Require().NoError(err)
+	s.Require().NoError(json.MarshalFile(s.Record, s.RecordPath))
 }
 
 //=====================================
 
 func (s *LockTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 	//-- arrange
-	err := os.Remove(s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(os.Remove(s.ConfigLoader.Path))
 
 	//-- act
 	s.RunCommand()
@@ -85,8 +80,7 @@ func (s *LockTestSuite) TestRunFailsWhenPathIsEmpty() {
 func (s *LockTestSuite) TestRunFailsWithInvalidVaultPath() {
 	//-- arrange
 	s.Config.VaultPath = "invalid"
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
 	//-- act
 	s.RunCommand("-path", s.RecordPath)
@@ -127,8 +121,7 @@ func (s *LockTestSuite) TestRunFailsWithInvalidRecord() {
 	//-- arrange
 	s.Record.Name = ""
 
-	err := json.MarshalFile(s.Record, s.RecordPath)
-	s.Require().NoError(err)
+	s.Require().NoError(json.MarshalFile(s.Record, s.RecordPath))
 
 	//-- act
 	s.RunCommand("-path", s.RecordPath)
@@ -139,12 +132,12 @@ func (s *LockTestSuite) TestRunFailsWithInvalidRecord() {
 
 func (s *LockTestSuite) TestRunFailsWhenNameAlreadyExists() {
 	//-- arrange
+	const PASSWORD = "Password123!"
+
 	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
 
-	rand := rand.New(0)
-	err = v.SaveRecord(record_v2.NewEmptyRecord(s.Record.Name), rand.ASCII(30))
-	s.Require().NoError(err)
+	s.Require().NoError(v.SaveRecord(record_v2.NewEmptyRecord(s.Record.Name), PASSWORD))
 
 	//-- act
 	s.RunCommand("-path", s.RecordPath)
@@ -155,8 +148,7 @@ func (s *LockTestSuite) TestRunFailsWhenNameAlreadyExists() {
 
 func (s *LockTestSuite) TestRunFailsWithIncorrectVerifyPassword() {
 	//-- arrange
-	rand := rand.New(0)
-	PASSWORD := rand.ASCII(30)
+	const PASSWORD = "Password123!"
 
 	io := pipe.OpenStdio(2, 2, false)
 	defer io.Close()
@@ -176,8 +168,7 @@ func (s *LockTestSuite) TestRunFailsWithIncorrectVerifyPassword() {
 
 func (s *LockTestSuite) TestRunPassesAndSavesNewRecord() {
 	//-- arrange
-	rand := rand.New(0)
-	PASSWORD := rand.ASCII(30)
+	const PASSWORD = "Password123!"
 
 	io := pipe.OpenStdio(2, 4, false)
 	defer io.Close()
@@ -211,14 +202,12 @@ func (s *LockTestSuite) TestRunPassesAndUpdatesExistingRecord() {
 	OLD_RECORD := record_v2.NewEmptyRecord(s.Record.Name + "x")
 	OLD_RECORD.ID = s.Record.ID
 
-	rand := rand.New(0)
-	PASSWORD := rand.ASCII(30)
+	const PASSWORD = "Password123!"
 
 	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
 
-	err = v.SaveRecord(OLD_RECORD, PASSWORD+"x")
-	s.Require().NoError(err)
+	s.Require().NoError(v.SaveRecord(OLD_RECORD, PASSWORD+"x"))
 
 	io := pipe.OpenStdio(2, 4, false)
 	defer io.Close()

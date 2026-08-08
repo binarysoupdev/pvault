@@ -148,9 +148,7 @@ func TestEncodeDecodeIndexReturnsIndexAndNoError(t *testing.T) {
 		"":     uuid.Nil,
 		"name": uuid.New(),
 	}
-
-	err := e.EncodeIndex(buffer, INDEX)
-	require.NoError(t, err)
+	require.NoError(t, e.EncodeIndex(buffer, INDEX))
 
 	//-- act
 	res, err := e.DecodeIndex(buffer)

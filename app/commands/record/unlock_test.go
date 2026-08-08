@@ -18,9 +18,7 @@ import (
 
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
-	"github.com/binarysoupdev/tinsel/rand"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 )
@@ -37,7 +35,7 @@ type UnlockTestSuite struct {
 
 func TestUnlockCommandSuite(t *testing.T) {
 	s := UnlockTestSuite{
-		ConfigLoader: json.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: json.NewLoader[config.Config](filepath.Join(t.TempDir(), "config.json")),
 	}
 
 	s.CommandSuite = test.NewCommandSuite(cmd.NewUnlockCommand(s.ConfigLoader))
@@ -47,29 +45,26 @@ func TestUnlockCommandSuite(t *testing.T) {
 func (s *UnlockTestSuite) SetupTest() {
 	s.Config = config.Config{
 		Version:    config.VERSION,
-		VaultPath:  file.NewPath(s.T(), "vault"),
-		OutputPath: file.NewPath(s.T(), ""),
+		VaultPath:  filepath.Join(s.T().TempDir(), "vault"),
+		OutputPath: s.T().TempDir(),
 	}
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
-	rand := rand.New(0)
-	s.Record = record_v2.NewEmptyRecord(rand.ASCII(15))
-	s.Password = rand.ASCII(30)
+	s.Record = record_v2.NewEmptyRecord("name")
+	s.Password = "Password123!"
 
+	var err error
 	s.Vault, err = vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 
-	err = s.Vault.SaveRecord(s.Record, s.Password)
-	s.Require().NoError(err)
+	s.Require().NoError(s.Vault.SaveRecord(s.Record, s.Password))
 }
 
 //=====================================
 
 func (s *UnlockTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 	//-- arrange
-	err := os.Remove(s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(os.Remove(s.ConfigLoader.Path))
 
 	//-- act
 	s.RunCommand()
@@ -81,8 +76,7 @@ func (s *UnlockTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 func (s *UnlockTestSuite) TestRunFailsWhenInvalidVaultPath() {
 	//-- arrange
 	s.Config.VaultPath = "invalid"
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
 	//-- act
 	s.RunCommand("-s", s.Record.Name)
@@ -114,8 +108,7 @@ func (s *UnlockTestSuite) TestRunFailsWhenVaultOutOfDate() {
 func (s *UnlockTestSuite) TestRunFailsWhenConfigOutputPathInvalid() {
 	//-- arrange
 	s.Config.OutputPath = "invalid"
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
 	//-- act
 	s.RunCommand("-s", s.Record.Name)
@@ -184,9 +177,7 @@ func (s *UnlockTestSuite) TestRunPassesAndOutputRecordWasUpgradedWhenUnlockingOl
 		Username: "foo",
 		Password: "bar",
 	}
-
-	err := s.Vault.SaveRecord(r1, s.Password)
-	s.Require().NoError(err)
+	s.Require().NoError(s.Vault.SaveRecord(r1, s.Password))
 
 	OUTPUT_FILE := filepath.Join(s.Config.OutputPath, r1.ID.String()+".json")
 

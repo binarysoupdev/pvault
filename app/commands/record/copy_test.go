@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	cmd "pvault/app/commands/record"
 	"pvault/app/config"
 	"pvault/app/vault"
@@ -19,9 +20,7 @@ import (
 
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
-	"github.com/binarysoupdev/tinsel/file"
 	"github.com/binarysoupdev/tinsel/pipe"
-	"github.com/binarysoupdev/tinsel/rand"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -40,7 +39,7 @@ type CopyTestSuite struct {
 
 func TestCopyCommandSuite(t *testing.T) {
 	s := CopyTestSuite{
-		ConfigLoader: json.NewLoader[config.Config](file.NewPath(t, "config.json")),
+		ConfigLoader: json.NewLoader[config.Config](filepath.Join(t.TempDir(), "config.json")),
 		Clipboard:    clipboard.Mock(),
 		QRCode:       qrcode.Mock(),
 	}
@@ -55,23 +54,21 @@ func (s *CopyTestSuite) SetupTest() {
 
 	s.Config = config.Config{
 		Version:   config.VERSION,
-		VaultPath: file.NewPath(s.T(), "vault"),
+		VaultPath: filepath.Join(s.T().TempDir(), "vault"),
 	}
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
-	rand := rand.New(0)
-	s.Record = record_v2.NewEmptyRecord(rand.ASCII(15))
-	s.Record.Username = rand.ASCII(10)
-	s.Record.Password = rand.ASCII(30)
+	s.Record = record_v2.NewEmptyRecord("name")
+	s.Record.Username = "username"
+	s.Record.Password = "password"
 
-	s.Password = rand.ASCII(30)
+	s.Password = "Password123!"
 
+	var err error
 	s.Vault, err = vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 
-	err = s.Vault.SaveRecord(s.Record, s.Password)
-	s.Require().NoError(err)
+	s.Require().NoError(s.Vault.SaveRecord(s.Record, s.Password))
 }
 
 //=====================================
@@ -89,8 +86,7 @@ func (s *CopyTestSuite) TestRunFailsWhenClipboardUnsupported() {
 
 func (s *CopyTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 	//-- arrange
-	err := os.Remove(s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(os.Remove(s.ConfigLoader.Path))
 
 	//-- act
 	s.RunCommand()
@@ -102,8 +98,7 @@ func (s *CopyTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 func (s *CopyTestSuite) TestRunFailsWithInvalidVaultPath() {
 	//-- arrange
 	s.Config.VaultPath = "invalid"
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
 	//-- act
 	s.RunCommand("-s", s.Record.Name)

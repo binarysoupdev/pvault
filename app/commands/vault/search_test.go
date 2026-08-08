@@ -42,10 +42,9 @@ func (s *SearchTestSuite) SetupTest() {
 		VaultPath:  filepath.Join(s.T().TempDir(), "vault"),
 		OutputPath: s.T().TempDir(),
 	}
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
-	_, err = vault.InitializeNew(s.Config.VaultPath, "")
+	_, err := vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 }
 
@@ -53,8 +52,7 @@ func (s *SearchTestSuite) SetupTest() {
 
 func (s *SearchTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 	//-- arrange
-	err := os.Remove(s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(os.Remove(s.ConfigLoader.Path))
 
 	//-- act
 	s.RunCommand()
@@ -68,8 +66,7 @@ func (s *SearchTestSuite) TestRunFailsWithInvalidVaultPath() {
 	const NAME = "name"
 
 	s.Config.VaultPath = "invalid"
-	err := json.MarshalFile(s.Config, s.ConfigLoader.Path)
-	s.Require().NoError(err)
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
 	//-- act
 	s.RunCommand("-s", NAME)
@@ -116,8 +113,7 @@ func (s *SearchTestSuite) TestRunPassesAndDisplaysSearchResults() {
 	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
 
-	err = v.SaveRecord(record_v2.NewEmptyRecord(NAME), PASSWORD)
-	s.Require().NoError(err)
+	s.Require().NoError(v.SaveRecord(record_v2.NewEmptyRecord(NAME), PASSWORD))
 
 	out := pipe.OpenStdout(1)
 	defer out.Close()
