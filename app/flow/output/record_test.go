@@ -1,4 +1,4 @@
-package output_test
+package output_flow_test
 
 import (
 	"path/filepath"

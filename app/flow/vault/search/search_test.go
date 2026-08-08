@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	vault_flow "pvault/app/flow/vault"
-	flow "pvault/app/flow/vault/search"
+	search_flow "pvault/app/flow/vault/search"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/pipe"
@@ -15,7 +15,7 @@ type SearchFlowSuite struct {
 	suite.Suite
 	VaultMock *vault_flow.VaultMock
 
-	Flow  flow.SearchFlow
+	Flow  search_flow.SearchFlow
 	flags *flag.FlagSet
 }
 
@@ -27,7 +27,7 @@ func (s *SearchFlowSuite) SetupTest() {
 	s.VaultMock = &vault_flow.VaultMock{}
 
 	s.flags = flag.NewFlagSet("", flag.PanicOnError)
-	s.Flow = flow.NewSearchFlow(s.flags)
+	s.Flow = search_flow.NewSearchFlow(s.flags)
 }
 
 func (s *SearchFlowSuite) ParseFlags(args ...string) {

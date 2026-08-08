@@ -5,7 +5,7 @@ import (
 	"pvault/app/config"
 	config_flow "pvault/app/flow/config"
 	vault_flow "pvault/app/flow/vault"
-	v2 "pvault/app/vault/record/record/v2"
+	record_v2 "pvault/app/vault/record/record/v2"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/go-commando/errors"
@@ -49,7 +49,7 @@ func (cmd LockCommand) Run(args []string) error {
 		return err
 	}
 
-	r, err := json.UnmarshalFile[v2.Record](*path)
+	r, err := json.UnmarshalFile[record_v2.Record](*path)
 	if err != nil {
 		return errors.Chain(err, "error loading source record")
 	}

@@ -1,10 +1,10 @@
-package vault_test
+package vault_flow_test
 
 import (
 	"fmt"
 	"path/filepath"
 	"pvault/app/config"
-	flow "pvault/app/flow/vault"
+	vault_flow "pvault/app/flow/vault"
 	"pvault/app/vault"
 	"pvault/app/vault/database"
 	db_v1 "pvault/app/vault/database/encoder/legacy/v1"
@@ -23,7 +23,7 @@ import (
 
 func TestOpenLegacyVaultReturnsErrorWithInvalidPath(t *testing.T) {
 	//-- act
-	_, res := flow.OpenLegacyVault("invalid")
+	_, res := vault_flow.OpenLegacyVault("invalid")
 
 	//-- assert
 	require.ErrorContains(t, res, "error opening vault")
@@ -41,7 +41,7 @@ func TestOpenLegacyVaultReturnsVaultAndNoError(t *testing.T) {
 	require.NoError(t, database.SaveIndex(DATABASE, PATH, index.IndexMap{}))
 
 	//-- act
-	res, err := flow.OpenLegacyVault(PATH)
+	res, err := vault_flow.OpenLegacyVault(PATH)
 
 	//-- assert
 	require.NoError(t, err)
@@ -50,7 +50,7 @@ func TestOpenLegacyVaultReturnsVaultAndNoError(t *testing.T) {
 
 func TestOpenCurrentVaultReturnsErrorWithInvalidPath(t *testing.T) {
 	//-- act
-	_, res := flow.OpenCurrentVault("invalid")
+	_, res := vault_flow.OpenCurrentVault("invalid")
 
 	//-- assert
 	require.ErrorContains(t, res, "error opening vault")
@@ -68,7 +68,7 @@ func TestOpenCurrentVaultReturnsErrorWhenVaultOutOfDate(t *testing.T) {
 	require.NoError(t, database.SaveIndex(DATABASE, PATH, index.IndexMap{}))
 
 	//-- act
-	_, res := flow.OpenCurrentVault(PATH)
+	_, res := vault_flow.OpenCurrentVault(PATH)
 
 	//-- assert
 	require.ErrorContains(t, res, fmt.Sprintf("vault (@v%d) out-of-date", META.DatabaseVersion))
@@ -82,7 +82,7 @@ func TestOpenCurrentVaultReturnsVaultAndNoErrorWhenVaultUpToDate(t *testing.T) {
 	require.NoError(t, err)
 
 	//-- act
-	res, err := flow.OpenCurrentVault(PATH)
+	res, err := vault_flow.OpenCurrentVault(PATH)
 
 	//-- assert
 	require.NoError(t, err)
@@ -97,7 +97,7 @@ func TestBackupVaultReturnsErrorWhenBackupPathInvalid(t *testing.T) {
 	require.NoError(t, util.CreateEmptyFile(CONFIG.BackupPath))
 
 	//-- act
-	res := flow.BackupVault(vault.Vault{}, CONFIG)
+	res := vault_flow.BackupVault(vault.Vault{}, CONFIG)
 
 	//-- assert
 	require.ErrorContains(t, res, "error validating \"config.backup_path\"")
@@ -119,7 +119,7 @@ func TestBackupVaultReturnsNoErrorAndBacksUpVault(t *testing.T) {
 	defer out.Close()
 
 	//-- act
-	res := flow.BackupVault(v, CONFIG)
+	res := vault_flow.BackupVault(v, CONFIG)
 
 	//-- assert
 	require.NoError(t, res)

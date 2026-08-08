@@ -1,8 +1,8 @@
-package vault_test
+package vault_flow_test
 
 import (
 	"errors"
-	flow "pvault/app/flow/vault"
+	vault_flow "pvault/app/flow/vault"
 	record_v2 "pvault/app/vault/record/record/v2"
 	"testing"
 
@@ -14,12 +14,12 @@ import (
 func TestSaveRecordReturnsErrorWithInvalidRecord(t *testing.T) {
 	//-- arrange
 	RECORD := record_v2.NewEmptyRecord("name")
-	v := &flow.VaultMock{
+	v := &vault_flow.VaultMock{
 		ValidateRecordError: errors.New(""),
 	}
 
 	//-- act
-	res := flow.SaveRecord(v, RECORD)
+	res := vault_flow.SaveRecord(v, RECORD)
 
 	//-- arrange
 	require.ErrorContains(t, res, "error validating record")
@@ -38,7 +38,7 @@ func TestSaveRecordReturnsErrorWhenVerifyPasswordDoesNotMatch(t *testing.T) {
 	io.Queue("PASSWORD: ", PASSWORD+"x")
 	io.EndQueue()
 
-	res := flow.SaveRecord(&flow.VaultMock{}, record_v2.Record{})
+	res := vault_flow.SaveRecord(&vault_flow.VaultMock{}, record_v2.Record{})
 
 	//-- assert
 	require.ErrorContains(t, res, "passwords do not match")
@@ -49,7 +49,7 @@ func TestSaveRecordReturnsErrorWhenVerifyPasswordDoesNotMatch(t *testing.T) {
 func TestSaveRecordReturnsErrorWhenVaultSaveRecordReturnsError(t *testing.T) {
 	//-- arrange
 	RECORD := record_v2.NewEmptyRecord("name")
-	v := &flow.VaultMock{
+	v := &vault_flow.VaultMock{
 		SaveRecordError: errors.New(""),
 	}
 
@@ -63,7 +63,7 @@ func TestSaveRecordReturnsErrorWhenVaultSaveRecordReturnsError(t *testing.T) {
 	io.Queue("PASSWORD: ", PASSWORD)
 	io.EndQueue()
 
-	res := flow.SaveRecord(v, RECORD)
+	res := vault_flow.SaveRecord(v, RECORD)
 
 	//-- assert
 	require.ErrorContains(t, res, "error saving vault record")
@@ -77,7 +77,7 @@ func TestSaveRecordReturnsErrorWhenVaultSaveRecordReturnsError(t *testing.T) {
 func TestSaveRecordReturnsNoErrorAndSavesRecord(t *testing.T) {
 	//-- arrange
 	RECORD := record_v2.NewEmptyRecord("name")
-	v := &flow.VaultMock{}
+	v := &vault_flow.VaultMock{}
 
 	const PASSWORD = "Password123!"
 
@@ -89,7 +89,7 @@ func TestSaveRecordReturnsNoErrorAndSavesRecord(t *testing.T) {
 	io.Queue("PASSWORD: ", PASSWORD)
 	io.EndQueue()
 
-	res := flow.SaveRecord(v, RECORD)
+	res := vault_flow.SaveRecord(v, RECORD)
 
 	//-- assert
 	require.NoError(t, res)
@@ -105,7 +105,7 @@ func TestSaveRecordReturnsNoErrorAndSavesRecord(t *testing.T) {
 func TestLoadRecordReturnsErrorWhenVaultLoadRecordReturnsError(t *testing.T) {
 	//-- arrange
 	const NAME = "name"
-	v := &flow.VaultMock{
+	v := &vault_flow.VaultMock{
 		LoadRecordError: errors.New(""),
 	}
 
@@ -118,7 +118,7 @@ func TestLoadRecordReturnsErrorWhenVaultLoadRecordReturnsError(t *testing.T) {
 	io.Queue("PASSWORD: ", PASSWORD)
 	io.EndQueue()
 
-	_, res := flow.LoadRecord(v, NAME)
+	_, res := vault_flow.LoadRecord(v, NAME)
 
 	//-- assert
 	require.ErrorContains(t, res, "error loading vault record")
@@ -131,7 +131,7 @@ func TestLoadRecordReturnsErrorWhenVaultLoadRecordReturnsError(t *testing.T) {
 func TestLoadRecordReturnsRecordAndNoError(t *testing.T) {
 	//-- arrange
 	const NAME = "name"
-	v := &flow.VaultMock{
+	v := &vault_flow.VaultMock{
 		Record: record_v2.NewEmptyRecord(NAME),
 	}
 
@@ -144,7 +144,7 @@ func TestLoadRecordReturnsRecordAndNoError(t *testing.T) {
 	io.Queue("PASSWORD: ", PASSWORD)
 	io.EndQueue()
 
-	res, err := flow.LoadRecord(v, NAME)
+	res, err := vault_flow.LoadRecord(v, NAME)
 
 	//-- assert
 	require.NoError(t, err)
@@ -168,7 +168,7 @@ func TestDeleteRecordReturnsErrorWhenVerifyNameDoesNotMatch(t *testing.T) {
 	io.Queue("NAME: ", NAME+"x")
 	io.EndQueue()
 
-	res := flow.DeleteRecord(&flow.VaultMock{}, NAME)
+	res := vault_flow.DeleteRecord(&vault_flow.VaultMock{}, NAME)
 
 	//-- assert
 	require.ErrorContains(t, res, "names do not match")
@@ -178,7 +178,7 @@ func TestDeleteRecordReturnsErrorWhenVerifyNameDoesNotMatch(t *testing.T) {
 func TestDeleteRecordReturnsErrorWhenVaultDeleteRecordReturnsError(t *testing.T) {
 	//-- arrange
 	const NAME = "name"
-	v := &flow.VaultMock{
+	v := &vault_flow.VaultMock{
 		Record:            record_v2.NewEmptyRecord(NAME),
 		DeleteRecordError: errors.New(""),
 	}
@@ -190,7 +190,7 @@ func TestDeleteRecordReturnsErrorWhenVaultDeleteRecordReturnsError(t *testing.T)
 	io.Queue("NAME: ", NAME)
 	io.EndQueue()
 
-	res := flow.DeleteRecord(v, NAME)
+	res := vault_flow.DeleteRecord(v, NAME)
 
 	//-- assert
 	require.ErrorContains(t, res, "error deleting vault record")
@@ -202,7 +202,7 @@ func TestDeleteRecordReturnsErrorWhenVaultDeleteRecordReturnsError(t *testing.T)
 func TestDeleteRecordReturnsNoErrorAndDeletesRecord(t *testing.T) {
 	//-- arrange
 	const NAME = "name"
-	v := &flow.VaultMock{
+	v := &vault_flow.VaultMock{
 		Record: record_v2.NewEmptyRecord(NAME),
 	}
 
@@ -213,7 +213,7 @@ func TestDeleteRecordReturnsNoErrorAndDeletesRecord(t *testing.T) {
 	io.Queue("NAME: ", NAME)
 	io.EndQueue()
 
-	err := flow.DeleteRecord(v, NAME)
+	err := vault_flow.DeleteRecord(v, NAME)
 
 	//-- assert
 	require.NoError(t, err)

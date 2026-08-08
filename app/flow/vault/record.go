@@ -1,4 +1,4 @@
-package vault
+package vault_flow
 
 import (
 	"pvault/app/flow/prompt"
