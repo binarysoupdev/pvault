@@ -1,8 +1,8 @@
-package vault
+package cmds
 
 import (
-	"pvault/app/commands/base"
 	"pvault/app/config"
+	config_flow "pvault/app/flow/config"
 	vault_flow "pvault/app/flow/vault"
 	search_flow "pvault/app/flow/vault/search"
 
@@ -13,18 +13,19 @@ import (
 type SearchCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	base.ConfigCommand
+	command.ConfigCommand[config.Config]
 }
 
 func NewSearchCommand(configLoader json.Loader[config.Config]) *SearchCommand {
 	return &SearchCommand{
 		CommandBase:   command.NewCommandBase("search", "search records in the vault"),
-		ConfigCommand: base.NewConfigCommand(configLoader),
+		ConfigCommand: command.NewConfigCommand(configLoader),
 	}
 }
 
 func (cmd *SearchCommand) Initialize() error {
-	if err := cmd.LoadConfig(); err != nil {
+	err := config_flow.LoadConfig(&cmd.ConfigCommand)
+	if err != nil {
 		return err
 	}
 

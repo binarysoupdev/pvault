@@ -1,10 +1,10 @@
-package vault_test
+package cmds_test
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
-	cmd "pvault/app/commands/vault"
+	"pvault/app/cmds"
 	"pvault/app/config"
 	"pvault/app/vault"
 	"pvault/app/vault/database"
@@ -27,7 +27,7 @@ import (
 )
 
 type VaultTestSuite struct {
-	test.CommandSuite[*cmd.VaultCommand]
+	test.CommandSuite[*cmds.VaultCommand]
 	ConfigLoader json.Loader[config.Config]
 	Config       config.Config
 	Dir          string
@@ -38,7 +38,7 @@ func TestVaultCommandSuite(t *testing.T) {
 		ConfigLoader: json.NewLoader[config.Config](filepath.Join(t.TempDir(), "config.json")),
 	}
 
-	s.CommandSuite = test.NewCommandSuite(cmd.NewVaultCommand(s.ConfigLoader))
+	s.CommandSuite = test.NewCommandSuite(cmds.NewVaultCommand(s.ConfigLoader))
 	suite.Run(t, &s)
 }
 
@@ -55,7 +55,7 @@ func (s *VaultTestSuite) SetupTest() {
 
 //=====================================
 
-func (s *VaultTestSuite) TestRunFailsWhenErrorLoadingConfig() {
+func (s *VaultTestSuite) TestRunFailsWhenConfigNotFound() {
 	//-- arrange
 	s.Require().NoError(os.Remove(s.ConfigLoader.Path))
 
@@ -64,6 +64,18 @@ func (s *VaultTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 
 	//-- assert
 	s.RequireResultFail("invalid config path")
+}
+
+func (s *VaultTestSuite) TestRunFailsWhenConfigVersionUnsupported() {
+	//-- arrange
+	s.Config.Version = config.VERSION + 1
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultFail(fmt.Sprintf("unsupported config version \"%d\"", s.Config.Version))
 }
 
 func (s *VaultTestSuite) TestRunSetNicknameFailsWithInvalidVault() {

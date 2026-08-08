@@ -1,8 +1,8 @@
-package record
+package cmds
 
 import (
-	"pvault/app/commands/base"
 	"pvault/app/config"
+	config_flow "pvault/app/flow/config"
 	vault_flow "pvault/app/flow/vault"
 	search_flow "pvault/app/flow/vault/search"
 	"pvault/tools/clipboard"
@@ -17,7 +17,7 @@ import (
 type CopyCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	base.ConfigCommand
+	command.ConfigCommand[config.Config]
 
 	clipboard clipboard.Clipboard
 	qrcode    qrcode.Renderer
@@ -26,7 +26,7 @@ type CopyCommand struct {
 func NewCopyCommand(configLoader json.Loader[config.Config], clipboard clipboard.Clipboard, qrcode qrcode.Renderer) *CopyCommand {
 	return &CopyCommand{
 		CommandBase:   command.NewCommandBase("copy", "copy password/username of a record"),
-		ConfigCommand: base.NewConfigCommand(configLoader),
+		ConfigCommand: command.NewConfigCommand(configLoader),
 		clipboard:     clipboard,
 		qrcode:        qrcode,
 	}
@@ -38,7 +38,8 @@ func (cmd *CopyCommand) Initialize() error {
 		return errors.Chain(err, "clipboard unsupported")
 	}
 
-	if err := cmd.LoadConfig(); err != nil {
+	err = config_flow.LoadConfig(&cmd.ConfigCommand)
+	if err != nil {
 		return err
 	}
 

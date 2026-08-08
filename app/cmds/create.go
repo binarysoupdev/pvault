@@ -1,8 +1,8 @@
-package record
+package cmds
 
 import (
-	"pvault/app/commands/base"
 	"pvault/app/config"
+	config_flow "pvault/app/flow/config"
 	output_flow "pvault/app/flow/output"
 	vault_flow "pvault/app/flow/vault"
 	v2 "pvault/app/vault/record/record/v2"
@@ -15,18 +15,19 @@ import (
 type CreateCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	base.ConfigCommand
+	command.ConfigCommand[config.Config]
 }
 
 func NewCreateCommand(configLoader json.Loader[config.Config]) *CreateCommand {
 	return &CreateCommand{
 		CommandBase:   command.NewCommandBase("create", "create a new vault record"),
-		ConfigCommand: base.NewConfigCommand(configLoader),
+		ConfigCommand: command.NewConfigCommand(configLoader),
 	}
 }
 
 func (cmd *CreateCommand) Initialize() error {
-	if err := cmd.LoadConfig(); err != nil {
+	err := config_flow.LoadConfig(&cmd.ConfigCommand)
+	if err != nil {
 		return err
 	}
 

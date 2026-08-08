@@ -1,9 +1,9 @@
-package record
+package cmds
 
 import (
 	"os"
-	"pvault/app/commands/base"
 	"pvault/app/config"
+	config_flow "pvault/app/flow/config"
 	vault_flow "pvault/app/flow/vault"
 	v2 "pvault/app/vault/record/record/v2"
 
@@ -16,18 +16,19 @@ import (
 type LockCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	base.ConfigCommand
+	command.ConfigCommand[config.Config]
 }
 
 func NewLockCommand(configLoader json.Loader[config.Config]) *LockCommand {
 	return &LockCommand{
 		CommandBase:   command.NewCommandBase("lock", "lock a record in the vault"),
-		ConfigCommand: base.NewConfigCommand(configLoader),
+		ConfigCommand: command.NewConfigCommand(configLoader),
 	}
 }
 
 func (cmd *LockCommand) Initialize() error {
-	if err := cmd.LoadConfig(); err != nil {
+	err := config_flow.LoadConfig(&cmd.ConfigCommand)
+	if err != nil {
 		return err
 	}
 

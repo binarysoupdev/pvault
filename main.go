@@ -4,10 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	config_cmds "pvault/app/commands/config"
-	record_cmds "pvault/app/commands/record"
-	tool_cmds "pvault/app/commands/tool"
-	vault_cmds "pvault/app/commands/vault"
+	"pvault/app/cmds"
 	"pvault/app/config"
 	"pvault/app/logger"
 	"pvault/build"
@@ -58,15 +55,15 @@ func buildRunner() command.Runner {
 	qrcode := qrcode.Skip2Renderer{}
 
 	return command.NewRunner(
-		tool_cmds.NewPasswordCommand(clipboard),
-		config_cmds.NewConfigCommand(configLoader),
-		vault_cmds.NewVaultCommand(configLoader),
-		vault_cmds.NewSearchCommand(configLoader),
-		record_cmds.NewCreateCommand(configLoader),
-		record_cmds.NewLockCommand(configLoader),
-		record_cmds.NewUnlockCommand(configLoader),
-		record_cmds.NewDeleteCommand(configLoader),
-		record_cmds.NewCopyCommand(configLoader, clipboard, qrcode),
+		cmds.NewPasswordCommand(clipboard),
+		cmds.NewConfigCommand(configLoader),
+		cmds.NewVaultCommand(configLoader),
+		cmds.NewSearchCommand(configLoader),
+		cmds.NewCreateCommand(configLoader),
+		cmds.NewLockCommand(configLoader),
+		cmds.NewUnlockCommand(configLoader),
+		cmds.NewDeleteCommand(configLoader),
+		cmds.NewCopyCommand(configLoader, clipboard, qrcode),
 	)
 }
 

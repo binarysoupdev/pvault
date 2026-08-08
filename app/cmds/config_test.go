@@ -1,10 +1,10 @@
-package config_test
+package cmds_test
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
-	cmd "pvault/app/commands/config"
+	"pvault/app/cmds"
 	"pvault/app/config"
 	"pvault/app/vault"
 	"pvault/app/vault/database"
@@ -22,7 +22,7 @@ import (
 )
 
 type ConfigTestSuite struct {
-	test.CommandSuite[*cmd.ConfigCommand]
+	test.CommandSuite[*cmds.ConfigCommand]
 	ConfigLoader json.Loader[config.Config]
 	Config       config.Config
 }
@@ -32,7 +32,7 @@ func TestConfigCommandSuite(t *testing.T) {
 		ConfigLoader: json.NewLoader[config.Config](filepath.Join(t.TempDir(), "config.json")),
 	}
 
-	s.CommandSuite = test.NewCommandSuite(cmd.NewConfigCommand(s.ConfigLoader))
+	s.CommandSuite = test.NewCommandSuite(cmds.NewConfigCommand(s.ConfigLoader))
 	suite.Run(t, &s)
 }
 
@@ -82,6 +82,18 @@ func (s *ConfigTestSuite) TestRunFailsWhenConfigNotFound() {
 
 	//-- assert
 	s.RequireResultFail("invalid config path")
+}
+
+func (s *ConfigTestSuite) TestRunFailsWhenConfigVersionUnsupported() {
+	//-- arrange
+	s.Config.Version = config.VERSION + 1
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultFail(fmt.Sprintf("unsupported config version \"%d\"", s.Config.Version))
 }
 
 func (s *ConfigTestSuite) TestRunValidatePassesWithInvalidVaultAndPrintsError() {

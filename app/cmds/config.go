@@ -1,11 +1,11 @@
-package config
+package cmds
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"pvault/app/commands/base"
 	"pvault/app/config"
+	config_flow "pvault/app/flow/config"
 	vault_flow "pvault/app/flow/vault"
 	"pvault/build"
 
@@ -18,13 +18,13 @@ import (
 type ConfigCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	base.ConfigCommand
+	command.ConfigCommand[config.Config]
 }
 
 func NewConfigCommand(configLoader json.Loader[config.Config]) *ConfigCommand {
 	return &ConfigCommand{
 		CommandBase:   command.NewCommandBase("config", "configure the application"),
-		ConfigCommand: base.NewConfigCommand(configLoader),
+		ConfigCommand: command.NewConfigCommand(configLoader),
 	}
 }
 
@@ -41,7 +41,7 @@ func (cmd ConfigCommand) Run(args []string) error {
 		return cmd.generateNew()
 	}
 
-	err := cmd.LoadConfig()
+	err := config_flow.LoadConfig(&cmd.ConfigCommand)
 	if err != nil {
 		return err
 	}

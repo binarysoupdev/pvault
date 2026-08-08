@@ -1,10 +1,10 @@
-package record_test
+package cmds_test
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
-	cmd "pvault/app/commands/record"
+	"pvault/app/cmds"
 	"pvault/app/config"
 	"pvault/app/vault"
 	"pvault/app/vault/database"
@@ -22,7 +22,7 @@ import (
 )
 
 type LockTestSuite struct {
-	test.CommandSuite[*cmd.LockCommand]
+	test.CommandSuite[*cmds.LockCommand]
 	ConfigLoader json.Loader[config.Config]
 	Config       config.Config
 
@@ -35,7 +35,7 @@ func TestLockCommandSuite(t *testing.T) {
 		ConfigLoader: json.NewLoader[config.Config](filepath.Join(t.TempDir(), "config.json")),
 	}
 
-	s.CommandSuite = test.NewCommandSuite(cmd.NewLockCommand(s.ConfigLoader))
+	s.CommandSuite = test.NewCommandSuite(cmds.NewLockCommand(s.ConfigLoader))
 	suite.Run(t, &s)
 }
 
@@ -58,7 +58,7 @@ func (s *LockTestSuite) SetupTest() {
 
 //=====================================
 
-func (s *LockTestSuite) TestRunFailsWhenErrorLoadingConfig() {
+func (s *LockTestSuite) TestRunFailsWhenConfigNotFound() {
 	//-- arrange
 	s.Require().NoError(os.Remove(s.ConfigLoader.Path))
 
@@ -69,12 +69,16 @@ func (s *LockTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 	s.RequireResultFail("invalid config path")
 }
 
-func (s *LockTestSuite) TestRunFailsWhenPathIsEmpty() {
+func (s *LockTestSuite) TestRunFailsWhenConfigVersionUnsupported() {
+	//-- arrange
+	s.Config.Version = config.VERSION + 1
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
+
 	//-- act
-	s.RunCommand("-path", "")
+	s.RunCommand()
 
 	//-- assert
-	s.RequireResultFail("\"path\" cannot be empty")
+	s.RequireResultFail(fmt.Sprintf("unsupported config version \"%d\"", s.Config.Version))
 }
 
 func (s *LockTestSuite) TestRunFailsWithInvalidVaultPath() {

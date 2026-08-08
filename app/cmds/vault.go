@@ -1,9 +1,9 @@
-package vault
+package cmds
 
 import (
 	"path/filepath"
-	"pvault/app/commands/base"
 	"pvault/app/config"
+	config_flow "pvault/app/flow/config"
 	vault_flow "pvault/app/flow/vault"
 	"pvault/app/vault"
 	"time"
@@ -17,18 +17,19 @@ import (
 type VaultCommand struct {
 	command.CommandBase
 	command.FlagCommand
-	base.ConfigCommand
+	command.ConfigCommand[config.Config]
 }
 
 func NewVaultCommand(configLoader json.Loader[config.Config]) *VaultCommand {
 	return &VaultCommand{
 		CommandBase:   command.NewCommandBase("vault", "configure the vault"),
-		ConfigCommand: base.NewConfigCommand(configLoader),
+		ConfigCommand: command.NewConfigCommand(configLoader),
 	}
 }
 
 func (cmd *VaultCommand) Initialize() error {
-	if err := cmd.LoadConfig(); err != nil {
+	err := config_flow.LoadConfig(&cmd.ConfigCommand)
+	if err != nil {
 		return err
 	}
 

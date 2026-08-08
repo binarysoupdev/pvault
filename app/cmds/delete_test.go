@@ -1,10 +1,10 @@
-package record_test
+package cmds_test
 
 import (
 	"fmt"
 	"os"
 	"path/filepath"
-	cmd "pvault/app/commands/record"
+	"pvault/app/cmds"
 	"pvault/app/config"
 	"pvault/app/vault"
 	"pvault/app/vault/database"
@@ -22,7 +22,7 @@ import (
 )
 
 type DeleteTestSuite struct {
-	test.CommandSuite[*cmd.DeleteCommand]
+	test.CommandSuite[*cmds.DeleteCommand]
 	ConfigLoader json.Loader[config.Config]
 	Config       config.Config
 
@@ -35,7 +35,7 @@ func TestDeleteCommandSuite(t *testing.T) {
 		ConfigLoader: json.NewLoader[config.Config](filepath.Join(t.TempDir(), "config.json")),
 	}
 
-	s.CommandSuite = test.NewCommandSuite(cmd.NewDeleteCommand(s.ConfigLoader))
+	s.CommandSuite = test.NewCommandSuite(cmds.NewDeleteCommand(s.ConfigLoader))
 	suite.Run(t, &s)
 }
 
@@ -58,7 +58,7 @@ func (s *DeleteTestSuite) SetupTest() {
 
 //=====================================
 
-func (s *DeleteTestSuite) TestRunFailsWhenErrorLoadingConfig() {
+func (s *DeleteTestSuite) TestRunFailsWhenConfigNotFound() {
 	//-- arrange
 	s.Require().NoError(os.Remove(s.ConfigLoader.Path))
 
@@ -67,6 +67,18 @@ func (s *DeleteTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 
 	//-- assert
 	s.RequireResultFail("invalid config path")
+}
+
+func (s *DeleteTestSuite) TestRunFailsWhenConfigVersionUnsupported() {
+	//-- arrange
+	s.Config.Version = config.VERSION + 1
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultFail(fmt.Sprintf("unsupported config version \"%d\"", s.Config.Version))
 }
 
 func (s *DeleteTestSuite) TestRunFailsWithInvalidVaultPath() {

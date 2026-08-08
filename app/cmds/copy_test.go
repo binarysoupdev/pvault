@@ -1,11 +1,11 @@
-package record_test
+package cmds_test
 
 import (
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
-	cmd "pvault/app/commands/record"
+	"pvault/app/cmds"
 	"pvault/app/config"
 	"pvault/app/vault"
 	"pvault/app/vault/database"
@@ -25,7 +25,7 @@ import (
 )
 
 type CopyTestSuite struct {
-	test.CommandSuite[*cmd.CopyCommand]
+	test.CommandSuite[*cmds.CopyCommand]
 	Clipboard *clipboard.MockClipboard
 	QRCode    *qrcode.MockRenderer
 
@@ -44,7 +44,7 @@ func TestCopyCommandSuite(t *testing.T) {
 		QRCode:       qrcode.Mock(),
 	}
 
-	s.CommandSuite = test.NewCommandSuite(cmd.NewCopyCommand(s.ConfigLoader, s.Clipboard, s.QRCode))
+	s.CommandSuite = test.NewCommandSuite(cmds.NewCopyCommand(s.ConfigLoader, s.Clipboard, s.QRCode))
 	suite.Run(t, &s)
 }
 
@@ -84,7 +84,7 @@ func (s *CopyTestSuite) TestRunFailsWhenClipboardUnsupported() {
 	s.RequireResultFail("clipboard unsupported")
 }
 
-func (s *CopyTestSuite) TestRunFailsWhenErrorLoadingConfig() {
+func (s *CopyTestSuite) TestRunFailsWhenConfigNotFound() {
 	//-- arrange
 	s.Require().NoError(os.Remove(s.ConfigLoader.Path))
 
@@ -93,6 +93,18 @@ func (s *CopyTestSuite) TestRunFailsWhenErrorLoadingConfig() {
 
 	//-- assert
 	s.RequireResultFail("invalid config path")
+}
+
+func (s *CopyTestSuite) TestRunFailsWhenConfigVersionUnsupported() {
+	//-- arrange
+	s.Config.Version = config.VERSION + 1
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
+
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultFail(fmt.Sprintf("unsupported config version \"%d\"", s.Config.Version))
 }
 
 func (s *CopyTestSuite) TestRunFailsWithInvalidVaultPath() {

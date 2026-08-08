@@ -1,8 +1,8 @@
-package tool_test
+package cmds_test
 
 import (
 	"fmt"
-	cmd "pvault/app/commands/tool"
+	"pvault/app/cmds"
 	"pvault/tools/clipboard"
 	"testing"
 
@@ -13,16 +13,16 @@ import (
 )
 
 type PasswordTestSuite struct {
-	test.CommandSuite[*cmd.PasswordCommand]
+	test.CommandSuite[*cmds.PasswordCommand]
 	Clipboard *clipboard.MockClipboard
 }
 
-func TestCopyCommandSuite(t *testing.T) {
+func TestPasswordTestSuite(t *testing.T) {
 	s := PasswordTestSuite{
 		Clipboard: clipboard.Mock(),
 	}
 
-	s.CommandSuite = test.NewCommandSuite(cmd.NewPasswordCommand(s.Clipboard))
+	s.CommandSuite = test.NewCommandSuite(cmds.NewPasswordCommand(s.Clipboard))
 	suite.Run(t, &s)
 }
 
