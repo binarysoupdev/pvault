@@ -5,7 +5,7 @@ import (
 	config_flow "pvault/app/flow/config"
 	output_flow "pvault/app/flow/output"
 	vault_flow "pvault/app/flow/vault"
-	record_v2 "pvault/app/vault/record/record/v2"
+	record_v2 "pvault/vault/record/record/v2"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/go-commando/errors"

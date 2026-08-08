@@ -1,7 +1,7 @@
 package vault_flow
 
 import (
-	"pvault/app/vault/record"
+	"pvault/vault/record"
 
 	"github.com/google/uuid"
 )

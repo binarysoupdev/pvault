@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"pvault/app/config"
 	flow "pvault/app/flow/output"
-	record_v2 "pvault/app/vault/record/record/v2"
+	record_v2 "pvault/vault/record/record/v2"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/pipe"

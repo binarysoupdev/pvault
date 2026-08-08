@@ -3,7 +3,7 @@ package vault_flow
 import (
 	"pvault/app/flow/prompt"
 	"pvault/app/logger"
-	record_v2 "pvault/app/vault/record/record/v2"
+	record_v2 "pvault/vault/record/record/v2"
 
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/binarysoupdev/got-style/style"

@@ -3,7 +3,7 @@ package vault_flow_test
 import (
 	"errors"
 	vault_flow "pvault/app/flow/vault"
-	record_v2 "pvault/app/vault/record/record/v2"
+	record_v2 "pvault/vault/record/record/v2"
 	"testing"
 
 	"github.com/binarysoupdev/tinsel/pipe"

@@ -5,7 +5,7 @@ import (
 	"pvault/app/config"
 	config_flow "pvault/app/flow/config"
 	vault_flow "pvault/app/flow/vault"
-	"pvault/app/vault"
+	"pvault/vault"
 	"time"
 
 	"github.com/binarysoupdev/go-commando/command"

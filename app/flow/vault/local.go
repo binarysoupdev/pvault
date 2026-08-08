@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"pvault/app/config"
 	"pvault/app/logger"
-	"pvault/app/vault"
+	"pvault/vault"
 	"time"
 
 	"github.com/binarysoupdev/go-commando/errors"
