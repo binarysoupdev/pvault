@@ -37,7 +37,15 @@ func (s *PasswordTestSuite) TestRunFailsWhenLengthTooShort() {
 	s.RunCommand("-len", "0")
 
 	//-- assert
-	s.RequireResultFail("\"len\" too short")
+	s.RequireResultFail("\"len\" cannot be less than one")
+}
+
+func (s *PasswordTestSuite) TestRunFailsWhenLengthTooLarge() {
+	//-- act
+	s.RunCommand("-len", fmt.Sprintf("%d", cmds.MAX_PASS_LENGTH+1))
+
+	//-- assert
+	s.RequireResultFail(fmt.Sprintf("\"len\" cannot be greater than %d", cmds.MAX_PASS_LENGTH))
 }
 
 func (s *PasswordTestSuite) TestRunPassesAndPrintsPassword() {

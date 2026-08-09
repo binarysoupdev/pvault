@@ -10,6 +10,8 @@ import (
 	"github.com/binarysoupdev/got-style/style"
 )
 
+const MAX_PASS_LENGTH = 256
+
 type PasswordCommand struct {
 	command.CommandBase
 	command.FlagCommand
@@ -35,15 +37,19 @@ func (cmd PasswordCommand) Run(args []string) error {
 	cmd.ParseFlags(args)
 
 	if *len < 1 {
-		return errors.New("\"len\" too short")
+		return errors.New("\"len\" cannot be less than one")
+	} else if *len > MAX_PASS_LENGTH {
+		return errors.Format("\"len\" cannot be greater than %d", MAX_PASS_LENGTH)
 	}
 
-	password := rand.Password(*len)
+	password := make([]byte, *len)
+	rand.Password(password)
+
 	if *copy {
-		return cmd.copyToClipboard(password)
+		return cmd.copyToClipboard(string(password))
 	}
 
-	fmt.Println(password)
+	fmt.Printf("%s\n", password)
 	return nil
 }
 

@@ -54,10 +54,17 @@ func (cmd CreateCommand) Run(args []string) error {
 	if *name == "" {
 		return errors.New("\"name\" cannot be empty")
 	}
+	if *pass > MAX_PASS_LENGTH {
+		return errors.Format("\"pass\" cannot be greater than %d", MAX_PASS_LENGTH)
+	}
+
 	r := record_v2.NewEmptyRecord(*name)
 
 	if *pass > 0 {
-		r.Password = rand.Password(*pass)
+		password := make([]byte, *pass)
+		rand.Password(password)
+
+		r.Password = string(password)
 	}
 
 	err = v.ValidateRecord(r)

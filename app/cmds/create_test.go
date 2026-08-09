@@ -132,6 +132,17 @@ func (s *CreateTestSuite) TestRunFailsWhenNameIsEmpty() {
 	s.RequireResultFail("\"name\" cannot be empty")
 }
 
+func (s *CreateTestSuite) TestRunFailsWhenPassLengthTooLarge() {
+	//-- arrange
+	const NAME = "name"
+
+	//-- act
+	s.RunCommand("-name", NAME, "-pass", fmt.Sprintf("%d", cmds.MAX_PASS_LENGTH+1))
+
+	//-- assert
+	s.RequireResultFail(fmt.Sprintf("\"pass\" cannot be greater than %d", cmds.MAX_PASS_LENGTH))
+}
+
 func (s *CreateTestSuite) TestRunFailsWhenNameAlreadyExists() {
 	//-- arrange
 	const NAME = "name"

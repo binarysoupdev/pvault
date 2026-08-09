@@ -5,18 +5,9 @@ import (
 	"math/big"
 )
 
-const MAX_PASS_LENGTH = 256
-
-func Password(length int) string {
-	if length < 1 {
-		return ""
-	}
-	//TODO: validate max length
-
+func Password(bytes []byte) {
 	const START = 32 // SPACE
 	const END = 126  // ~
-
-	bytes := make([]byte, length)
 	max := big.NewInt(END - START)
 
 	for i := range bytes {
@@ -27,6 +18,4 @@ func Password(length int) string {
 
 		bytes[i] = byte(num.Int64() + START)
 	}
-
-	return string(bytes)
 }
