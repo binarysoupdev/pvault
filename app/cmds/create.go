@@ -5,6 +5,7 @@ import (
 	config_flow "pvault/app/flow/config"
 	output_flow "pvault/app/flow/output"
 	vault_flow "pvault/app/flow/vault"
+	"pvault/tools/rand"
 	record_v2 "pvault/vault/record/record/v2"
 
 	"github.com/binarysoupdev/go-commando/command"
@@ -42,6 +43,7 @@ func (cmd *CreateCommand) Initialize() error {
 
 func (cmd CreateCommand) Run(args []string) error {
 	name := cmd.Flags.String("name", "", "name of the record")
+	pass := cmd.Flags.Int("pass", 0, "populate the password field with a random n-len string")
 	cmd.ParseFlags(args)
 
 	v, err := vault_flow.OpenCurrentVault(cmd.Config.VaultPath)
@@ -53,6 +55,10 @@ func (cmd CreateCommand) Run(args []string) error {
 		return errors.New("\"name\" cannot be empty")
 	}
 	r := record_v2.NewEmptyRecord(*name)
+
+	if *pass > 0 {
+		r.Password = rand.Password(*pass)
+	}
 
 	err = v.ValidateRecord(r)
 	if err != nil {

@@ -5,10 +5,13 @@ import (
 	"math/big"
 )
 
+const MAX_PASS_LENGTH = 256
+
 func Password(length int) string {
 	if length < 1 {
 		return ""
 	}
+	//TODO: validate max length
 
 	const START = 32 // SPACE
 	const END = 126  // ~

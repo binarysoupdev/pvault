@@ -12,6 +12,7 @@ import (
 	"pvault/vault/index"
 	"pvault/vault/meta"
 	meta_v1 "pvault/vault/meta/encoder/v1"
+	record_v2 "pvault/vault/record/record/v2"
 	v2 "pvault/vault/record/record/v2"
 	"testing"
 
@@ -179,4 +180,28 @@ func (s *CreateTestSuite) TestRunPassesAndCreatesNewRecord() {
 	s.Require().NoError(err)
 
 	s.Assert().Equal(r1, r2)
+}
+
+func (s *CreateTestSuite) TestRunPassesAndCreatesNewRecordWithRandPassword() {
+	//-- arrange
+	const NAME = "name"
+	const LENGTH = 30
+
+	out := pipe.OpenStdout(2)
+	defer out.Close()
+
+	//-- act
+	s.RunCommand("-name", NAME, "-pass", fmt.Sprintf("%d", LENGTH))
+
+	//-- assert
+	s.RequireResultPass()
+
+	s.Require().Contains(out.ReadLine(), "[+] Created Record: ")
+	s.Require().NoError(s.Vault.LoadIndex())
+
+	r, err := s.Vault.LoadRecord(NAME, "")
+	s.Require().NoError(err)
+
+	s.Require().IsType(record_v2.Record{}, r)
+	s.Assert().Len(r.(record_v2.Record).Password, LENGTH)
 }
