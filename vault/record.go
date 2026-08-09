@@ -20,7 +20,7 @@ func (v Vault) ValidateRecord(r record.Record) error {
 
 	existingId, ok := v.Map[r.GetName()]
 	if ok && existingId != r.GetID() {
-		return errors.Format("name \"%s\" already exists", r.GetName())
+		return errors.Format("name \"%s\" already exists for a different record", r.GetName())
 	}
 
 	return nil

@@ -85,6 +85,18 @@ func (s *UnlockTestSuite) TestRunFailsWhenConfigVersionUnsupported() {
 	s.RequireResultFail(fmt.Sprintf("unsupported config version \"%d\"", s.Config.Version))
 }
 
+func (s *UnlockTestSuite) TestRunFailsWhenConfigOutputPathInvalid() {
+	//-- arrange
+	s.Config.OutputPath = "invalid"
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
+
+	//-- act
+	s.RunCommand("-s", s.Record.Name)
+
+	//-- assert
+	s.RequireResultFail("error validating \"config.output_path\"")
+}
+
 func (s *UnlockTestSuite) TestRunFailsWhenVaultOutOfDate() {
 	//-- arrange
 	s.Config.VaultPath = s.T().TempDir()
@@ -103,18 +115,6 @@ func (s *UnlockTestSuite) TestRunFailsWhenVaultOutOfDate() {
 
 	//-- assert
 	s.RequireResultFail(fmt.Sprintf("vault (@v%d) out-of-date", DATABASE.GetVersion()))
-}
-
-func (s *UnlockTestSuite) TestRunFailsWhenConfigOutputPathInvalid() {
-	//-- arrange
-	s.Config.OutputPath = "invalid"
-	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
-
-	//-- act
-	s.RunCommand("-s", s.Record.Name)
-
-	//-- assert
-	s.RequireResultFail("error validating config \"output_path\"")
 }
 
 func (s *UnlockTestSuite) TestRunFailsWhenNoResults() {

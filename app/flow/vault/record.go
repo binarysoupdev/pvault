@@ -9,11 +9,26 @@ import (
 	"github.com/binarysoupdev/got-style/style"
 )
 
+func CreateRecord(v Vault, r record_v2.Record) error {
+	err := v.SaveRecord(r, "")
+	if err != nil {
+		logger.LogError(err)
+		return errors.New("error creating vault record")
+	}
+
+	logger.LogCreate("create record " + r.GetID().String())
+	style.BoldCreate.Printf("[+] Created Record: %s\n", r.GetID().String())
+
+	return nil
+}
+
 func SaveRecord(v Vault, r record_v2.Record) error {
 	err := v.ValidateRecord(r)
 	if err != nil {
 		return errors.Chain(err, "error validating record")
 	}
+
+	//TODO: add print to say record validated
 
 	password := prompt.Password("New PASSWORD: ")
 	if prompt.Password("Verify PASSWORD: ") != password {
@@ -27,7 +42,7 @@ func SaveRecord(v Vault, r record_v2.Record) error {
 	}
 
 	logger.LogCreate("save record " + r.GetID().String())
-	style.BoldCreate.Printf("[+] Saved Record: %s\n", r.GetID().String())
+	style.New(style.BOLD, style.YELLOW).Printf("[+] Saved Record: %s\n", r.GetID().String())
 
 	return nil
 }

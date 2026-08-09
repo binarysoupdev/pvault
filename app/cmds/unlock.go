@@ -31,6 +31,11 @@ func (cmd *UnlockCommand) Initialize() error {
 		return err
 	}
 
+	err = cmd.Config.ValidateOutputPath()
+	if err != nil {
+		return errors.Chain(err, "error validating \"config.output_path\"")
+	}
+
 	cmd.InitFlagSet(cmd.Name, cmd.Description)
 	return nil
 }
@@ -42,11 +47,6 @@ func (cmd UnlockCommand) Run(args []string) error {
 	v, err := vault_flow.OpenCurrentVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
-	}
-
-	err = cmd.Config.ValidateOutputPath()
-	if err != nil {
-		return errors.Chain(err, "error validating config \"output_path\"")
 	}
 
 	name, err := search.Select(v)

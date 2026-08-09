@@ -11,6 +11,39 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestCreateRecordReturnsErrorWhenVaultSaveRecordReturnsError(t *testing.T) {
+	//-- arrange
+	RECORD := record_v2.NewEmptyRecord("name")
+	v := &vault_flow.VaultMock{
+		SaveRecordError: errors.New(""),
+	}
+
+	//-- act
+	res := vault_flow.CreateRecord(v, RECORD)
+
+	//-- assert
+	require.ErrorContains(t, res, "error creating vault record")
+	assert.Equal(t, RECORD, v.Record)
+}
+
+func TestCreateRecordReturnsNoErrorAndCreatesRecord(t *testing.T) {
+	//-- arrange
+	RECORD := record_v2.NewEmptyRecord("name")
+	v := &vault_flow.VaultMock{}
+
+	out := pipe.OpenStdout(1)
+	defer out.Close()
+
+	//-- act
+	res := vault_flow.CreateRecord(v, RECORD)
+
+	//-- assert
+	require.NoError(t, res)
+	assert.Contains(t, out.ReadLine(), "[+] Created Record")
+
+	assert.Equal(t, RECORD, v.Record)
+}
+
 func TestSaveRecordReturnsErrorWithInvalidRecord(t *testing.T) {
 	//-- arrange
 	RECORD := record_v2.NewEmptyRecord("name")

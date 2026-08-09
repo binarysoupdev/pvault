@@ -31,6 +31,11 @@ func (cmd *CreateCommand) Initialize() error {
 		return err
 	}
 
+	err = cmd.Config.ValidateOutputPath()
+	if err != nil {
+		return errors.Chain(err, "error validating \"config.output_path\"")
+	}
+
 	cmd.InitFlagSet(cmd.Name, cmd.Description)
 	return nil
 }
@@ -39,23 +44,22 @@ func (cmd CreateCommand) Run(args []string) error {
 	name := cmd.Flags.String("name", "", "name of the record")
 	cmd.ParseFlags(args)
 
-	if *name == "" {
-		return errors.New("\"name\" cannot be empty")
-	}
-
 	v, err := vault_flow.OpenCurrentVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
 	}
 
-	err = cmd.Config.ValidateOutputPath()
-	if err != nil {
-		return errors.Chain(err, "error validating config \"output_path\"")
+	if *name == "" {
+		return errors.New("\"name\" cannot be empty")
 	}
-
 	r := record_v2.NewEmptyRecord(*name)
 
-	err = vault_flow.SaveRecord(v, r)
+	err = v.ValidateRecord(r)
+	if err != nil {
+		return errors.Format("name \"%s\" already exists", *name)
+	}
+
+	err = vault_flow.CreateRecord(v, r)
 	if err != nil {
 		return err
 	}

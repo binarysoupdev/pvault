@@ -77,23 +77,27 @@ func (s *CreateTestSuite) TestRunFailsWhenConfigVersionUnsupported() {
 	s.RequireResultFail(fmt.Sprintf("unsupported config version \"%d\"", s.Config.Version))
 }
 
-func (s *CreateTestSuite) TestRunFailsWhenNameIsEmpty() {
-	//-- act
-	s.RunCommand("-name", "")
-
-	//-- assert
-	s.RequireResultFail("\"name\" cannot be empty")
-}
-
-func (s *CreateTestSuite) TestRunFailsWithInvalidVaultPath() {
+func (s *CreateTestSuite) TestRunFailsWhenConfigOutputPathInvalid() {
 	//-- arrange
 	const NAME = "name"
 
-	s.Config.VaultPath = "invalid"
+	s.Config.OutputPath = "invalid"
 	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
 	//-- act
 	s.RunCommand("-name", NAME)
+
+	//-- assert
+	s.RequireResultFail("error validating \"config.output_path\"")
+}
+
+func (s *CreateTestSuite) TestRunFailsWithInvalidVaultPath() {
+	//-- arrange
+	s.Config.VaultPath = "invalid"
+	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
+
+	//-- act
+	s.RunCommand()
 
 	//-- assert
 	s.RequireResultFail("error opening vault")
@@ -101,8 +105,6 @@ func (s *CreateTestSuite) TestRunFailsWithInvalidVaultPath() {
 
 func (s *CreateTestSuite) TestRunFailsWhenVaultOutOfDate() {
 	//-- arrange
-	const NAME = "name"
-
 	s.Config.VaultPath = s.T().TempDir()
 	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
@@ -115,24 +117,18 @@ func (s *CreateTestSuite) TestRunFailsWhenVaultOutOfDate() {
 	s.Require().NoError(database.SaveIndex(DATABASE, s.Config.VaultPath, index.IndexMap{}))
 
 	//-- act
-	s.RunCommand("-name", NAME)
+	s.RunCommand()
 
 	//-- assert
 	s.RequireResultFail(fmt.Sprintf("vault (@v%d) out-of-date", DATABASE.GetVersion()))
 }
 
-func (s *CreateTestSuite) TestRunFailsWhenConfigOutputPathInvalid() {
-	//-- arrange
-	const NAME = "name"
-
-	s.Config.OutputPath = "invalid"
-	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
-
+func (s *CreateTestSuite) TestRunFailsWhenNameIsEmpty() {
 	//-- act
-	s.RunCommand("-name", NAME)
+	s.RunCommand("-name", "")
 
 	//-- assert
-	s.RequireResultFail("error validating config \"output_path\"")
+	s.RequireResultFail("\"name\" cannot be empty")
 }
 
 func (s *CreateTestSuite) TestRunFailsWhenNameAlreadyExists() {
@@ -149,65 +145,37 @@ func (s *CreateTestSuite) TestRunFailsWhenNameAlreadyExists() {
 	s.RunCommand("-name", NAME)
 
 	//-- assert
-	s.RequireResultFail("error validating record")
-}
-
-func (s *CreateTestSuite) TestRunFailsWithIncorrectVerifyPassword() {
-	//-- arrange
-	const NAME = "name"
-	const PASSWORD = "Password123!"
-
-	io := pipe.OpenStdio(2, 2, false)
-	defer io.Close()
-
-	//-- act
-	io.Queue("PASSWORD: ", PASSWORD)
-	io.Queue("PASSWORD: ", PASSWORD+"x")
-	io.EndQueue()
-
-	s.RunCommand("-name", NAME)
-
-	//-- assert
-	s.RequireResultFail("passwords do not match")
-	s.Assert().Contains(io.ReadLine(), "New PASSWORD")
-	s.Assert().Contains(io.ReadLine(), "Verify PASSWORD")
+	s.RequireResultFail(fmt.Sprintf("name \"%s\" already exists", NAME))
 }
 
 func (s *CreateTestSuite) TestRunPassesAndCreatesNewRecord() {
 	//-- arrange
 	const NAME = "name"
-	const PASSWORD = "Password123!"
 
-	io := pipe.OpenStdio(2, 4, false)
-	defer io.Close()
+	out := pipe.OpenStdout(2)
+	defer out.Close()
 
 	//-- act
-	io.Queue("PASSWORD: ", PASSWORD)
-	io.Queue("PASSWORD: ", PASSWORD)
-	io.EndQueue()
-
 	s.RunCommand("-name", NAME)
 
 	//-- assert
 	s.RequireResultPass()
-	s.Assert().Contains(io.ReadLine(), "New PASSWORD")
-	s.Assert().Contains(io.ReadLine(), "Verify PASSWORD")
 
-	line := io.ReadLine()
-	s.Require().Contains(line, "[+] Saved Record: ")
+	line := out.ReadLine()
+	s.Require().Contains(line, "[+] Created Record: ")
 
 	ID, err := uuid.Parse(line[len(line)-36:])
 	s.Require().NoError(err)
 
 	OUTPUT_FILE := filepath.Join(s.Config.OutputPath, ID.String()+".json")
-	s.Assert().Contains(io.ReadLine(), "[+] "+OUTPUT_FILE)
+	s.Assert().Contains(out.ReadLine(), "[+] "+OUTPUT_FILE)
 
 	s.Require().NoError(s.Vault.LoadIndex())
 
 	r1, err := json.UnmarshalFile[v2.Record](OUTPUT_FILE)
 	s.Require().NoError(err)
 
-	r2, err := s.Vault.LoadRecord(NAME, PASSWORD)
+	r2, err := s.Vault.LoadRecord(NAME, "")
 	s.Require().NoError(err)
 
 	s.Assert().Equal(r1, r2)
