@@ -23,13 +23,21 @@ type ConfigCommand struct {
 
 func NewConfigCommand(configLoader json.Loader[config.Config]) *ConfigCommand {
 	return &ConfigCommand{
-		CommandBase:   command.NewCommandBase("config", "configure the application"),
+		CommandBase:   command.NewCommandBase("config", "Configure the application."),
 		ConfigCommand: command.NewConfigCommand(configLoader),
 	}
 }
 
 func (cmd *ConfigCommand) Initialize() error {
 	cmd.InitFlagSet(cmd.Name, cmd.Description)
+	usage := cmd.Flags.Usage
+
+	cmd.Flags.Usage = func() {
+		usage()
+		fmt.Println()
+		cmd.printDescription()
+	}
+
 	return nil
 }
 
@@ -47,6 +55,13 @@ func (cmd ConfigCommand) Run(args []string) error {
 	}
 
 	return cmd.validate()
+}
+
+func (cmd ConfigCommand) printDescription() {
+	style.New(style.BOLD, style.UNDERLINE).Printf("Current Version: %d\n", config.VERSION)
+	fmt.Println("vault_path: the vault directory")
+	fmt.Println("backup_path: directory where backups are saved")
+	fmt.Println("output_path: path where unlocked files are saved")
 }
 
 func (cmd ConfigCommand) generateNew() error {
