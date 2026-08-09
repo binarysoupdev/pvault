@@ -39,7 +39,7 @@ func TestValidateRecordReturnsErrorWhenNameAlreadyExistsForAnotherRecord(t *test
 	res := v.ValidateRecord(RECORD)
 
 	//-- assert
-	assert.ErrorContains(t, res, fmt.Sprintf("name \"%s\" already exists", RECORD.Name))
+	assert.ErrorContains(t, res, fmt.Sprintf("name \"%s\" already exists for a different record", RECORD.Name))
 }
 
 func TestValidateRecordReturnsNoErrorWhenNameExistsForSameRecord(t *testing.T) {
