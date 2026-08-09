@@ -225,7 +225,7 @@ func (s *LockTestSuite) TestRunPassesAndUpdatesExistingRecord() {
 
 	s.Require().NoError(v.SaveRecord(OLD_RECORD, PASSWORD+"x"))
 
-	io := pipe.OpenStdio(2, 4, false)
+	io := pipe.OpenStdio(2, 5, false)
 	defer io.Close()
 
 	//-- act
@@ -237,6 +237,8 @@ func (s *LockTestSuite) TestRunPassesAndUpdatesExistingRecord() {
 
 	//-- assert
 	s.RequireResultPass()
+
+	s.Assert().Contains(io.ReadLine(), "[=] Record Verified")
 	s.Assert().Contains(io.ReadLine(), "New PASSWORD")
 	s.Assert().Contains(io.ReadLine(), "Verify PASSWORD")
 
