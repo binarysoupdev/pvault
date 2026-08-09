@@ -55,9 +55,9 @@ func buildRunner() command.Runner {
 	qrcode := qrcode.Skip2Renderer{}
 
 	return command.NewRunner(
-		cmds.NewPasswordCommand(clipboard),
 		cmds.NewConfigCommand(configLoader),
 		cmds.NewVaultCommand(configLoader),
+		cmds.NewPasswordCommand(clipboard),
 		cmds.NewSearchCommand(configLoader),
 		cmds.NewCreateCommand(configLoader),
 		cmds.NewLockCommand(configLoader),
