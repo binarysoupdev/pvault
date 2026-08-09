@@ -21,7 +21,7 @@ type CreateCommand struct {
 
 func NewCreateCommand(configLoader json.Loader[config.Config]) *CreateCommand {
 	return &CreateCommand{
-		CommandBase:   command.NewCommandBase("create", "create a new vault record"),
+		CommandBase:   command.NewCommandBase("create", "Create a new vault record"),
 		ConfigCommand: command.NewConfigCommand(configLoader),
 	}
 }

@@ -20,7 +20,7 @@ type UnlockCommand struct {
 
 func NewUnlockCommand(configLoader json.Loader[config.Config]) *UnlockCommand {
 	return &UnlockCommand{
-		CommandBase:   command.NewCommandBase("unlock", "unlock a record from the vault"),
+		CommandBase:   command.NewCommandBase("unlock", "Unlock a record from the vault"),
 		ConfigCommand: command.NewConfigCommand(configLoader),
 	}
 }

@@ -18,7 +18,7 @@ type DeleteCommand struct {
 
 func NewDeleteCommand(configLoader json.Loader[config.Config]) *DeleteCommand {
 	return &DeleteCommand{
-		CommandBase:   command.NewCommandBase("delete", "delete a record from the vault"),
+		CommandBase:   command.NewCommandBase("delete", "Delete a record from the vault"),
 		ConfigCommand: command.NewConfigCommand(configLoader),
 	}
 }

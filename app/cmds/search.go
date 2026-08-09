@@ -18,7 +18,7 @@ type SearchCommand struct {
 
 func NewSearchCommand(configLoader json.Loader[config.Config]) *SearchCommand {
 	return &SearchCommand{
-		CommandBase:   command.NewCommandBase("search", "search records in the vault"),
+		CommandBase:   command.NewCommandBase("search", "Search records in the vault"),
 		ConfigCommand: command.NewConfigCommand(configLoader),
 	}
 }

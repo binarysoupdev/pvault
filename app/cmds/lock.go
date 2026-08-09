@@ -21,7 +21,7 @@ type LockCommand struct {
 
 func NewLockCommand(configLoader json.Loader[config.Config]) *LockCommand {
 	return &LockCommand{
-		CommandBase:   command.NewCommandBase("lock", "lock a record in the vault"),
+		CommandBase:   command.NewCommandBase("lock", "Lock a record in the vault"),
 		ConfigCommand: command.NewConfigCommand(configLoader),
 	}
 }

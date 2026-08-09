@@ -25,7 +25,7 @@ type CopyCommand struct {
 
 func NewCopyCommand(configLoader json.Loader[config.Config], clipboard clipboard.Clipboard, qrcode qrcode.Renderer) *CopyCommand {
 	return &CopyCommand{
-		CommandBase:   command.NewCommandBase("copy", "copy password/username of a record"),
+		CommandBase:   command.NewCommandBase("copy", "Copy password/username of a record"),
 		ConfigCommand: command.NewConfigCommand(configLoader),
 		clipboard:     clipboard,
 		qrcode:        qrcode,
@@ -49,7 +49,7 @@ func (cmd *CopyCommand) Initialize() error {
 
 func (cmd CopyCommand) Run(args []string) error {
 	search := search_flow.NewSearchFlow(cmd.Flags)
-	username := cmd.Flags.Bool("username", false, "copy username instead of password")
+	username := cmd.Flags.Bool("username", false, "Copy username instead of password.")
 	qr := cmd.Flags.Bool("qr", false, "render as a qrcode")
 	cmd.ParseFlags(args)
 

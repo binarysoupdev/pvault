@@ -22,7 +22,7 @@ type VaultCommand struct {
 
 func NewVaultCommand(configLoader json.Loader[config.Config]) *VaultCommand {
 	return &VaultCommand{
-		CommandBase:   command.NewCommandBase("vault", "configure the vault"),
+		CommandBase:   command.NewCommandBase("vault", "Configure the vault"),
 		ConfigCommand: command.NewConfigCommand(configLoader),
 	}
 }

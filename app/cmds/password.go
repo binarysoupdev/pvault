@@ -21,7 +21,7 @@ type PasswordCommand struct {
 
 func NewPasswordCommand(clipboard clipboard.Clipboard) *PasswordCommand {
 	return &PasswordCommand{
-		CommandBase: command.NewCommandBase("pass", "generate a new random password"),
+		CommandBase: command.NewCommandBase("pass", "Generate a new random password"),
 		clipboard:   clipboard,
 	}
 }

@@ -23,7 +23,7 @@ type ConfigCommand struct {
 
 func NewConfigCommand(configLoader json.Loader[config.Config]) *ConfigCommand {
 	return &ConfigCommand{
-		CommandBase:   command.NewCommandBase("config", "Configure the application."),
+		CommandBase:   command.NewCommandBase("config", "Configure the application"),
 		ConfigCommand: command.NewConfigCommand(configLoader),
 	}
 }
