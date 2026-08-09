@@ -113,6 +113,14 @@ func (s *LockTestSuite) TestRunFailsWhenVaultOutOfDate() {
 	s.RequireResultFail(fmt.Sprintf("vault (@v%d) out-of-date", DATABASE.GetVersion()))
 }
 
+func (s *LockTestSuite) TestRunFailsWithEmptyRecordPath() {
+	//-- act
+	s.RunCommand()
+
+	//-- assert
+	s.RequireResultFail("\"path\" cannot be empty")
+}
+
 func (s *LockTestSuite) TestRunFailsWithInvalidRecordPath() {
 	//-- act
 	s.RunCommand("-path", "invalid")

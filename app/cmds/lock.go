@@ -40,13 +40,13 @@ func (cmd LockCommand) Run(args []string) error {
 	path := cmd.Flags.String("path", "", "path to the record JSON")
 	cmd.ParseFlags(args)
 
-	if *path == "" {
-		return errors.New("\"path\" cannot be empty")
-	}
-
 	v, err := vault_flow.OpenCurrentVault(cmd.Config.VaultPath)
 	if err != nil {
 		return err
+	}
+
+	if *path == "" {
+		return errors.New("\"path\" cannot be empty")
 	}
 
 	r, err := json.UnmarshalFile[record_v2.Record](*path)
