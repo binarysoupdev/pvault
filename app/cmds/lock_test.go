@@ -162,7 +162,7 @@ func (s *LockTestSuite) TestRunFailsWithIncorrectVerifyPassword() {
 	//-- arrange
 	const PASSWORD = "Password123!"
 
-	io := pipe.OpenStdio(2, 2, false)
+	io := pipe.OpenStdio(2, 3, false)
 	defer io.Close()
 
 	//-- act
@@ -174,6 +174,8 @@ func (s *LockTestSuite) TestRunFailsWithIncorrectVerifyPassword() {
 
 	//-- assert
 	s.RequireResultFail("passwords do not match")
+
+	s.Assert().Contains(io.ReadLine(), "[=] Record Verified")
 	s.Assert().Contains(io.ReadLine(), "New PASSWORD")
 	s.Assert().Contains(io.ReadLine(), "Verify PASSWORD")
 }
@@ -182,7 +184,7 @@ func (s *LockTestSuite) TestRunPassesAndSavesNewRecord() {
 	//-- arrange
 	const PASSWORD = "Password123!"
 
-	io := pipe.OpenStdio(2, 4, false)
+	io := pipe.OpenStdio(2, 5, false)
 	defer io.Close()
 
 	//-- act
@@ -194,6 +196,8 @@ func (s *LockTestSuite) TestRunPassesAndSavesNewRecord() {
 
 	//-- assert
 	s.RequireResultPass()
+
+	s.Assert().Contains(io.ReadLine(), "[=] Record Verified")
 	s.Assert().Contains(io.ReadLine(), "New PASSWORD")
 	s.Assert().Contains(io.ReadLine(), "Verify PASSWORD")
 

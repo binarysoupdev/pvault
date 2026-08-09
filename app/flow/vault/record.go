@@ -27,8 +27,7 @@ func SaveRecord(v Vault, r record_v2.Record) error {
 	if err != nil {
 		return errors.Chain(err, "error validating record")
 	}
-
-	//TODO: add print to say record validated
+	style.Success.Println("[=] Record Verified")
 
 	password := prompt.Password("New PASSWORD: ")
 	if prompt.Password("Verify PASSWORD: ") != password {

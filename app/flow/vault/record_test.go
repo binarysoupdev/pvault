@@ -63,7 +63,7 @@ func TestSaveRecordReturnsErrorWhenVerifyPasswordDoesNotMatch(t *testing.T) {
 	//-- arrange
 	const PASSWORD = "Password123!"
 
-	io := pipe.OpenStdio(2, 2, false)
+	io := pipe.OpenStdio(2, 3, false)
 	defer io.Close()
 
 	//-- act
@@ -75,6 +75,8 @@ func TestSaveRecordReturnsErrorWhenVerifyPasswordDoesNotMatch(t *testing.T) {
 
 	//-- assert
 	require.ErrorContains(t, res, "passwords do not match")
+
+	assert.Contains(t, io.ReadLine(), "[=] Record Verified")
 	assert.Contains(t, io.ReadLine(), "New PASSWORD")
 	assert.Contains(t, io.ReadLine(), "Verify PASSWORD")
 }
@@ -85,32 +87,6 @@ func TestSaveRecordReturnsErrorWhenVaultSaveRecordReturnsError(t *testing.T) {
 	v := &vault_flow.VaultMock{
 		SaveRecordError: errors.New(""),
 	}
-
-	const PASSWORD = "Password123!"
-
-	io := pipe.OpenStdio(2, 2, false)
-	defer io.Close()
-
-	//-- act
-	io.Queue("PASSWORD: ", PASSWORD)
-	io.Queue("PASSWORD: ", PASSWORD)
-	io.EndQueue()
-
-	res := vault_flow.SaveRecord(v, RECORD)
-
-	//-- assert
-	require.ErrorContains(t, res, "error saving vault record")
-	assert.Contains(t, io.ReadLine(), "New PASSWORD")
-	assert.Contains(t, io.ReadLine(), "Verify PASSWORD")
-
-	assert.Equal(t, RECORD, v.Record)
-	assert.Equal(t, PASSWORD, v.PasswordParam)
-}
-
-func TestSaveRecordReturnsNoErrorAndSavesRecord(t *testing.T) {
-	//-- arrange
-	RECORD := record_v2.NewEmptyRecord("name")
-	v := &vault_flow.VaultMock{}
 
 	const PASSWORD = "Password123!"
 
@@ -125,8 +101,37 @@ func TestSaveRecordReturnsNoErrorAndSavesRecord(t *testing.T) {
 	res := vault_flow.SaveRecord(v, RECORD)
 
 	//-- assert
+	require.ErrorContains(t, res, "error saving vault record")
+
+	assert.Contains(t, io.ReadLine(), "[=] Record Verified")
+	assert.Contains(t, io.ReadLine(), "New PASSWORD")
+	assert.Contains(t, io.ReadLine(), "Verify PASSWORD")
+
+	assert.Equal(t, RECORD, v.Record)
+	assert.Equal(t, PASSWORD, v.PasswordParam)
+}
+
+func TestSaveRecordReturnsNoErrorAndSavesRecord(t *testing.T) {
+	//-- arrange
+	RECORD := record_v2.NewEmptyRecord("name")
+	v := &vault_flow.VaultMock{}
+
+	const PASSWORD = "Password123!"
+
+	io := pipe.OpenStdio(2, 4, false)
+	defer io.Close()
+
+	//-- act
+	io.Queue("PASSWORD: ", PASSWORD)
+	io.Queue("PASSWORD: ", PASSWORD)
+	io.EndQueue()
+
+	res := vault_flow.SaveRecord(v, RECORD)
+
+	//-- assert
 	require.NoError(t, res)
 
+	assert.Contains(t, io.ReadLine(), "[=] Record Verified")
 	assert.Contains(t, io.ReadLine(), "New PASSWORD")
 	assert.Contains(t, io.ReadLine(), "Verify PASSWORD")
 	assert.Contains(t, io.ReadLine(), "[+] Saved Record")
