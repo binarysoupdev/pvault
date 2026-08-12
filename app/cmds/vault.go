@@ -123,7 +123,7 @@ func (cmd VaultCommand) upgrade() error {
 		return errors.Chain(err, "error upgrading vault")
 	}
 
-	style.BoldCreate.Printf("[+] Vault Upgraded (@v%d -> @v%d)\n", oldVersion, v.GetVersion())
+	style.BoldCreate.Printf("[+] Vault Upgraded (@%d -> @%d)\n", oldVersion, v.GetVersion())
 	return nil
 }
 

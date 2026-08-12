@@ -314,7 +314,7 @@ func (s *VaultTestSuite) TestRunUpgradePassesAndCreatesBackupAndUpgradesDatabase
 	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
 
-	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("[+] Vault Upgraded (@v%d -> @v%d)", db.GetVersion(), v.GetVersion()))
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("[+] Vault Upgraded (@%d -> @%d)", db.GetVersion(), v.GetVersion()))
 }
 
 func (s *VaultTestSuite) TestRunValidateFailsWithInvalidVault() {
