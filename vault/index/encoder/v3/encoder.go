@@ -1,4 +1,4 @@
-package v2
+package v3
 
 import (
 	"encoding/binary"
@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const VERSION = 2
+const VERSION = 3
 
 type Encoder struct{}
 

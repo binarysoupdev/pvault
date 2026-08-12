@@ -1,4 +1,4 @@
-package v2_test
+package v3_test
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"pvault/util"
 	"pvault/vault/index"
-	v2 "pvault/vault/index/encoder/v2"
+	v3 "pvault/vault/index/encoder/v3"
 	"testing"
 
 	"github.com/google/uuid"
@@ -17,7 +17,7 @@ import (
 
 func TestEncodeIndexReturnsErrorWhenErrorWritingHeader(t *testing.T) {
 	//-- arrange
-	e := v2.Encoder{}
+	e := v3.Encoder{}
 	mock := &util.MockWriter{
 		WriteErrors: []error{errors.New("")},
 	}
@@ -31,7 +31,7 @@ func TestEncodeIndexReturnsErrorWhenErrorWritingHeader(t *testing.T) {
 
 func TestEncodeIndexReturnsErrorWhenErrorWritingEntry(t *testing.T) {
 	//-- arrange
-	e := v2.Encoder{}
+	e := v3.Encoder{}
 	mock := &util.MockWriter{
 		WriteErrors: []error{nil, errors.New("")},
 	}
@@ -45,7 +45,7 @@ func TestEncodeIndexReturnsErrorWhenErrorWritingEntry(t *testing.T) {
 
 func TestDecodeIndexReturnsErrorWhenHeaderTooShort(t *testing.T) {
 	//-- arrange
-	e := v2.Encoder{}
+	e := v3.Encoder{}
 	buffer := &bytes.Buffer{}
 
 	//-- act
@@ -57,7 +57,7 @@ func TestDecodeIndexReturnsErrorWhenHeaderTooShort(t *testing.T) {
 
 func TestDecodeIndexReturnsErrorWhenIndexVersionUnsupported(t *testing.T) {
 	//-- arrange
-	e := v2.Encoder{}
+	e := v3.Encoder{}
 	buffer := &bytes.Buffer{}
 
 	const VERSION = index.VERSION + 1
@@ -75,7 +75,7 @@ func TestDecodeIndexReturnsErrorWhenIndexVersionUnsupported(t *testing.T) {
 
 func TestDecodeIndexReturnsErrorWhenEntryHeaderTooShort(t *testing.T) {
 	//-- arrange
-	e := v2.Encoder{}
+	e := v3.Encoder{}
 	buffer := &bytes.Buffer{}
 
 	HEADER := make([]byte, 4)
@@ -93,7 +93,7 @@ func TestDecodeIndexReturnsErrorWhenEntryHeaderTooShort(t *testing.T) {
 
 func TestDecodeIndexReturnsErrorWhenEntryLengthTooShort(t *testing.T) {
 	//-- arrange
-	e := v2.Encoder{}
+	e := v3.Encoder{}
 	buffer := &bytes.Buffer{}
 
 	HEADER := make([]byte, 4)
@@ -117,7 +117,7 @@ func TestDecodeIndexReturnsErrorWhenEntryLengthTooShort(t *testing.T) {
 
 func TestDecodeIndexReturnsErrorWhenEntryBodyTooShort(t *testing.T) {
 	//-- arrange
-	e := v2.Encoder{}
+	e := v3.Encoder{}
 	buffer := &bytes.Buffer{}
 
 	HEADER := make([]byte, 4)
@@ -141,7 +141,7 @@ func TestDecodeIndexReturnsErrorWhenEntryBodyTooShort(t *testing.T) {
 
 func TestEncodeDecodeIndexReturnsIndexAndNoError(t *testing.T) {
 	//-- arrange
-	e := v2.Encoder{}
+	e := v3.Encoder{}
 	buffer := &bytes.Buffer{}
 
 	INDEX := index.IndexMap{

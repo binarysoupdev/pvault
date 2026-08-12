@@ -39,9 +39,19 @@ func (db Encoder) Upgrade(path string) (v3.Encoder, error) {
 }
 
 func (db Encoder) upgradeIndex(target v3.Encoder, path string) error {
-	err := os.Rename(db.IndexPath(path), target.IndexPath(path))
+	bytes, err := os.ReadFile(db.IndexPath(path))
 	if err != nil {
-		return errors.Chain(err, "error renaming index file")
+		return errors.Chain(err, "error reading old index file")
+	}
+
+	err = os.WriteFile(target.IndexPath(path), bytes[2:], 0666)
+	if err != nil {
+		return errors.Chain(err, "error writing new index file")
+	}
+
+	err = os.Remove(db.IndexPath(path))
+	if err != nil {
+		return errors.Chain(err, "error removing old index file")
 	}
 
 	return nil

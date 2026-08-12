@@ -2,7 +2,7 @@ package v2
 
 import (
 	"path/filepath"
-	index_v2 "pvault/vault/index/encoder/v2"
+	index_v2 "pvault/vault/index/encoder/legacy/v2"
 	record_v2 "pvault/vault/record/encoder/legacy/v2"
 
 	"github.com/google/uuid"

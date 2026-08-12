@@ -2,7 +2,7 @@ package v3
 
 import (
 	"path/filepath"
-	index_v2 "pvault/vault/index/encoder/v2"
+	index_v3 "pvault/vault/index/encoder/v3"
 	record_v3 "pvault/vault/record/encoder/v3"
 
 	"github.com/google/uuid"
@@ -10,7 +10,7 @@ import (
 
 const VERSION = 3
 
-type IndexEncoder = index_v2.Encoder
+type IndexEncoder = index_v3.Encoder
 type RecordEncoder = record_v3.Encoder
 
 type Encoder struct {
