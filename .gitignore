@@ -5,3 +5,4 @@ pvault-prod
 coverage.out
 
 local/*
+export/*
