@@ -1,5 +1,7 @@
 package main
 
+// go build -tags=prod -ldflags="-s -w" -o pvault-prod
+
 import (
 	"fmt"
 	"os"
