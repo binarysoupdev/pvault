@@ -21,8 +21,6 @@ import (
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
 	"github.com/binarysoupdev/tinsel/pipe"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -85,11 +83,15 @@ func (s *VaultTestSuite) TestRunSetNicknameFailsWithInvalidVault() {
 	s.Config.VaultPath = s.T().TempDir()
 	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
+	out := pipe.OpenStdout(1)
+	defer out.Close()
+
 	//-- act
 	s.RunCommand("-nickname", NICKNAME)
 
 	//-- assert
-	s.RequireResultFail("error opening vault")
+	s.RequireResultFail("vault not found")
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault Path: \"%s\"", s.Config.VaultPath))
 }
 
 func (s *VaultTestSuite) TestRunSetNicknamePassesAndSetsNickname() {
@@ -99,7 +101,7 @@ func (s *VaultTestSuite) TestRunSetNicknamePassesAndSetsNickname() {
 	_, err := vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 
-	out := pipe.OpenStdout(1)
+	out := pipe.OpenStdout(2)
 	defer out.Close()
 
 	//-- act
@@ -107,6 +109,8 @@ func (s *VaultTestSuite) TestRunSetNicknamePassesAndSetsNickname() {
 
 	//-- assert
 	s.RequireResultPass()
+
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault Path: \"%s\"", s.Config.VaultPath))
 	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("[+] Set Nickname: %s", NICKNAME))
 
 	v, err := vault.Open(s.Config.VaultPath)
@@ -120,15 +124,6 @@ func (s *VaultTestSuite) TestRunInitFailsWithInvalidVaultPath() {
 	s.Config.VaultPath = s.T().TempDir()
 	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
-	//-- act
-	s.RunCommand("-init")
-
-	//-- assert
-	s.RequireResultFail("error initializing new vault")
-}
-
-func (s *VaultTestSuite) TestRunInitPassesAndInitializesVaultWithDefaultNickname() {
-	//-- arrange
 	out := pipe.OpenStdout(1)
 	defer out.Close()
 
@@ -136,8 +131,24 @@ func (s *VaultTestSuite) TestRunInitPassesAndInitializesVaultWithDefaultNickname
 	s.RunCommand("-init")
 
 	//-- assert
+	s.RequireResultFail("error initializing new vault")
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault Path: \"%s\"", s.Config.VaultPath))
+}
+
+func (s *VaultTestSuite) TestRunInitPassesAndInitializesVaultWithDefaultNickname() {
+	//-- arrange
+	out := pipe.OpenStdout(2)
+	defer out.Close()
+
+	//-- act
+	s.RunCommand("-init")
+
+	//-- assert
 	s.RequireResultPass()
+
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault Path: \"%s\"", s.Config.VaultPath))
 	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("[+] New Vault \"%s\" Initialized: %s", s.Dir, s.Config.VaultPath))
+
 	s.Assert().DirExists(s.Config.VaultPath)
 }
 
@@ -145,7 +156,7 @@ func (s *VaultTestSuite) TestRunInitPassesAndInitializesVaultWithNickname() {
 	//-- arrange
 	const NICKNAME = "nickname"
 
-	out := pipe.OpenStdout(1)
+	out := pipe.OpenStdout(2)
 	defer out.Close()
 
 	//-- act
@@ -153,7 +164,10 @@ func (s *VaultTestSuite) TestRunInitPassesAndInitializesVaultWithNickname() {
 
 	//-- assert
 	s.RequireResultPass()
+
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault Path: \"%s\"", s.Config.VaultPath))
 	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("[+] New Vault \"%s\" Initialized: %s", NICKNAME, s.Config.VaultPath))
+
 	s.Assert().DirExists(s.Config.VaultPath)
 }
 
@@ -162,11 +176,15 @@ func (s *VaultTestSuite) TestRunBackupFailsWithInvalidVault() {
 	s.Config.VaultPath = s.T().TempDir()
 	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
+	out := pipe.OpenStdout(1)
+	defer out.Close()
+
 	//-- act
 	s.RunCommand("-backup")
 
 	//-- assert
-	s.RequireResultFail("error opening vault")
+	s.RequireResultFail("vault not found")
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault Path: \"%s\"", s.Config.VaultPath))
 }
 
 func (s *VaultTestSuite) TestRunBackupFailsWithInvalidBackupPath() {
@@ -174,6 +192,9 @@ func (s *VaultTestSuite) TestRunBackupFailsWithInvalidBackupPath() {
 	s.Config.BackupPath = filepath.Join(s.T().TempDir(), "backups.txt")
 	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 	s.Require().NoError(util.CreateEmptyFile(s.Config.BackupPath))
+
+	out := pipe.OpenStdout(1)
+	defer out.Close()
 
 	_, err := vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
@@ -183,6 +204,7 @@ func (s *VaultTestSuite) TestRunBackupFailsWithInvalidBackupPath() {
 
 	//-- assert
 	s.RequireResultFail("error validating \"config.backup_path\"")
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault Path: \"%s\"", s.Config.VaultPath))
 }
 
 func (s *VaultTestSuite) TestRunBackupPassesAndBacksUpVault() {
@@ -192,7 +214,7 @@ func (s *VaultTestSuite) TestRunBackupPassesAndBacksUpVault() {
 	_, err := vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 
-	out := pipe.OpenStdout(1)
+	out := pipe.OpenStdout(2)
 	defer out.Close()
 
 	//-- act
@@ -200,13 +222,14 @@ func (s *VaultTestSuite) TestRunBackupPassesAndBacksUpVault() {
 
 	//-- assert
 	s.RequireResultPass()
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault Path: \"%s\"", s.Config.VaultPath))
 
 	line := out.ReadLine()
-	require.Contains(s.T(), line, "[+] Created Backup")
+	s.Require().Contains(line, "[+] Created Backup")
 
 	match := DIR_REGEX.FindStringSubmatch(line)
-	require.Len(s.T(), match, 2)
-	assert.DirExists(s.T(), match[1])
+	s.Require().Len(match, 2)
+	s.Assert().DirExists(match[1])
 }
 
 func (s *VaultTestSuite) TestRunUpgradeFailsWithInvalidVault() {
@@ -214,11 +237,15 @@ func (s *VaultTestSuite) TestRunUpgradeFailsWithInvalidVault() {
 	s.Config.VaultPath = s.T().TempDir()
 	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
+	out := pipe.OpenStdout(1)
+	defer out.Close()
+
 	//-- act
 	s.RunCommand("-upgrade")
 
 	//-- assert
-	s.RequireResultFail("error opening vault")
+	s.RequireResultFail("vault not found")
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault Path: \"%s\"", s.Config.VaultPath))
 }
 
 func (s *VaultTestSuite) TestRunUpgradeFailsWhenVaultIsUpToDate() {
@@ -226,11 +253,15 @@ func (s *VaultTestSuite) TestRunUpgradeFailsWhenVaultIsUpToDate() {
 	_, err := vault.InitializeNew(s.Config.VaultPath, "")
 	s.Require().NoError(err)
 
+	out := pipe.OpenStdout(1)
+	defer out.Close()
+
 	//-- act
 	s.RunCommand("-upgrade")
 
 	//-- assert
 	s.RequireResultFail("vault is up-to-date")
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault Path: \"%s\"", s.Config.VaultPath))
 }
 
 func (s *VaultTestSuite) TestRunUpgradeFailsWithInvalidBackupPath() {
@@ -242,11 +273,15 @@ func (s *VaultTestSuite) TestRunUpgradeFailsWithInvalidBackupPath() {
 
 	s.Require().NoError(database.SaveIndex(db_v1.Encoder{}, s.Config.VaultPath, index.IndexMap{}))
 
+	out := pipe.OpenStdout(1)
+	defer out.Close()
+
 	//-- act
 	s.RunCommand("-upgrade")
 
 	//-- assert
 	s.RequireResultFail("error validating \"config.backup_path\"")
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault Path: \"%s\"", s.Config.VaultPath))
 }
 
 func (s *VaultTestSuite) TestRunUpgradePassesAndCreatesBackupAndUpgradesDatabase() {
@@ -259,7 +294,7 @@ func (s *VaultTestSuite) TestRunUpgradePassesAndCreatesBackupAndUpgradesDatabase
 	db := db_v1.Encoder{}
 	s.Require().NoError(database.SaveIndex(db, s.Config.VaultPath, index.IndexMap{}))
 
-	out := pipe.OpenStdout(2)
+	out := pipe.OpenStdout(3)
 	defer out.Close()
 
 	//-- act
@@ -267,13 +302,14 @@ func (s *VaultTestSuite) TestRunUpgradePassesAndCreatesBackupAndUpgradesDatabase
 
 	//-- assert
 	s.RequireResultPass()
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault Path: \"%s\"", s.Config.VaultPath))
 
 	line := out.ReadLine()
-	require.Contains(s.T(), line, "[+] Created Backup")
+	s.Require().Contains(line, "[+] Created Backup")
 
 	match := DIR_REGEX.FindStringSubmatch(line)
-	require.Len(s.T(), match, 2)
-	assert.DirExists(s.T(), match[1])
+	s.Require().Len(match, 2)
+	s.Assert().DirExists(match[1])
 
 	v, err := vault.Open(s.Config.VaultPath)
 	s.Require().NoError(err)
@@ -286,11 +322,15 @@ func (s *VaultTestSuite) TestRunValidateFailsWithInvalidVault() {
 	s.Config.VaultPath = s.T().TempDir()
 	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
+	out := pipe.OpenStdout(1)
+	defer out.Close()
+
 	//-- act
 	s.RunCommand()
 
 	//-- assert
-	s.RequireResultFail("error opening vault")
+	s.RequireResultFail("vault not found")
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault Path: \"%s\"", s.Config.VaultPath))
 }
 
 func (s *VaultTestSuite) TestRunValidateFailsWhenVaultOutOfDate() {
@@ -306,11 +346,15 @@ func (s *VaultTestSuite) TestRunValidateFailsWhenVaultOutOfDate() {
 	s.Require().NoError(meta.SaveMetadata(meta_v1.Encoder{}, s.Config.VaultPath, META))
 	s.Require().NoError(database.SaveIndex(DATABASE, s.Config.VaultPath, index.IndexMap{}))
 
+	out := pipe.OpenStdout(1)
+	defer out.Close()
+
 	//-- act
 	s.RunCommand()
 
 	//-- assert
 	s.RequireResultFail(fmt.Sprintf("vault (@v%d) out-of-date", DATABASE.GetVersion()))
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault Path: \"%s\"", s.Config.VaultPath))
 }
 
 func (s *VaultTestSuite) TestRunValidatePassesAndPrintsVaultPathAndRecordCount() {
@@ -326,7 +370,7 @@ func (s *VaultTestSuite) TestRunValidatePassesAndPrintsVaultPathAndRecordCount()
 		s.Require().NoError(v.SaveRecord(record_v2.NewEmptyRecord(fmt.Sprintf("name_%d", i)), PASSWORD))
 	}
 
-	out := pipe.OpenStdout(3)
+	out := pipe.OpenStdout(4)
 	defer out.Close()
 
 	//-- act
@@ -334,7 +378,9 @@ func (s *VaultTestSuite) TestRunValidatePassesAndPrintsVaultPathAndRecordCount()
 
 	//-- assert
 	s.RequireResultPass()
-	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault \"%s\" verified at \"%s\" (@v%d)", NICKNAME, v.Path, v.GetVersion()))
+
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Vault Path: \"%s\"", s.Config.VaultPath))
+	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Verified vault \"%s\" (@v%d)", NICKNAME, v.GetVersion()))
 	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("Created on %s", v.Meta.CreationDate.Format(time.DateOnly)))
 	s.Assert().Contains(out.ReadLine(), fmt.Sprintf("[%d] records found", NUM_RECORDS))
 }

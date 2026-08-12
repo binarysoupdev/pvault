@@ -1,6 +1,7 @@
 package cmds
 
 import (
+	"fmt"
 	"path/filepath"
 	"pvault/app/config"
 	config_flow "pvault/app/flow/config"
@@ -43,6 +44,8 @@ func (cmd VaultCommand) Run(args []string) error {
 	backup := cmd.Flags.Bool("backup", false, "backup the vault to the backup directory")
 	upgrade := cmd.Flags.Bool("upgrade", false, "upgrade the vault if it's out-of-date")
 	cmd.ParseFlags(args)
+
+	style.BoldInfo.Printf("[=] Vault Path: \"%s\"\n", cmd.Config.VaultPath)
 
 	if *init {
 		return cmd.initialize(*nickname)
@@ -130,9 +133,9 @@ func (cmd VaultCommand) validate() error {
 		return err
 	}
 
-	style.BoldInfo.Printf("[=] Vault \"%s\" verified at \"%s\" (@v%d)\n", v.Meta.Nickname, v.Path, v.GetVersion())
-	style.Info.Printf("Created on %s\n", v.Meta.CreationDate.Format(time.DateOnly))
-	style.Info.Printf("[%d] records found\n", len(v.Map))
+	style.Success.Printf("Verified vault \"%s\" (@v%d)\n", v.Meta.Nickname, v.GetVersion())
+	fmt.Printf("Created on %s\n", v.Meta.CreationDate.Format(time.DateOnly))
+	fmt.Printf("[%d] records found\n", len(v.Map))
 
 	return nil
 }

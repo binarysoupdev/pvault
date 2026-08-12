@@ -13,6 +13,14 @@ import (
 	"github.com/binarysoupdev/go-commando/errors"
 )
 
+type ErrorNotFound struct{}
+
+func (err ErrorNotFound) Error() string {
+	return "vault not found"
+}
+
+//=================================
+
 func Open(path string) (Vault, error) {
 	v := New(path, filepath.Base(path))
 
@@ -40,7 +48,7 @@ func open(v *Vault) error {
 		return err
 	}
 
-	return errors.Format("vault not found at \"%s\"", v.Path)
+	return ErrorNotFound{}
 }
 
 func loadFromMetadata(v *Vault) (bool, error) {

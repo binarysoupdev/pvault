@@ -84,7 +84,7 @@ func (s *SearchTestSuite) TestRunFailsWithInvalidVaultPath() {
 	s.RunCommand("-s", NAME)
 
 	//-- assert
-	s.RequireResultFail("error opening vault")
+	s.RequireResultFail("vault not found")
 }
 
 func (s *SearchTestSuite) TestRunFailsWhenVaultOutOfDate() {

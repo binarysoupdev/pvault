@@ -90,7 +90,7 @@ func (s *DeleteTestSuite) TestRunFailsWithInvalidVaultPath() {
 	s.RunCommand("-s", s.Record.Name)
 
 	//-- assert
-	s.RequireResultFail("error opening vault")
+	s.RequireResultFail("vault not found")
 }
 
 func (s *DeleteTestSuite) TestRunFailsWhenVaultOutOfDate() {

@@ -19,14 +19,11 @@ import (
 )
 
 func TestOpenReturnsErrorWhenDatabaseNotFound(t *testing.T) {
-	//-- arrange
-	PATH := t.TempDir()
-
 	//-- act
-	_, res := vault.Open(PATH)
+	_, res := vault.Open(t.TempDir())
 
 	//-- assert
-	assert.ErrorContains(t, res, fmt.Sprintf("vault not found at \"%s\"", PATH))
+	assert.ErrorContains(t, res, "vault not found")
 }
 
 func TestOpenReturnsVaultAndNoErrorWhenDatabaseIsV1AndCreatesNewMetadata(t *testing.T) {

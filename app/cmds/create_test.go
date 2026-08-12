@@ -101,7 +101,7 @@ func (s *CreateTestSuite) TestRunFailsWithInvalidVaultPath() {
 	s.RunCommand()
 
 	//-- assert
-	s.RequireResultFail("error opening vault")
+	s.RequireResultFail("vault not found")
 }
 
 func (s *CreateTestSuite) TestRunFailsWhenVaultOutOfDate() {

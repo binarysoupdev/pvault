@@ -9,6 +9,7 @@ import (
 	"pvault/vault"
 	"pvault/vault/database"
 	db_v1 "pvault/vault/database/encoder/legacy/v1"
+	db_v2 "pvault/vault/database/encoder/legacy/v2"
 	"pvault/vault/index"
 	"pvault/vault/meta"
 	meta_v1 "pvault/vault/meta/encoder/v1"
@@ -24,6 +25,18 @@ import (
 func TestOpenLegacyVaultReturnsErrorWithInvalidPath(t *testing.T) {
 	//-- act
 	_, res := vault_flow.OpenLegacyVault("invalid")
+
+	//-- assert
+	require.ErrorContains(t, res, "vault not found")
+}
+
+func TestOpenLegacyVaultReturnsErrorWithInvalidVault(t *testing.T) {
+	//-- arrange
+	PATH := t.TempDir()
+	require.NoError(t, util.CreateEmptyFile(db_v2.Encoder{}.IndexPath(PATH)))
+
+	//-- act
+	_, res := vault_flow.OpenLegacyVault(PATH)
 
 	//-- assert
 	require.ErrorContains(t, res, "error opening vault")
@@ -51,6 +64,18 @@ func TestOpenLegacyVaultReturnsVaultAndNoError(t *testing.T) {
 func TestOpenCurrentVaultReturnsErrorWithInvalidPath(t *testing.T) {
 	//-- act
 	_, res := vault_flow.OpenCurrentVault("invalid")
+
+	//-- assert
+	require.ErrorContains(t, res, "vault not found")
+}
+
+func TestOpenCurrentVaultReturnsErrorWithInvalidVault(t *testing.T) {
+	//-- arrange
+	PATH := t.TempDir()
+	require.NoError(t, util.CreateEmptyFile(db_v2.Encoder{}.IndexPath(PATH)))
+
+	//-- act
+	_, res := vault_flow.OpenCurrentVault(PATH)
 
 	//-- assert
 	require.ErrorContains(t, res, "error opening vault")

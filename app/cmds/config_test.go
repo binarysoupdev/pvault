@@ -113,7 +113,7 @@ func (s *ConfigTestSuite) TestRunValidatePassesWithInvalidVaultAndPrintsError() 
 
 	vaultPath := out.ReadLine()
 	s.Assert().Contains(vaultPath, s.Config.VaultPath)
-	s.Assert().Contains(vaultPath, "error opening vault")
+	s.Assert().Contains(vaultPath, "vault not found")
 }
 
 func (s *ConfigTestSuite) TestRunValidatePassesWithOutOfDateVaultAndPrintsError() {
