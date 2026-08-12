@@ -2,19 +2,20 @@ package v2_test
 
 import (
 	"bytes"
+	"encoding/binary"
+	"errors"
+	"fmt"
 	"pvault/util"
 	"pvault/vault/index"
 	v2 "pvault/vault/index/encoder/legacy/v2"
 	"testing"
 
 	"github.com/google/uuid"
-
-	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestEncodeIndexReturnsErrorWhenErrorWritingNullHeader(t *testing.T) {
+func TestEncodeIndexReturnsErrorWhenErrorWritingHeader(t *testing.T) {
 	//-- arrange
 	e := v2.Encoder{}
 	mock := &util.MockWriter{
@@ -25,7 +26,21 @@ func TestEncodeIndexReturnsErrorWhenErrorWritingNullHeader(t *testing.T) {
 	res := e.EncodeIndex(mock, index.IndexMap{})
 
 	//-- arrange
-	assert.ErrorContains(t, res, "error encoding null header")
+	assert.ErrorContains(t, res, "error encoding header")
+}
+
+func TestEncodeIndexReturnsErrorWhenErrorWritingEntry(t *testing.T) {
+	//-- arrange
+	e := v2.Encoder{}
+	mock := &util.MockWriter{
+		WriteErrors: []error{nil, errors.New("")},
+	}
+
+	//-- act
+	res := e.EncodeIndex(mock, index.IndexMap{"": uuid.Nil})
+
+	//-- arrange
+	assert.ErrorContains(t, res, "error encoding entry [0]")
 }
 
 func TestDecodeIndexReturnsErrorWhenHeaderTooShort(t *testing.T) {
@@ -37,7 +52,73 @@ func TestDecodeIndexReturnsErrorWhenHeaderTooShort(t *testing.T) {
 	_, res := e.DecodeIndex(buffer)
 
 	//-- arrange
-	assert.ErrorContains(t, res, "error decoding null header")
+	assert.ErrorContains(t, res, "error decoding header")
+}
+
+func TestDecodeIndexReturnsErrorWhenEntryHeaderTooShort(t *testing.T) {
+	//-- arrange
+	e := v2.Encoder{}
+	buffer := &bytes.Buffer{}
+
+	HEADER := make([]byte, 4)
+	binary.BigEndian.PutUint16(HEADER, uint16(index.VERSION))
+	binary.BigEndian.PutUint16(HEADER[2:], 1)
+	buffer.Write(HEADER)
+
+	//-- act
+	_, res := e.DecodeIndex(buffer)
+
+	//-- arrange
+	assert.ErrorContains(t, res, "error decoding entry [0]")
+	assert.ErrorContains(t, res, "error decoding header")
+}
+
+func TestDecodeIndexReturnsErrorWhenEntryLengthTooShort(t *testing.T) {
+	//-- arrange
+	e := v2.Encoder{}
+	buffer := &bytes.Buffer{}
+
+	HEADER := make([]byte, 4)
+	binary.BigEndian.PutUint16(HEADER, uint16(index.VERSION))
+	binary.BigEndian.PutUint16(HEADER[2:], 1)
+	buffer.Write(HEADER)
+
+	const ENTRY_LENGTH = 1
+
+	ENTRY := make([]byte, 2)
+	binary.BigEndian.PutUint16(ENTRY, ENTRY_LENGTH)
+	buffer.Write(ENTRY)
+
+	//-- act
+	_, res := e.DecodeIndex(buffer)
+
+	//-- arrange
+	assert.ErrorContains(t, res, "error decoding entry [0]")
+	assert.ErrorContains(t, res, fmt.Sprintf("length too short: %d", ENTRY_LENGTH))
+}
+
+func TestDecodeIndexReturnsErrorWhenEntryBodyTooShort(t *testing.T) {
+	//-- arrange
+	e := v2.Encoder{}
+	buffer := &bytes.Buffer{}
+
+	HEADER := make([]byte, 4)
+	binary.BigEndian.PutUint16(HEADER, uint16(index.VERSION))
+	binary.BigEndian.PutUint16(HEADER[2:], 1)
+	buffer.Write(HEADER)
+
+	const ENTRY_LENGTH = 16 + 1
+
+	ENTRY := make([]byte, 2)
+	binary.BigEndian.PutUint16(ENTRY, uint16(ENTRY_LENGTH))
+	buffer.Write(ENTRY)
+
+	//-- act
+	_, res := e.DecodeIndex(buffer)
+
+	//-- arrange
+	assert.ErrorContains(t, res, "error decoding entry [0]")
+	assert.ErrorContains(t, res, "error decoding body")
 }
 
 func TestEncodeDecodeIndexReturnsIndexAndNoError(t *testing.T) {

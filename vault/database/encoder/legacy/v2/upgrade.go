@@ -6,6 +6,7 @@ import (
 	"os"
 	"pvault/vault/database"
 	v3 "pvault/vault/database/encoder/v3"
+	"pvault/vault/index"
 	record_v1 "pvault/vault/record/record/legacy/v1"
 	record_v2 "pvault/vault/record/record/v2"
 
@@ -44,7 +45,9 @@ func (db Encoder) upgradeIndex(target v3.Encoder, path string) error {
 		return errors.Chain(err, "error reading old index file")
 	}
 
-	err = os.WriteFile(target.IndexPath(path), bytes[2:], 0666)
+	binary.BigEndian.PutUint16(bytes, index.VERSION)
+
+	err = os.WriteFile(target.IndexPath(path), bytes, 0666)
 	if err != nil {
 		return errors.Chain(err, "error writing new index file")
 	}
