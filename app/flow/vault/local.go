@@ -6,9 +6,10 @@ import (
 	"os"
 	"path/filepath"
 	"pvault/app/config"
-	"pvault/app/logger"
 	"pvault/vault"
 	"time"
+
+	"github.com/binarysoupdev/go-commando/logger"
 
 	"github.com/binarysoupdev/go-extensions/errors"
 	"github.com/binarysoupdev/got-style/style"
@@ -60,7 +61,7 @@ func BackupVault(v vault.Vault, cfg config.Config) error {
 		return errors.New("error backing vault")
 	}
 
-	logger.LogCreate("create backup " + path)
+	logger.Logf("[+] create backup %s", path)
 	style.BoldCreate.Printf("[+] Created Backup \"%s\"\n", path)
 
 	return nil

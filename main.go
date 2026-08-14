@@ -8,13 +8,13 @@ import (
 	"path/filepath"
 	"pvault/app/cmds"
 	"pvault/app/config"
-	"pvault/app/logger"
 	"pvault/build"
 	"pvault/tools/clipboard"
 	"pvault/tools/qrcode"
 	"pvault/version"
 
 	"github.com/binarysoupdev/go-commando/command"
+	"github.com/binarysoupdev/go-commando/logger"
 	"github.com/binarysoupdev/go-extensions/errors"
 	"github.com/binarysoupdev/go-extensions/json"
 	"github.com/binarysoupdev/got-style/style"
@@ -40,7 +40,7 @@ func printDefault(runner command.Runner) {
 }
 
 func runApp(runner command.Runner) error {
-	log, err := logger.Open(logPath())
+	log, err := logger.OpenFile(logPath())
 	if err != nil {
 		return errors.Chain(err, "error opening logger")
 	}

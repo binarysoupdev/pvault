@@ -3,8 +3,9 @@ package output_flow
 import (
 	"path/filepath"
 	"pvault/app/config"
-	"pvault/app/logger"
 	record_v2 "pvault/vault/record/record/v2"
+
+	"github.com/binarysoupdev/go-commando/logger"
 
 	"github.com/binarysoupdev/go-extensions/errors"
 	"github.com/binarysoupdev/go-extensions/json"
@@ -25,7 +26,7 @@ func SaveRecord(cfg config.Config, r record_v2.Record) error {
 		return errors.New("error creating output record")
 	}
 
-	logger.LogCreate("created " + path)
+	logger.Logf("[+] created %s", path)
 	style.Create.Printf("[+] %s\n", path)
 
 	return nil
