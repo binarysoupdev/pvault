@@ -1,7 +1,6 @@
 package vault_flow
 
 import (
-	errors_std "errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -31,7 +30,7 @@ func OpenCurrentVault(path string) (vault.Vault, error) {
 func OpenLegacyVault(path string) (vault.Vault, error) {
 	v, err := vault.Open(path)
 
-	if errors_std.Is(err, vault.ErrorNotFound{}) {
+	if errors.Is[vault.ErrorNotFound](err) {
 		return vault.Vault{}, errors.New("vault not found (run \"vault -init\" to create)")
 	}
 	if err != nil {
