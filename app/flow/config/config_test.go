@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/command"
-	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-extensions/file"
+	"github.com/binarysoupdev/go-extensions/json"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

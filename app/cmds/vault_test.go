@@ -18,9 +18,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
 	"github.com/binarysoupdev/go-extensions/file"
+	"github.com/binarysoupdev/go-extensions/json"
 	"github.com/binarysoupdev/tinsel/pipe"
 	"github.com/stretchr/testify/suite"
 )

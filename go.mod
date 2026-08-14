@@ -8,7 +8,7 @@ require (
 	github.com/binarysoupdev/go-commando v1.4.0
 	github.com/binarysoupdev/go-extensions v0.1.0
 	github.com/binarysoupdev/got-style v1.1.0
-	github.com/binarysoupdev/tinsel v0.2.0
+	github.com/binarysoupdev/tinsel v1.0.0
 	github.com/google/uuid v1.6.0
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.11.1
@@ -22,5 +22,8 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
+replace github.com/binarysoupdev/go-commando => ../go-commando
+
 replace github.com/binarysoupdev/cryptool => ../cryptool
+
 replace github.com/binarysoupdev/go-extensions => ../go-extensions

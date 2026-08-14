@@ -15,9 +15,9 @@ import (
 	meta_v1 "pvault/vault/meta/encoder/v1"
 	"testing"
 
-	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
 	"github.com/binarysoupdev/go-extensions/file"
+	"github.com/binarysoupdev/go-extensions/json"
 	"github.com/binarysoupdev/tinsel/pipe"
 	"github.com/stretchr/testify/suite"
 )

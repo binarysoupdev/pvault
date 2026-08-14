@@ -8,8 +8,8 @@ import (
 	search_flow "pvault/app/flow/vault/search"
 
 	"github.com/binarysoupdev/go-commando/command"
-	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-extensions/errors"
+	"github.com/binarysoupdev/go-extensions/json"
 )
 
 type UnlockCommand struct {
