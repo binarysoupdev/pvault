@@ -2,6 +2,8 @@ github.com/atotto/clipboard v0.1.4 h1:EH0zSVneZPSuFR11BlR9YppQTVDbh5+16AmcJi4g1z
 github.com/atotto/clipboard v0.1.4/go.mod h1:ZY9tmq7sm5xIbd9bOK4onWV4S6X0u6GY7Vn0Yu86PYI=
 github.com/binarysoupdev/go-commando v1.5.1 h1:iS6d/C3fnXPEFdgU+cIQ3kAoHI4MEKETqfRkLLfbVcA=
 github.com/binarysoupdev/go-commando v1.5.1/go.mod h1:tEzA+qBRaRFn8mezl0qzfUvR5C10hHNpDWFs7E3Do2s=
+github.com/binarysoupdev/go-extensions v0.2.0 h1:laIxth9L7smb05xCN4nFRGrhAoVikgP6+vfa5Zqo8ds=
+github.com/binarysoupdev/go-extensions v0.2.0/go.mod h1:bDoRYhZnVuz0kstMfdy/6gEotFK3tICIDtboX5pANnw=
 github.com/binarysoupdev/got-style v1.1.0 h1:f5D2tsWE5ttftoYPSuF33J74tnTQ4uiAbkuvdZzrack=
 github.com/binarysoupdev/got-style v1.1.0/go.mod h1:3Dp1Ng/kovJAeDxPrLaSVFNfa4tFVUucFZ7jG44DQFc=
 github.com/binarysoupdev/tinsel v1.0.0 h1:h8E08VnVooYeLrsgbhdKra33EvIdDjE+QfL9WF4sDNE=
