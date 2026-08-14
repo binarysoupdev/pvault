@@ -3,7 +3,8 @@ package cmds
 import (
 	"fmt"
 	"pvault/tools/clipboard"
-	"pvault/tools/rand"
+
+	"github.com/binarysoupdev/cryptool/rand"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/go-commando/errors"
@@ -43,7 +44,7 @@ func (cmd PasswordCommand) Run(args []string) error {
 	}
 
 	password := make([]byte, *len)
-	rand.Password(password)
+	rand.ASCII(password)
 
 	if *copy {
 		return cmd.copyToClipboard(string(password))

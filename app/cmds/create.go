@@ -5,9 +5,9 @@ import (
 	config_flow "pvault/app/flow/config"
 	output_flow "pvault/app/flow/output"
 	vault_flow "pvault/app/flow/vault"
-	"pvault/tools/rand"
 	record_v2 "pvault/vault/record/record/v2"
 
+	"github.com/binarysoupdev/cryptool/rand"
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/binarysoupdev/go-commando/json"
@@ -62,7 +62,7 @@ func (cmd CreateCommand) Run(args []string) error {
 
 	if *pass > 0 {
 		password := make([]byte, *pass)
-		rand.Password(password)
+		rand.ASCII(password)
 
 		r.Password = string(password)
 	}
