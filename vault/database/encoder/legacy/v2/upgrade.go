@@ -94,6 +94,13 @@ func (db Encoder) upgradeRecordV1(target v3.Encoder, r io.Reader, path string, i
 	}
 	defer new.Close()
 
+	version := make([]byte, 2)
+	binary.BigEndian.PutUint16(version, record_v1.VERSION)
+
+	if _, err := new.Write(version); err != nil {
+		return errors.Chain(err, "error writing version header")
+	}
+
 	err = target.EncodeRawV1(new, raw.Data, id, raw.Name)
 	if err != nil {
 		return errors.Chain(err, "error encoding new record")
