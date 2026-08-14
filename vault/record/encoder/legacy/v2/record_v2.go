@@ -1,8 +1,6 @@
 package v2
 
 import (
-	"bytes"
-	"encoding/binary"
 	"io"
 
 	"pvault/vault/record"
@@ -26,10 +24,7 @@ func (e Encoder) EncodeV2(w io.Writer, password string, r record.Record) error {
 }
 
 func (e Encoder) EncodeRawV2(w io.Writer, data []byte) error {
-	version := make([]byte, 2)
-	binary.BigEndian.PutUint16(version, v2.VERSION)
-
-	_, err := w.Write(bytes.Join([][]byte{version, data}, []byte{}))
+	_, err := w.Write(data)
 	return err
 }
 

@@ -32,9 +32,8 @@ func (e Encoder) EncodeV1(w io.Writer, password string, r record.Record) error {
 }
 
 func (e Encoder) EncodeRawV1(w io.Writer, data []byte, name string) error {
-	header := make([]byte, 2+2)
-	binary.BigEndian.PutUint16(header, v1.VERSION)
-	binary.BigEndian.PutUint16(header[2:], uint16(len(name)))
+	header := make([]byte, 2)
+	binary.BigEndian.PutUint16(header, uint16(len(name)))
 
 	_, err := w.Write(bytes.Join([][]byte{header, []byte(name), data}, []byte{}))
 	return err

@@ -37,5 +37,3 @@ func TestDecodeV1ReturnsErrorWhenErrorDecryptingRecord(t *testing.T) {
 	//-- assert
 	assert.ErrorContains(t, res, "error decrypting record v1")
 }
-
-//TODO: test EncodeDecode
