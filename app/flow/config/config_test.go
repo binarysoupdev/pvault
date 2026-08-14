@@ -5,11 +5,12 @@ import (
 	"path/filepath"
 	"pvault/app/config"
 	config_flow "pvault/app/flow/config"
-	"pvault/util"
+
 	"testing"
 
 	"github.com/binarysoupdev/go-commando/command"
 	"github.com/binarysoupdev/go-commando/json"
+	"github.com/binarysoupdev/go-extensions/file"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -32,7 +33,7 @@ func TestConfigCommandBaseLoadConfigReturnsErrorWhenConfigIsInvalidJson(t *testi
 	cmd := command.NewConfigCommand(
 		json.NewLoader[config.Config](filepath.Join(t.TempDir(), "invalid.json")),
 	)
-	require.NoError(t, util.CreateEmptyFile(cmd.ConfigLoader.Path))
+	require.NoError(t, file.CreateEmpty(cmd.ConfigLoader.Path))
 
 	//-- act
 	res := config_flow.LoadConfig(&cmd)

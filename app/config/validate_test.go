@@ -3,9 +3,10 @@ package config_test
 import (
 	"path/filepath"
 	"pvault/app/config"
-	"pvault/util"
+
 	"testing"
 
+	"github.com/binarysoupdev/go-extensions/file"
 	"github.com/stretchr/testify/require"
 )
 
@@ -14,7 +15,7 @@ func TestValidateBackupPathWherePathIsAFileReturnsError(t *testing.T) {
 	cfg := config.Config{
 		BackupPath: filepath.Join(t.TempDir(), "backup.txt"),
 	}
-	require.NoError(t, util.CreateEmptyFile(cfg.BackupPath))
+	require.NoError(t, file.CreateEmpty(cfg.BackupPath))
 
 	//-- act
 	res := cfg.ValidateBackupPath()
@@ -67,7 +68,7 @@ func TestValidateOutputPathNotDirectory(t *testing.T) {
 	cfg := config.Config{
 		OutputPath: filepath.Join(t.TempDir(), "file.txt"),
 	}
-	require.NoError(t, util.CreateEmptyFile(cfg.OutputPath))
+	require.NoError(t, file.CreateEmpty(cfg.OutputPath))
 
 	//-- act
 	res := cfg.ValidateOutputPath()

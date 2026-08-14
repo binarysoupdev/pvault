@@ -4,7 +4,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 )
 
 type Encoder interface {

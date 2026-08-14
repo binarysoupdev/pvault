@@ -6,7 +6,7 @@ import (
 	v3 "pvault/vault/database/encoder/v3"
 	"pvault/vault/index"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 	"github.com/google/uuid"
 )
 

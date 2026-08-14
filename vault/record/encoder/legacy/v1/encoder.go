@@ -5,7 +5,7 @@ import (
 	"pvault/vault/record"
 	record_v1 "pvault/vault/record/record/legacy/v1"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 	"github.com/google/uuid"
 )
 

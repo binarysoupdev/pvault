@@ -6,7 +6,7 @@ import (
 	vault_flow "pvault/app/flow/vault"
 	"strings"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 	"github.com/binarysoupdev/got-style/style"
 )
 

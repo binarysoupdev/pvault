@@ -10,7 +10,7 @@ import (
 	"pvault/vault/meta"
 	meta_v1 "pvault/vault/meta/encoder/v1"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 )
 
 type ErrorNotFound struct{}

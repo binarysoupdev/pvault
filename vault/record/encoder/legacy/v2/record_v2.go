@@ -1,13 +1,14 @@
 package v2
 
 import (
+	"bytes"
 	"encoding/binary"
 	"io"
-	"pvault/util"
+
 	"pvault/vault/record"
 	v2 "pvault/vault/record/record/v2"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 )
 
 func (e Encoder) EncodeV2(w io.Writer, password string, r record.Record) error {
@@ -28,7 +29,8 @@ func (e Encoder) EncodeRawV2(w io.Writer, data []byte) error {
 	version := make([]byte, 2)
 	binary.BigEndian.PutUint16(version, v2.VERSION)
 
-	return util.WriteBytes(w, version, data)
+	_, err := w.Write(bytes.Join([][]byte{version, data}, []byte{}))
+	return err
 }
 
 func (e Encoder) DecodeV2(r io.Reader, password string) (v2.Record, error) {

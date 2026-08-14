@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"pvault/app/config"
 	vault_flow "pvault/app/flow/vault"
-	"pvault/util"
+
 	"pvault/vault"
 	"pvault/vault/database"
 	db_v1 "pvault/vault/database/encoder/legacy/v1"
@@ -17,6 +17,7 @@ import (
 
 	"testing"
 
+	"github.com/binarysoupdev/go-extensions/file"
 	"github.com/binarysoupdev/tinsel/pipe"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,7 +34,7 @@ func TestOpenLegacyVaultReturnsErrorWithInvalidPath(t *testing.T) {
 func TestOpenLegacyVaultReturnsErrorWithInvalidVault(t *testing.T) {
 	//-- arrange
 	PATH := t.TempDir()
-	require.NoError(t, util.CreateEmptyFile(db_v2.Encoder{}.IndexPath(PATH)))
+	require.NoError(t, file.CreateEmpty(db_v2.Encoder{}.IndexPath(PATH)))
 
 	//-- act
 	_, res := vault_flow.OpenLegacyVault(PATH)
@@ -72,7 +73,7 @@ func TestOpenCurrentVaultReturnsErrorWithInvalidPath(t *testing.T) {
 func TestOpenCurrentVaultReturnsErrorWithInvalidVault(t *testing.T) {
 	//-- arrange
 	PATH := t.TempDir()
-	require.NoError(t, util.CreateEmptyFile(db_v2.Encoder{}.IndexPath(PATH)))
+	require.NoError(t, file.CreateEmpty(db_v2.Encoder{}.IndexPath(PATH)))
 
 	//-- act
 	_, res := vault_flow.OpenCurrentVault(PATH)
@@ -119,7 +120,7 @@ func TestBackupVaultReturnsErrorWhenBackupPathInvalid(t *testing.T) {
 	CONFIG := config.Config{
 		BackupPath: filepath.Join(t.TempDir(), "invalid.txt"),
 	}
-	require.NoError(t, util.CreateEmptyFile(CONFIG.BackupPath))
+	require.NoError(t, file.CreateEmpty(CONFIG.BackupPath))
 
 	//-- act
 	res := vault_flow.BackupVault(vault.Vault{}, CONFIG)

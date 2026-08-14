@@ -3,7 +3,7 @@ package qrcode
 import (
 	"fmt"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 
 	qrcode "github.com/skip2/go-qrcode"
 )

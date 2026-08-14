@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"pvault/util"
+
 	"pvault/vault"
 	"pvault/vault/database"
 	"pvault/vault/index"
 	"pvault/vault/meta"
 	"testing"
 
+	"github.com/binarysoupdev/go-extensions/file"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -27,7 +28,7 @@ func TestVaultBackupReturnsErrorWhenPathNotFound(t *testing.T) {
 func TestVaultBackupReturnsErrorWhenPathIsNotADir(t *testing.T) {
 	//-- arrange
 	PATH := filepath.Join(t.TempDir(), "backups.txt")
-	require.NoError(t, util.CreateEmptyFile(PATH))
+	require.NoError(t, file.CreateEmpty(PATH))
 
 	//-- act
 	res := vault.Vault{}.Backup(PATH)

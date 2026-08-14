@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 )
 
 var logger *log.Logger

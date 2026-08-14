@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"pvault/app/cmds"
 	"pvault/app/config"
-	"pvault/util"
+
 	"pvault/vault"
 	"pvault/vault/database"
 	db_v1 "pvault/vault/database/encoder/legacy/v1"
@@ -17,6 +17,7 @@ import (
 
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
+	"github.com/binarysoupdev/go-extensions/file"
 	"github.com/binarysoupdev/tinsel/pipe"
 	"github.com/stretchr/testify/suite"
 )
@@ -148,7 +149,7 @@ func (s *ConfigTestSuite) TestRunValidatePassesWithOutOfDateVaultAndPrintsError(
 func (s *ConfigTestSuite) TestRunValidatePassesWithInvalidBackupPathAndPrintsError() {
 	//-- arrange
 	s.Config.BackupPath = filepath.Join(s.T().TempDir(), "backup.txt")
-	s.Require().NoError(util.CreateEmptyFile(s.Config.BackupPath))
+	s.Require().NoError(file.CreateEmpty(s.Config.BackupPath))
 	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
 
 	out := pipe.OpenStdout(3)

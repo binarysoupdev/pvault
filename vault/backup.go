@@ -3,9 +3,9 @@ package vault
 import (
 	"os"
 	"path/filepath"
-	"pvault/util"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
+	"github.com/binarysoupdev/go-extensions/file"
 )
 
 func (v Vault) Backup(path string) error {
@@ -41,5 +41,5 @@ func (v Vault) Backup(path string) error {
 }
 
 func (Vault) backupFile(dir string, src string) error {
-	return util.CopyFile(filepath.Join(dir, filepath.Base(src)), src)
+	return file.Copy(filepath.Join(dir, filepath.Base(src)), src)
 }

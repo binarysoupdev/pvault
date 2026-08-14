@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/binarysoupdev/cryptool/crypt"
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 )
 
 func Encrypt(r Record, password string) ([]byte, error) {

@@ -6,8 +6,8 @@ import (
 	"pvault/tools/clipboard"
 	"testing"
 
-	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/binarysoupdev/go-commando/test"
+	"github.com/binarysoupdev/go-extensions/errors"
 	"github.com/binarysoupdev/tinsel/pipe"
 	"github.com/stretchr/testify/suite"
 )

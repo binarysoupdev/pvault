@@ -3,11 +3,12 @@ package database_test
 import (
 	"errors"
 	"path/filepath"
-	"pvault/util"
+
 	"pvault/vault/database"
 	"pvault/vault/index"
 	"testing"
 
+	"github.com/binarysoupdev/go-extensions/file"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -70,7 +71,7 @@ func TestLoadIndexReturnsErrorWhenDecodeIndexReturnsError(t *testing.T) {
 	}
 
 	PATH := t.TempDir()
-	require.NoError(t, util.CreateEmptyFile(mock.IndexPath(PATH)))
+	require.NoError(t, file.CreateEmpty(mock.IndexPath(PATH)))
 
 	//-- act
 	_, res := database.LoadIndex(mock, PATH)
@@ -88,7 +89,7 @@ func TestLoadIndexReturnsIndexAndNoErrorAndLoadsIndex(t *testing.T) {
 	}
 
 	PATH := t.TempDir()
-	require.NoError(t, util.CreateEmptyFile(mock.IndexPath(PATH)))
+	require.NoError(t, file.CreateEmpty(mock.IndexPath(PATH)))
 
 	//-- act
 	res, err := database.LoadIndex(mock, PATH)

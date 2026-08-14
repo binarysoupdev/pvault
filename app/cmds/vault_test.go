@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"pvault/app/cmds"
 	"pvault/app/config"
-	"pvault/util"
+
 	"pvault/vault"
 	"pvault/vault/database"
 	db_v1 "pvault/vault/database/encoder/legacy/v1"
@@ -20,6 +20,7 @@ import (
 
 	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
+	"github.com/binarysoupdev/go-extensions/file"
 	"github.com/binarysoupdev/tinsel/pipe"
 	"github.com/stretchr/testify/suite"
 )
@@ -191,7 +192,7 @@ func (s *VaultTestSuite) TestRunBackupFailsWithInvalidBackupPath() {
 	//-- arrange
 	s.Config.BackupPath = filepath.Join(s.T().TempDir(), "backups.txt")
 	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
-	s.Require().NoError(util.CreateEmptyFile(s.Config.BackupPath))
+	s.Require().NoError(file.CreateEmpty(s.Config.BackupPath))
 
 	out := pipe.OpenStdout(1)
 	defer out.Close()
@@ -269,7 +270,7 @@ func (s *VaultTestSuite) TestRunUpgradeFailsWithInvalidBackupPath() {
 	s.Config.VaultPath = s.T().TempDir()
 	s.Config.BackupPath = filepath.Join(s.T().TempDir(), "backups.txt")
 	s.Require().NoError(json.MarshalFile(s.Config, s.ConfigLoader.Path))
-	s.Require().NoError(util.CreateEmptyFile(s.Config.BackupPath))
+	s.Require().NoError(file.CreateEmpty(s.Config.BackupPath))
 
 	s.Require().NoError(database.SaveIndex(db_v1.Encoder{}, s.Config.VaultPath, index.IndexMap{}))
 

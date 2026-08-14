@@ -11,7 +11,7 @@ import (
 	record_v2 "pvault/vault/record/record/v2"
 	"testing"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

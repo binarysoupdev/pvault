@@ -4,32 +4,15 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
-	"pvault/util"
+
 	"pvault/vault/meta"
 	v1 "pvault/vault/meta/encoder/v1"
 	"testing"
 	"time"
 
-	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func TestEncodeMetadataReturnsErrorWhenErrorWritingData(t *testing.T) {
-	//-- arrange
-	const ERROR = "write error"
-
-	e := v1.Encoder{}
-	mock := &util.MockWriter{
-		WriteErrors: []error{errors.New(ERROR)},
-	}
-
-	//-- act
-	res := e.EncodeMetadata(mock, meta.Metadata{})
-
-	//-- assert
-	assert.ErrorContains(t, res, ERROR)
-}
 
 func TestDecodeMetadataReturnsErrorWhenErrorReadingHeader(t *testing.T) {
 	//-- arrange

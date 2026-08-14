@@ -1,13 +1,14 @@
 package v3
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"io"
-	"pvault/util"
+
 	"pvault/vault/index"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 	"github.com/google/uuid"
 )
 
@@ -38,14 +39,16 @@ func (e Encoder) encodeIndexHeader(w io.Writer, numRecords int) error {
 	binary.BigEndian.PutUint16(header, uint16(index.VERSION))
 	binary.BigEndian.PutUint16(header[2:], uint16(numRecords))
 
-	return util.WriteBytes(w, header)
+	_, err := w.Write(header)
+	return err
 }
 
 func (e Encoder) encodeEntry(w io.Writer, id uuid.UUID, name string) error {
 	length := make([]byte, 2)
 	binary.BigEndian.PutUint16(length, uint16(len(id)+len(name)))
 
-	return util.WriteBytes(w, length, id[:], []byte(name))
+	_, err := w.Write(bytes.Join([][]byte{length, id[:], []byte(name)}, []byte{}))
+	return err
 }
 
 func (e Encoder) DecodeIndex(r io.Reader) (index.IndexMap, error) {
@@ -68,8 +71,8 @@ func (e Encoder) DecodeIndex(r io.Reader) (index.IndexMap, error) {
 }
 
 func (Encoder) decodeIndexHeader(r io.Reader) ([]byte, error) {
-	header, err := util.ReadBytes(r, 4)
-	if err != nil {
+	header := make([]byte, 4)
+	if _, err := io.ReadFull(r, header); err != nil {
 		return nil, err
 	}
 
@@ -82,9 +85,9 @@ func (Encoder) decodeIndexHeader(r io.Reader) ([]byte, error) {
 }
 
 func (Encoder) decodeEntry(idx index.IndexMap, r io.Reader) error {
-	header, err := util.ReadBytes(r, 2)
-	if err != nil {
-		return errors.Chain(err, "error decoding header")
+	header := make([]byte, 2)
+	if _, err := io.ReadFull(r, header); err != nil {
+		return errors.Chain(err, "error reading header")
 	}
 
 	length := int(binary.BigEndian.Uint16(header))
@@ -92,8 +95,8 @@ func (Encoder) decodeEntry(idx index.IndexMap, r io.Reader) error {
 		return errors.Format("length too short: %d", length)
 	}
 
-	entry, err := util.ReadBytes(r, length)
-	if err != nil {
+	entry := make([]byte, length)
+	if _, err := io.ReadFull(r, entry); err != nil {
 		return errors.Chain(err, "error decoding body")
 	}
 

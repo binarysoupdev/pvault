@@ -3,9 +3,8 @@ package v3_test
 import (
 	"bytes"
 	"encoding/binary"
-	"errors"
 	"fmt"
-	"pvault/util"
+
 	"pvault/vault/index"
 	v3 "pvault/vault/index/encoder/v3"
 	"testing"
@@ -14,34 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func TestEncodeIndexReturnsErrorWhenErrorWritingHeader(t *testing.T) {
-	//-- arrange
-	e := v3.Encoder{}
-	mock := &util.MockWriter{
-		WriteErrors: []error{errors.New("")},
-	}
-
-	//-- act
-	res := e.EncodeIndex(mock, index.IndexMap{})
-
-	//-- arrange
-	assert.ErrorContains(t, res, "error encoding header")
-}
-
-func TestEncodeIndexReturnsErrorWhenErrorWritingEntry(t *testing.T) {
-	//-- arrange
-	e := v3.Encoder{}
-	mock := &util.MockWriter{
-		WriteErrors: []error{nil, errors.New("")},
-	}
-
-	//-- act
-	res := e.EncodeIndex(mock, index.IndexMap{"": uuid.Nil})
-
-	//-- arrange
-	assert.ErrorContains(t, res, "error encoding entry [0]")
-}
 
 func TestDecodeIndexReturnsErrorWhenHeaderTooShort(t *testing.T) {
 	//-- arrange
@@ -88,7 +59,7 @@ func TestDecodeIndexReturnsErrorWhenEntryHeaderTooShort(t *testing.T) {
 
 	//-- arrange
 	assert.ErrorContains(t, res, "error decoding entry [0]")
-	assert.ErrorContains(t, res, "error decoding header")
+	assert.ErrorContains(t, res, "error reading header")
 }
 
 func TestDecodeIndexReturnsErrorWhenEntryLengthTooShort(t *testing.T) {

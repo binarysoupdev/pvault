@@ -8,8 +8,8 @@ import (
 	record_v2 "pvault/vault/record/record/v2"
 
 	"github.com/binarysoupdev/go-commando/command"
-	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/binarysoupdev/go-commando/json"
+	"github.com/binarysoupdev/go-extensions/errors"
 	"github.com/binarysoupdev/got-style/style"
 )
 
