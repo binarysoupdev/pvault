@@ -1,0 +1,100 @@
+# Build, test, and draft a release with built Go binaries.
+# Manual trigger only. You must provide the release tag when running the workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release Tag (ie. v2.X.X)'
+        required: true
+        default: ''
+
+permissions:
+  contents: write
+
+name: Draft Release
+
+jobs:
+  build:
+    name: Build (matrix)
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+            runner: ubuntu-latest
+          - goos: linux
+            goarch: arm64
+            runner: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.25.0'
+
+      - name: Show build target
+        run: |
+          echo "Building for: ${{ matrix.goos }}/${{ matrix.goarch }} on runner ${{ matrix.runner }}"
+
+      - name: Run tests
+        run: |
+          go test ./...
+
+      - name: Build binary
+        run: |
+          set -e
+          out_dir="dist/${{ matrix.goos }}-${{ matrix.goarch }}"
+          rm -rf "$out_dir"
+          mkdir -p "$out_dir"
+          # Disable CGO for reproducible cross-compiles
+          export CGO_ENABLED=0
+          export GOOS=${{ matrix.goos }}
+          export GOARCH=${{ matrix.goarch }}
+          echo "GOOS=$GOOS GOARCH=$GOARCH CGO_ENABLED=$CGO_ENABLED"
+          # Build for production
+          out_file="pvault-${{ matrix.goos }}-${{ matrix.goarch }}"
+          go build -tags=prod -ldflags "-s -w" -o "${out_dir}/${out_file}" .
+          echo "Built: ${out_dir}/${out_file}"
+          ls -la "$out_dir"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/${{ matrix.goos }}-${{ matrix.goarch }}/*
+
+  draft-release:
+    name: Draft release and upload artifacts
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download all build artifacts into dist/
+        uses: actions/download-artifact@v4
+        with:
+          # no `name` -> downloads all artifacts
+          path: dist
+
+      - name: List artifacts
+        run: |
+          echo "Downloaded artifacts in dist/:"
+          ls -R dist || true
+
+      - name: Draft GitHub release (drafted = true) and upload artifacts
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ github.event.inputs.tag }}
+          name: Release ${{ github.event.inputs.tag }}
+          body: ''
+          draft: true
+          files: dist/**
+
+      - name: Output release info
+        run: |
+          echo "Draft release created for tag: ${{ github.event.inputs.tag }}"
+          echo "Artifacts uploaded from dist/:"
+          ls -la dist || true
