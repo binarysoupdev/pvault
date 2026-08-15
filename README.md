@@ -4,7 +4,7 @@ Simple and secure JSON-based password manager.
 
 ## Releases
 
-- `v2.0.0` | Fully featured, fully unit-tested!
+- [`v2.0.0`](https://github.com/binarysoupdev/pvault/releases/tag/v2.0.0) | Fully featured, fully unit-tested!
 - [`v1.0.0`](https://github.com/binarysoupdev/pvault/releases/tag/v1.0-beta1) | (Legacy) Clunky code-base, no unit tests.
 
 ## Commands
