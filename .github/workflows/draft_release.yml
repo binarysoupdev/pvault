@@ -88,10 +88,10 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.event.inputs.tag }}
-          name: Release ${{ github.event.inputs.tag }}
+          name: ${{ github.event.inputs.tag }}
           body: ''
           draft: true
-          files: dist/**
+          artifacts: dist/**
 
       - name: Output release info
         run: |
