@@ -10,7 +10,7 @@ import (
 	record_v1 "pvault/vault/record/record/legacy/v1"
 	record_v2 "pvault/vault/record/record/v2"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 	"github.com/google/uuid"
 )
 
@@ -93,6 +93,13 @@ func (db Encoder) upgradeRecordV1(target v3.Encoder, r io.Reader, path string, i
 		return errors.Chain(err, "error creating new record file")
 	}
 	defer new.Close()
+
+	version := make([]byte, 2)
+	binary.BigEndian.PutUint16(version, record_v1.VERSION)
+
+	if _, err := new.Write(version); err != nil {
+		return errors.Chain(err, "error writing version header")
+	}
 
 	err = target.EncodeRawV1(new, raw.Data, id, raw.Name)
 	if err != nil {

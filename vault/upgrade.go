@@ -3,7 +3,7 @@ package vault
 import (
 	"pvault/vault/database"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 )
 
 func (v Vault) IsOutOfDate() bool {

@@ -4,7 +4,7 @@ import (
 	"os"
 	"pvault/vault/index"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 )
 
 func SaveIndex(db Encoder, path string, idx index.IndexMap) error {

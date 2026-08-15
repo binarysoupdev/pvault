@@ -3,11 +3,12 @@ package database_test
 import (
 	"errors"
 	"path/filepath"
-	"pvault/util"
+
 	"pvault/vault/database"
 	"pvault/vault/record"
 	"testing"
 
+	"github.com/binarysoupdev/go-extensions/file"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -83,7 +84,7 @@ func TestLoadRecordReturnsErrorWhenDecodeRecordReturnsError(t *testing.T) {
 	ID := uuid.New()
 
 	PATH := t.TempDir()
-	require.NoError(t, util.CreateEmptyFile(mock.RecordPath(PATH, ID)))
+	require.NoError(t, file.CreateEmpty(mock.RecordPath(PATH, ID)))
 
 	//-- act
 	_, res := database.LoadRecord(mock, PATH, ID, "")
@@ -103,7 +104,7 @@ func TestLoadRecordReturnsRecordAndNoErrorAndLoadsRecord(t *testing.T) {
 	}
 
 	PATH := t.TempDir()
-	require.NoError(t, util.CreateEmptyFile(mock.RecordPath(PATH, mock.Record.GetID())))
+	require.NoError(t, file.CreateEmpty(mock.RecordPath(PATH, mock.Record.GetID())))
 
 	//-- act
 	res, err := database.LoadRecord(mock, PATH, mock.Record.GetID(), PASSWORD)
@@ -130,7 +131,7 @@ func TestDeleteRecordReturnsNoErrorAndDeletesRecord(t *testing.T) {
 	ID := uuid.New()
 
 	PATH := t.TempDir()
-	require.NoError(t, util.CreateEmptyFile(mock.RecordPath(PATH, ID)))
+	require.NoError(t, file.CreateEmpty(mock.RecordPath(PATH, ID)))
 
 	//-- act
 	res := database.DeleteRecord(mock, PATH, ID)

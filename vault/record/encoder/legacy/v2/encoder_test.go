@@ -40,7 +40,7 @@ func TestDecodeRecordReturnsErrorWhenErrorReadingHeader(t *testing.T) {
 	_, res := e.DecodeRecord(buffer, "")
 
 	//-- assert
-	assert.ErrorContains(t, res, "error reading header")
+	assert.ErrorContains(t, res, "error reading version header")
 }
 
 func TestDecodeRecordReturnsErrorWhenRecordVersionUnsupported(t *testing.T) {

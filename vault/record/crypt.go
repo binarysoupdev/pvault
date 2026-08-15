@@ -1,10 +1,11 @@
 package record
 
 import (
+	"bytes"
 	"encoding/json"
 
 	"github.com/binarysoupdev/cryptool/crypt"
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 )
 
 func Encrypt(r Record, password string) ([]byte, error) {
@@ -20,7 +21,7 @@ func Encrypt(r Record, password string) ([]byte, error) {
 	c, salt := crypt.NewFromPassword(password)
 	ciphertext := c.Encrypt(plaintext)
 
-	return append(salt, ciphertext...), nil
+	return bytes.Join([][]byte{salt, ciphertext}, []byte{}), nil
 }
 
 func Decrypt[T Record](bytes []byte, password string) (T, error) {

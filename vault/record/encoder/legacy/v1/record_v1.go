@@ -1,12 +1,13 @@
 package v1
 
 import (
+	"bytes"
 	"io"
-	"pvault/util"
+
 	"pvault/vault/record"
 	v1 "pvault/vault/record/record/legacy/v1"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 	"github.com/google/uuid"
 )
 
@@ -28,7 +29,9 @@ func (e Encoder) EncodeV1(w io.Writer, password string, r record.Record) error {
 
 func (e Encoder) EncodeRawV1(w io.Writer, data []byte) error {
 	hash := make([]byte, HASH_SIZE)
-	return util.WriteBytes(w, hash, data)
+
+	_, err := w.Write(bytes.Join([][]byte{hash, data}, []byte{}))
+	return err
 }
 
 func (e Encoder) DecodeV1(r io.Reader, password string, id uuid.UUID, name string) (v1.Record, error) {
@@ -49,8 +52,8 @@ func (e Encoder) DecodeV1(r io.Reader, password string, id uuid.UUID, name strin
 }
 
 func (e Encoder) DecodeRawV1(r io.Reader) ([]byte, error) {
-	_, err := util.ReadBytes(r, HASH_SIZE)
-	if err != nil {
+	hash := make([]byte, HASH_SIZE)
+	if _, err := io.ReadFull(r, hash); err != nil {
 		return nil, errors.Chain(err, "error decoding hash prefix")
 	}
 

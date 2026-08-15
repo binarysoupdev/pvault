@@ -1,16 +1,16 @@
 package vault_flow
 
 import (
-	errors_std "errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"pvault/app/config"
-	"pvault/app/logger"
 	"pvault/vault"
 	"time"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-commando/logger"
+
+	"github.com/binarysoupdev/go-extensions/errors"
 	"github.com/binarysoupdev/got-style/style"
 )
 
@@ -30,7 +30,7 @@ func OpenCurrentVault(path string) (vault.Vault, error) {
 func OpenLegacyVault(path string) (vault.Vault, error) {
 	v, err := vault.Open(path)
 
-	if errors_std.Is(err, vault.ErrorNotFound{}) {
+	if errors.Is[vault.ErrorNotFound](err) {
 		return vault.Vault{}, errors.New("vault not found (run \"vault -init\" to create)")
 	}
 	if err != nil {
@@ -60,7 +60,7 @@ func BackupVault(v vault.Vault, cfg config.Config) error {
 		return errors.New("error backing vault")
 	}
 
-	logger.LogCreate("create backup " + path)
+	logger.Logf("[+] create backup %s", path)
 	style.BoldCreate.Printf("[+] Created Backup \"%s\"\n", path)
 
 	return nil

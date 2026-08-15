@@ -18,8 +18,8 @@ import (
 	record_v2 "pvault/vault/record/record/v2"
 	"testing"
 
-	"github.com/binarysoupdev/go-commando/json"
 	"github.com/binarysoupdev/go-commando/test"
+	"github.com/binarysoupdev/go-extensions/json"
 	"github.com/binarysoupdev/tinsel/pipe"
 	"github.com/stretchr/testify/suite"
 )

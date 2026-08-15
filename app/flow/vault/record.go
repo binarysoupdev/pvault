@@ -2,10 +2,11 @@ package vault_flow
 
 import (
 	"pvault/app/flow/prompt"
-	"pvault/app/logger"
 	record_v2 "pvault/vault/record/record/v2"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-commando/logger"
+
+	"github.com/binarysoupdev/go-extensions/errors"
 	"github.com/binarysoupdev/got-style/style"
 )
 
@@ -16,7 +17,7 @@ func CreateRecord(v Vault, r record_v2.Record) error {
 		return errors.New("error creating vault record")
 	}
 
-	logger.LogCreate("create record " + r.GetID().String())
+	logger.Logf("[+] create record %s", r.GetID().String())
 	style.BoldCreate.Printf("[+] Created Record: %s\n", r.GetID().String())
 
 	return nil
@@ -40,7 +41,7 @@ func SaveRecord(v Vault, r record_v2.Record) error {
 		return errors.New("error saving vault record")
 	}
 
-	logger.LogCreate("save record " + r.GetID().String())
+	logger.Logf("[+] save record %s", r.GetID().String())
 	style.New(style.BOLD, style.YELLOW).Printf("[+] Saved Record: %s\n", r.GetID().String())
 
 	return nil
@@ -55,7 +56,7 @@ func LoadRecord(v Vault, name string) (record_v2.Record, error) {
 		return record_v2.Record{}, errors.New("error loading vault record")
 	}
 
-	logger.LogInfo("load record " + r.GetID().String())
+	logger.Logf("[=] load record %s", r.GetID().String())
 	style.BoldInfo.Printf("[=] Loaded Record: %s\n", r.GetID().String())
 
 	return r.Upgrade(), nil
@@ -72,7 +73,7 @@ func DeleteRecord(v Vault, name string) error {
 		return errors.New("error deleting vault record")
 	}
 
-	logger.LogDelete("delete record " + id.String())
+	logger.Logf("[-] delete record %s", id.String())
 	style.BoldDelete.Printf("[-] Deleted Record: %s\n", id.String())
 
 	return nil

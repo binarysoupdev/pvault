@@ -4,7 +4,7 @@ import (
 	"pvault/app/config"
 
 	"github.com/binarysoupdev/go-commando/command"
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 )
 
 func LoadConfig(cmd *command.ConfigCommand[config.Config]) error {

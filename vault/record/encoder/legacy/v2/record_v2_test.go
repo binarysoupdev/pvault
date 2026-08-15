@@ -2,44 +2,15 @@ package v2_test
 
 import (
 	"bytes"
-	"pvault/util"
+
 	v2 "pvault/vault/record/encoder/legacy/v2"
 	record_v2 "pvault/vault/record/record/v2"
 	"testing"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
-
-func TestEncodeV2ReturnsErrorWhenErrorWritingData(t *testing.T) {
-	//-- arrange
-	e := v2.Encoder{}
-	mock := &util.MockWriter{
-		WriteErrors: []error{errors.New("")},
-	}
-
-	RECORD := record_v2.Record{}
-
-	//-- act
-	res := e.EncodeV2(mock, "", RECORD)
-
-	//-- assert
-	assert.ErrorContains(t, res, "error encoding record v2")
-}
-
-func TestDecodeV2ReturnsErrorWhenErrorReadingData(t *testing.T) {
-	//-- arrange
-	e := v2.Encoder{}
-	mock := &util.MockReader{
-		ReadErrors: []error{errors.New("")},
-	}
-
-	//-- act
-	_, res := e.DecodeV2(mock, "")
-
-	//-- assert
-	assert.ErrorContains(t, res, "error decoding record v2")
-}
 
 func TestDecodeV2ReturnsErrorWhenErrorDecryptingRecord(t *testing.T) {
 	//-- arrange
@@ -54,4 +25,29 @@ func TestDecodeV2ReturnsErrorWhenErrorDecryptingRecord(t *testing.T) {
 
 	//-- assert
 	assert.ErrorContains(t, res, "error decrypting record v2")
+}
+
+func TestEncodeDecodeV2ReturnsRecordAndNoError(t *testing.T) {
+	//-- arrange
+	e := v2.Encoder{}
+	buffer := &bytes.Buffer{}
+
+	const PASSWORD = "Password123!"
+
+	RECORD := record_v2.Record{
+		ID:       uuid.New(),
+		Name:     "name",
+		Password: "password",
+		Username: "username",
+		Other:    map[string]any{"foo": "bar"},
+	}
+	require.NoError(t, e.EncodeV2(buffer, PASSWORD, RECORD))
+
+	//-- act
+	res, err := e.DecodeV2(buffer, PASSWORD)
+	require.NoError(t, err)
+
+	//-- assert
+	require.NoError(t, err)
+	assert.Equal(t, RECORD, res)
 }

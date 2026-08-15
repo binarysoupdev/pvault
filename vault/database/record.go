@@ -4,7 +4,7 @@ import (
 	"os"
 	"pvault/vault/record"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 	"github.com/google/uuid"
 )
 

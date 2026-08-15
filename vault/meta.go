@@ -3,7 +3,7 @@ package vault
 import (
 	"pvault/vault/meta"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 )
 
 func (v Vault) MetadataPath() string {

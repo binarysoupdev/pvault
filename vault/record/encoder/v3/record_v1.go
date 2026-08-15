@@ -1,13 +1,14 @@
 package v3
 
 import (
+	"bytes"
 	"encoding/binary"
 	"io"
-	"pvault/util"
+
 	"pvault/vault/record"
 	v1 "pvault/vault/record/record/legacy/v1"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 	"github.com/google/uuid"
 )
 
@@ -32,11 +33,11 @@ func (e Encoder) EncodeV1(w io.Writer, password string, r record.Record) error {
 }
 
 func (e Encoder) EncodeRawV1(w io.Writer, data []byte, id uuid.UUID, name string) error {
-	header := make([]byte, 2+2)
-	binary.BigEndian.PutUint16(header, v1.VERSION)
-	binary.BigEndian.PutUint16(header[2:], uint16(len(name)))
+	header := make([]byte, 2)
+	binary.BigEndian.PutUint16(header, uint16(len(name)))
 
-	return util.WriteBytes(w, header, id[:], []byte(name), data)
+	_, err := w.Write(bytes.Join([][]byte{header, id[:], []byte(name), data}, []byte{}))
+	return err
 }
 
 func (e Encoder) DecodeV1(r io.Reader, password string) (v1.Record, error) {
@@ -57,18 +58,18 @@ func (e Encoder) DecodeV1(r io.Reader, password string) (v1.Record, error) {
 }
 
 func (e Encoder) DecodeRawV1(r io.Reader) (rawV1, error) {
-	length, err := util.ReadBytes(r, 2)
-	if err != nil {
+	length := make([]byte, 2)
+	if _, err := io.ReadFull(r, length); err != nil {
 		return rawV1{}, errors.Chain(err, "error reading length")
 	}
 
-	id, err := util.ReadBytes(r, 16)
-	if err != nil {
+	id := make([]byte, 16)
+	if _, err := io.ReadFull(r, id); err != nil {
 		return rawV1{}, errors.Chain(err, "error reading id")
 	}
 
-	name, err := util.ReadBytes(r, int(binary.BigEndian.Uint16(length)))
-	if err != nil {
+	name := make([]byte, int(binary.BigEndian.Uint16(length)))
+	if _, err := io.ReadFull(r, name); err != nil {
 		return rawV1{}, errors.Chain(err, "error reading name")
 	}
 

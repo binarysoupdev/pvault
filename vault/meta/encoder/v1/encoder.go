@@ -1,14 +1,15 @@
 package v1
 
 import (
+	"bytes"
 	"encoding/binary"
 	"io"
 	"path/filepath"
-	"pvault/util"
+
 	"pvault/vault/meta"
 	"time"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 )
 
 const HEADER_SIZE = 2 + 2 + 2 + 2
@@ -31,12 +32,13 @@ func (Encoder) EncodeMetadata(w io.Writer, m meta.Metadata) error {
 	}
 	binary.BigEndian.PutUint16(header[2+2+2:], uint16(len(dateBytes)))
 
-	return util.WriteBytes(w, header, []byte(m.Nickname), dateBytes)
+	_, err = w.Write(bytes.Join([][]byte{header, []byte(m.Nickname), dateBytes}, []byte{}))
+	return err
 }
 
 func (Encoder) DecodeMetadata(r io.Reader) (meta.Metadata, error) {
-	header, err := util.ReadBytes(r, HEADER_SIZE)
-	if err != nil {
+	header := make([]byte, HEADER_SIZE)
+	if _, err := io.ReadFull(r, header); err != nil {
 		return meta.Metadata{}, errors.Chain(err, "error reading header")
 	}
 
@@ -44,21 +46,23 @@ func (Encoder) DecodeMetadata(r io.Reader) (meta.Metadata, error) {
 	if version != meta.VERSION {
 		return meta.Metadata{}, errors.Format("unsupported metadata version \"%d\"", version)
 	}
-	dbVersion := binary.BigEndian.Uint16(header[2:])
 
-	name, err := util.ReadBytes(r, int(binary.BigEndian.Uint16(header[2+2:])))
-	if err != nil {
+	dbVersion := binary.BigEndian.Uint16(header[2:])
+	nameLength := binary.BigEndian.Uint16(header[2+2:])
+	dateLength := binary.BigEndian.Uint16(header[2+2+2:])
+
+	name := make([]byte, int(nameLength))
+	if _, err := io.ReadFull(r, name); err != nil {
 		return meta.Metadata{}, errors.Chain(err, "error reading nickname")
 	}
 
-	dateBytes, err := util.ReadBytes(r, int(binary.BigEndian.Uint16(header[2+2+2:])))
-	if err != nil {
+	dateBytes := make([]byte, int(dateLength))
+	if _, err := io.ReadFull(r, dateBytes); err != nil {
 		return meta.Metadata{}, errors.Chain(err, "error reading creation date")
 	}
 
 	creationDate := time.Time{}
-	err = creationDate.UnmarshalBinary(dateBytes)
-	if err != nil {
+	if err := creationDate.UnmarshalBinary(dateBytes); err != nil {
 		return meta.Metadata{}, errors.Chain(err, "error unmarshaling creation date")
 	}
 

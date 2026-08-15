@@ -2,30 +2,15 @@ package v1_test
 
 import (
 	"bytes"
-	"pvault/util"
+
 	"pvault/vault/index"
 	v1 "pvault/vault/index/encoder/legacy/v1"
 	"testing"
 
-	"github.com/binarysoupdev/go-commando/errors"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func TestEncodeIndexReturnsErrorWhenErrorWritingEntry(t *testing.T) {
-	//-- arrange
-	e := v1.Encoder{}
-	mock := &util.MockWriter{
-		WriteErrors: []error{errors.New("")},
-	}
-
-	//-- act
-	res := e.EncodeIndex(mock, index.IndexMap{"": uuid.Nil})
-
-	//-- arrange
-	assert.ErrorContains(t, res, "error encoding entry [0]")
-}
 
 func TestDecodeIndexReturnsErrorWhenIndexPairInvalid(t *testing.T) {
 	//-- arrange

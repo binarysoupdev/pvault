@@ -3,13 +3,13 @@ package v3
 import (
 	"encoding/binary"
 	"io"
-	"pvault/util"
+
 	"pvault/vault/record"
 	v2 "pvault/vault/record/encoder/legacy/v2"
 	record_v1 "pvault/vault/record/record/legacy/v1"
 	record_v2 "pvault/vault/record/record/v2"
 
-	"github.com/binarysoupdev/go-commando/errors"
+	"github.com/binarysoupdev/go-extensions/errors"
 )
 
 const VERSION = 3
@@ -17,6 +17,13 @@ const VERSION = 3
 type Encoder struct{}
 
 func (e Encoder) EncodeRecord(w io.Writer, password string, r record.Record) error {
+	header := make([]byte, 2)
+	binary.BigEndian.PutUint16(header, uint16(r.GetVersion()))
+
+	if _, err := w.Write(header); err != nil {
+		return errors.Chain(err, "error writing version header")
+	}
+
 	switch r.GetVersion() {
 	case record_v1.VERSION:
 		return e.EncodeV1(w, password, r)
@@ -28,9 +35,9 @@ func (e Encoder) EncodeRecord(w io.Writer, password string, r record.Record) err
 }
 
 func (e Encoder) DecodeRecord(r io.Reader, password string) (record.Record, error) {
-	header, err := util.ReadBytes(r, 2)
-	if err != nil {
-		return nil, errors.Chain(err, "error reading header")
+	header := make([]byte, 2)
+	if _, err := io.ReadFull(r, header); err != nil {
+		return nil, errors.Chain(err, "error reading version header")
 	}
 
 	version := binary.BigEndian.Uint16(header)
