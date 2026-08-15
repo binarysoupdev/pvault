@@ -1,4 +1,4 @@
-# pvault [![Build and Test](https://github.com/binarysoupdev/pvault/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/binarysoupdev/pvault/actions/workflows/build.yml)
+# pvault [![Build and Test](https://github.com/binarysoupdev/pvault/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/binarysoupdev/pvault/actions/workflows/build.yml) [![Coverage Status](https://coveralls.io/repos/github/binarysoupdev/pvault/badge.svg?branch=main)](https://coveralls.io/github/binarysoupdev/pvault?branch=main)
 
 Simple and secure JSON-based password manager.
 
