@@ -58,7 +58,7 @@ jobs:
       - name: Build binary
         run: |
           set -e
-          out_dir="dist/${{ matrix.binary }}"
+          out_dir="dist/${{ matrix.goos }}-${{ matrix.goarch }}"
           rm -rf "$out_dir"
           mkdir -p "$out_dir"
           # Disable CGO for reproducible cross-compiles
