@@ -73,17 +73,6 @@ func (s *CopyTestSuite) SetupTest() {
 
 //=====================================
 
-func (s *CopyTestSuite) TestRunFailsWhenClipboardUnsupported() {
-	//-- arrange
-	s.Clipboard.UnsupportedError = errors.New("")
-
-	//-- act
-	s.RunCommand()
-
-	//-- assert
-	s.RequireResultFail("clipboard unsupported")
-}
-
 func (s *CopyTestSuite) TestRunFailsWhenConfigNotFound() {
 	//-- arrange
 	s.Require().NoError(os.Remove(s.ConfigLoader.Path))
@@ -167,9 +156,12 @@ func (s *CopyTestSuite) TestRunFailsWithIncorrectPassword() {
 
 func (s *CopyTestSuite) TestRunFailsWhenErrorCopyingToClipboard() {
 	//-- arrange
+	const CLIPBOARD_ERROR = "clipboard error"
+
+	s.Clipboard.UnsupportedError = errors.New(CLIPBOARD_ERROR)
 	s.Clipboard.WriteError = errors.New("")
 
-	io := pipe.OpenStdio(1, 3, false)
+	io := pipe.OpenStdio(1, 4, false)
 	defer io.Close()
 
 	//-- act
@@ -180,6 +172,8 @@ func (s *CopyTestSuite) TestRunFailsWhenErrorCopyingToClipboard() {
 
 	//-- assert
 	s.RequireResultFail("error copying to clipboard")
+
+	s.Assert().Contains(io.ReadLine(), fmt.Sprintf("WARNING: %s", CLIPBOARD_ERROR))
 
 	s.Assert().Contains(io.ReadLine(), s.Record.Name)
 	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")

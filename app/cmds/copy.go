@@ -36,7 +36,7 @@ func NewCopyCommand(configLoader json.Loader[config.Config], clipboard clipboard
 func (cmd *CopyCommand) Initialize() error {
 	err := cmd.clipboard.CheckUnsupported()
 	if err != nil {
-		return errors.Chain(err, "clipboard unsupported")
+		style.Warning.Printf("WARNING: %s (clipboard features may not work)\n", err)
 	}
 
 	err = config_flow.LoadConfig(&cmd.ConfigCommand)
@@ -90,7 +90,7 @@ func (cmd CopyCommand) Run(args []string) error {
 }
 
 func (cmd CopyCommand) renderToQRCode(field string) error {
-	style.Info.Println("rendered as QR-Code")
+	style.Info.Println(" rendered as QR-Code")
 
 	err := cmd.qrcode.RenderToStdout(field)
 	if err != nil {
@@ -106,7 +106,7 @@ func (cmd CopyCommand) printField(field string) error {
 }
 
 func (cmd CopyCommand) copyToClipboard(field string) error {
-	style.Info.Println("copied to clipboard")
+	style.Info.Println(" copied to clipboard")
 
 	err := cmd.clipboard.Write(field)
 	if err != nil {
