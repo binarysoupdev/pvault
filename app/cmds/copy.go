@@ -1,6 +1,7 @@
 package cmds
 
 import (
+	"fmt"
 	"pvault/app/config"
 	config_flow "pvault/app/flow/config"
 	vault_flow "pvault/app/flow/vault"
@@ -49,8 +50,9 @@ func (cmd *CopyCommand) Initialize() error {
 
 func (cmd CopyCommand) Run(args []string) error {
 	search := search_flow.NewSearchFlow(cmd.Flags)
-	username := cmd.Flags.Bool("username", false, "Copy username instead of password.")
+	username := cmd.Flags.Bool("username", false, "copy username instead of password")
 	qr := cmd.Flags.Bool("qr", false, "render as a qrcode")
+	show := cmd.Flags.Bool("show", false, "print to console")
 	cmd.ParseFlags(args)
 
 	v, err := vault_flow.OpenCurrentVault(cmd.Config.VaultPath)
@@ -68,28 +70,29 @@ func (cmd CopyCommand) Run(args []string) error {
 		return err
 	}
 
-	const USERNAME_FIELD = "USERNAME"
-	const PASSWORD_FIELD = "PASSWORD"
-
-	if *qr {
-		if *username {
-			return cmd.renderToQRCode(USERNAME_FIELD, r.Username)
-		} else {
-			return cmd.renderToQRCode(PASSWORD_FIELD, r.Password)
-		}
+	var field string
+	if *username {
+		style.Info.Print("[=] USERNAME")
+		field = r.Username
 	} else {
-		if *username {
-			return cmd.copyToClipboard(USERNAME_FIELD, r.Username)
-		} else {
-			return cmd.copyToClipboard(PASSWORD_FIELD, r.Password)
-		}
+		style.Info.Print("[=] PASSWORD")
+		field = r.Password
+	}
+
+	switch {
+	case *qr:
+		return cmd.renderToQRCode(field)
+	case *show:
+		return cmd.printField(field)
+	default:
+		return cmd.copyToClipboard(field)
 	}
 }
 
-func (cmd CopyCommand) renderToQRCode(field string, val string) error {
-	style.Info.Printf("[=] %s rendered as QR-Code\n", field)
+func (cmd CopyCommand) renderToQRCode(field string) error {
+	style.Info.Println("rendered as QR-Code")
 
-	err := cmd.qrcode.RenderToStdout(val)
+	err := cmd.qrcode.RenderToStdout(field)
 	if err != nil {
 		return errors.Chain(err, "error rendering qr-code")
 	}
@@ -97,12 +100,18 @@ func (cmd CopyCommand) renderToQRCode(field string, val string) error {
 	return nil
 }
 
-func (cmd CopyCommand) copyToClipboard(field string, val string) error {
-	err := cmd.clipboard.Write(val)
+func (cmd CopyCommand) printField(field string) error {
+	fmt.Printf(": %s\n", field)
+	return nil
+}
+
+func (cmd CopyCommand) copyToClipboard(field string) error {
+	style.Info.Println("copied to clipboard")
+
+	err := cmd.clipboard.Write(field)
 	if err != nil {
 		return errors.Chain(err, "error copying to clipboard")
 	}
 
-	style.Info.Printf("[=] %s copied to clipboard\n", field)
 	return nil
 }

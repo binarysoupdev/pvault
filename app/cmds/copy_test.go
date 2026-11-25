@@ -205,7 +205,10 @@ func (s *CopyTestSuite) TestRunPassesAndCopiesPassword() {
 	s.Assert().Contains(io.ReadLine(), s.Record.Name)
 	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")
 	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
-	s.Assert().Contains(io.ReadLine(), "[=] PASSWORD copied to clipboard")
+
+	line := io.ReadLine()
+	s.Assert().Contains(line, "[=] PASSWORD")
+	s.Assert().Contains(line, "copied to clipboard")
 }
 
 func (s *CopyTestSuite) TestRunPassesAndCopiesUsername() {
@@ -227,7 +230,10 @@ func (s *CopyTestSuite) TestRunPassesAndCopiesUsername() {
 	s.Assert().Contains(io.ReadLine(), s.Record.Name)
 	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")
 	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
-	s.Assert().Contains(io.ReadLine(), "[=] USERNAME copied to clipboard")
+
+	line := io.ReadLine()
+	s.Assert().Contains(line, "[=] USERNAME")
+	s.Assert().Contains(line, "copied to clipboard")
 }
 
 func (s *CopyTestSuite) TestRunQRFailsWithErrorRenderingToQRCode() {
@@ -270,7 +276,10 @@ func (s *CopyTestSuite) TestRunQRPassesAndRendersPasswordAsQRCode() {
 	s.Assert().Contains(io.ReadLine(), s.Record.Name)
 	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")
 	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
-	s.Assert().Contains(io.ReadLine(), "[=] PASSWORD rendered as QR-Code")
+
+	line := io.ReadLine()
+	s.Assert().Contains(line, "[=] PASSWORD")
+	s.Assert().Contains(line, "rendered as QR-Code")
 }
 
 func (s *CopyTestSuite) TestRunQRPassesAndRendersUsernameAsQRCode() {
@@ -292,5 +301,54 @@ func (s *CopyTestSuite) TestRunQRPassesAndRendersUsernameAsQRCode() {
 	s.Assert().Contains(io.ReadLine(), s.Record.Name)
 	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")
 	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
-	s.Assert().Contains(io.ReadLine(), "[=] USERNAME rendered as QR-Code")
+
+	line := io.ReadLine()
+	s.Assert().Contains(line, "[=] USERNAME")
+	s.Assert().Contains(line, "rendered as QR-Code")
+}
+
+func (s *CopyTestSuite) TestRunShowPassesAndPrintsPasswordToConsole() {
+	//-- arrange
+	io := pipe.OpenStdio(1, 4, false)
+	defer io.Close()
+
+	//-- act
+	io.Queue("PASSWORD: ", s.Password)
+	io.EndQueue()
+
+	s.RunCommand("-s", s.Record.Name, "-show")
+
+	//-- assert
+	s.RequireResultPass()
+
+	s.Assert().Contains(io.ReadLine(), s.Record.Name)
+	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")
+	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
+
+	line := io.ReadLine()
+	s.Assert().Contains(line, "[=] PASSWORD")
+	s.Assert().Contains(line, s.Record.Password)
+}
+
+func (s *CopyTestSuite) TestRunShowPassesAndPrintsUsernameToConsole() {
+	//-- arrange
+	io := pipe.OpenStdio(1, 4, false)
+	defer io.Close()
+
+	//-- act
+	io.Queue("PASSWORD: ", s.Password)
+	io.EndQueue()
+
+	s.RunCommand("-s", s.Record.Name, "-username", "-show")
+
+	//-- assert
+	s.RequireResultPass()
+
+	s.Assert().Contains(io.ReadLine(), s.Record.Name)
+	s.Assert().Contains(io.ReadLine(), "Enter PASSWORD")
+	s.Assert().Contains(io.ReadLine(), "[=] Loaded Record: "+s.Record.ID.String())
+
+	line := io.ReadLine()
+	s.Assert().Contains(line, "[=] USERNAME")
+	s.Assert().Contains(line, s.Record.Username)
 }
