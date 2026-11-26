@@ -53,7 +53,7 @@ func runApp(runner command.Runner) error {
 
 func buildRunner() command.Runner {
 	configLoader := json.NewLoader[config.Config](configPath())
-	clipboard := clipboard.XClipClipboard{}
+	clipboard := clipboard.AtottoClipboard{}
 	qrcode := qrcode.Skip2Renderer{}
 
 	return command.NewRunner(
