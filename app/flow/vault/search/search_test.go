@@ -1,4 +1,4 @@
-package search_test
+package search_flow_test
 
 import (
 	"flag"

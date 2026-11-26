@@ -3,7 +3,7 @@ package cmds
 import (
 	"pvault/app/config"
 	config_flow "pvault/app/flow/config"
-	vault_flow "pvault/app/flow/vault"
+	conn_flow "pvault/app/flow/vault/conn"
 	search_flow "pvault/app/flow/vault/search"
 
 	"github.com/binarysoupdev/go-commando/command"
@@ -35,9 +35,10 @@ func (cmd *SearchCommand) Initialize() error {
 
 func (cmd SearchCommand) Run(args []string) error {
 	search := search_flow.NewSearchFlow(cmd.Flags)
+	conn := conn_flow.NewConnFlow(cmd.Flags, cmd.Config.VaultPath)
 	cmd.ParseFlags(args)
 
-	v, err := vault_flow.OpenCurrentVault(cmd.Config.VaultPath)
+	v, err := conn.OpenVaultConnection()
 	if err != nil {
 		return err
 	}
