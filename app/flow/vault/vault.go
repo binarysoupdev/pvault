@@ -7,6 +7,8 @@ import (
 )
 
 type Vault interface {
+	Close() error
+
 	SearchNames(term string) []string
 
 	ValidateRecord(r record.Record) error

@@ -20,6 +20,10 @@ type VaultMock struct {
 	DeleteRecordError   error
 }
 
+func (VaultMock) Close() error {
+	return nil
+}
+
 func (m *VaultMock) SearchNames(term string) []string {
 	m.SearchTermParam = term
 	return m.SearchResults

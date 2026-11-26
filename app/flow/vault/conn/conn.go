@@ -13,7 +13,7 @@ type ConnFlow struct {
 func NewConnFlow(flags *flag.FlagSet, local string) ConnFlow {
 	return ConnFlow{
 		localPath:  local,
-		remoteAddr: flags.String("addr", "", "address of a remote vault"),
+		remoteAddr: flags.String("remote", "", "address of a remote vault"),
 	}
 }
 

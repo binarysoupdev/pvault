@@ -42,6 +42,7 @@ func (cmd SearchCommand) Run(args []string) error {
 	if err != nil {
 		return err
 	}
+	defer v.Close()
 
 	return search.Display(v)
 }

@@ -1,7 +1,17 @@
 package vault_flow
 
-import "pvault/remote"
+import (
+	"pvault/remote/client"
 
-func OpenRemoteVault(path string) (remote.Vault, error) {
-	return remote.Vault{}, nil
+	"github.com/binarysoupdev/got-style/style"
+)
+
+func OpenRemoteVault(path string) (client.Vault, error) {
+	v, err := client.ConnectToVault(path)
+	if err != nil {
+		return client.Vault{}, nil
+	}
+
+	style.Create.Printf("Connected to: %s\n", v.RemoteAddress())
+	return v, nil
 }

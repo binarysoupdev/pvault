@@ -66,6 +66,7 @@ func buildRunner() command.Runner {
 		cmds.NewUnlockCommand(configLoader),
 		cmds.NewDeleteCommand(configLoader),
 		cmds.NewCopyCommand(configLoader, clipboard, qrcode),
+		cmds.NewHostCommand(configLoader),
 	)
 }
 

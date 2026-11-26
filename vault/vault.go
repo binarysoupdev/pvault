@@ -15,6 +15,10 @@ type Vault struct {
 	Map  index.IndexMap
 }
 
+func (v Vault) Close() error {
+	return nil
+}
+
 func (v Vault) GetVersion() int {
 	return v.Meta.DatabaseVersion
 }
