@@ -7,8 +7,6 @@ import (
 )
 
 type Vault interface {
-	GetVersion() int
-
 	SearchNames(term string) []string
 
 	ValidateRecord(r record.Record) error

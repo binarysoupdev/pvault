@@ -7,8 +7,6 @@ import (
 )
 
 type VaultMock struct {
-	Version int
-
 	Record        record.Record
 	SearchResults []string
 
@@ -20,10 +18,6 @@ type VaultMock struct {
 	SaveRecordError     error
 	LoadRecordError     error
 	DeleteRecordError   error
-}
-
-func (m VaultMock) GetVersion() int {
-	return m.Version
 }
 
 func (m *VaultMock) SearchNames(term string) []string {
